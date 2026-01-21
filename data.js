@@ -53,4 +53,18 @@ const jobs = [
 {n:"Influencer",min:4000,max:30000,i:"🌟",d:"Monetización de audiencia digital mediante marcas y contenido",l:"https://www.google.com/search?q=trabajo+de+influencer"},
 {n:"Streamer",min:3000,max:25000,i:"🎮",d:"Transmisiones en vivo generando entretenimiento y comunidad digital",l:"https://www.google.com/search?q=trabajo+de+streamer"},
 {n:"Especialista en Marketing Digital",min:5000,max:16000,i:"📣",d:"Estrategias digitales para crecimiento de marcas y ventas",l:"https://www.google.com/search?q=trabajo+de+marketing+digital"}
+];// ... al final de tu lista de empleos
 ];
+
+// ESTO ES LO QUE FALTA PARA CONECTAR CON SCRIPT.JS:
+const i18n = {
+    es: {
+        g_neto_t: "Guía Sueldo Neto 2026",
+        g_neto_txt: "Cálculos basados en la UIT de S/ 5,500. Se aplican retenciones de ley y escalas de Impuesto a la Renta de 5ta categoría."
+    }
+};
+
+// El "Gatillo" que dispara el motor de Claude 4.5
+if (window.notifyDataReady) {
+    window.notifyDataReady();
+}
