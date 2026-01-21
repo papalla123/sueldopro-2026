@@ -1,47 +1,37 @@
-// script.js - Lógica Maestra SueldoPro 2026
-let forexChart;
+// script.js - El motor de SueldoPro 2026
 
-// 1. NAVEGACIÓN ENTRE SECCIONES
 function nav(id) {
     document.querySelectorAll('.sec-content').forEach(s => s.classList.remove('active'));
-    const section = document.getElementById('sec-' + id);
-    if(section) section.classList.add('active');
+    const target = document.getElementById('sec-' + id);
+    if(target) target.classList.add('active');
     
     document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
     const btn = document.getElementById('m-' + id);
     if(btn) btn.classList.add('active');
 }
 
-// 2. TRADUCTOR Y CARGA DE DATOS
 function setLang(lang) {
     if (typeof i18n === 'undefined') return;
     
-    // Traducir elementos con el atributo data-t si existen
-    document.querySelectorAll('[data-t]').forEach(el => {
-        const key = el.getAttribute('data-t');
-        if (i18n[lang][key]) el.innerText = i18n[lang][key];
-    });
+    const elements = {
+        'guide-neto-title': i18n[lang].g_neto_t,
+        'guide-neto-text': i18n[lang].g_neto_txt
+    };
 
-    // Cargar textos de las guías desde data.js
-    const titleEl = document.getElementById('guide-neto-title');
-    const textEl = document.getElementById('guide-neto-text');
-    if (titleEl) titleEl.innerText = i18n[lang].g_neto_t;
-    if (textEl) textEl.innerText = i18n[lang].g_neto_txt;
-
+    for (let id in elements) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = elements[id];
+    }
     renderJobs();
 }
 
-// 3. RENDERIZAR LOS 1,000 OFICIOS
 function renderJobs(query = "") {
     const grid = document.getElementById('job-grid');
     if (!grid || typeof jobs === 'undefined') return;
     
-    const filtered = jobs.filter(j => 
-        j.n.toLowerCase().includes(query.toLowerCase())
-    );
-
+    const filtered = jobs.filter(j => j.n.toLowerCase().includes(query.toLowerCase()));
     grid.innerHTML = filtered.map(j => `
-        <div class="job-card p-6 rounded-3xl bg-white dark:bg-dark-900 shadow-sm border border-slate-100 dark:border-slate-800 transition-all">
+        <div class="job-card p-6 rounded-3xl bg-white dark:bg-dark-900 border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:shadow-xl">
             <div class="text-4xl mb-2">${j.i}</div>
             <h4 class="font-bold text-lg text-brand-500">${j.n}</h4>
             <p class="text-[10px] text-slate-500 mb-4">${j.d}</p>
@@ -53,10 +43,13 @@ function renderJobs(query = "") {
     `).join('');
 }
 
-// 4. INICIALIZADOR GLOBAL
-window.onload = () => {
-    setLang('es');
-    document.getElementById('job-search')?.addEventListener('input', (e) => {
-        renderJobs(e.target.value);
-    });
-};
+// ARRANQUE SEGURO
+window.addEventListener('load', () => {
+    setTimeout(() => { // Pequeño delay para asegurar que data.js se leyó
+        if (typeof i18n !== 'undefined') {
+            setLang('es');
+        }
+    }, 100);
+
+    document.getElementById('job-search')?.addEventListener('input', (e) => renderJobs(e.target.value));
+});
