@@ -1,37 +1,36 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-body { font-family: 'Plus Jakarta Sans', sans-serif; cursor: default; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
 /* Sidebar Premium */
-.sidebar-btn { @apply w-full flex items-center p-5 rounded-[1.5rem] text-sm font-bold transition-all text-slate-400 dark:text-slate-500 hover:bg-brand-50 dark:hover:bg-surface-800; }
-.sidebar-btn.active { @apply bg-brand-500 text-white shadow-2xl shadow-brand-500/40; }
+.sidebar-btn { @apply w-full flex items-center p-5 rounded-[1.5rem] text-sm font-bold transition-all text-slate-400 dark:text-slate-500 hover:bg-brand-50 dark:hover:bg-surface-800 hover:text-brand-500; }
+.sidebar-btn.active { @apply bg-brand-500 text-white shadow-2xl shadow-brand-500/40 hover:text-white; }
 
-/* Pildoras de Navegación */
-.tab-pill { @apply px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest transition-all bg-white dark:bg-surface-900 text-slate-400 border-2 border-slate-100 dark:border-surface-800 whitespace-nowrap; }
-.tab-pill.active { @apply border-brand-500 text-brand-500 bg-brand-50 dark:bg-brand-500/10 shadow-lg; }
+/* Calculator Tabs */
+.calc-tab { @apply w-full text-left p-5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all border-2 border-transparent text-slate-400; }
+.calc-tab.active { @apply border-brand-500 text-brand-500 bg-white dark:bg-surface-900 shadow-xl; }
+.calc-tab:hover:not(.active) { @apply bg-slate-100 dark:bg-surface-800; }
 
-/* UI de Calculadora */
+/* Forms Vanguardia */
 .input-pro { @apply w-full p-6 rounded-3xl bg-slate-50 dark:bg-surface-800 border-2 border-transparent focus:border-brand-500 outline-none font-black text-3xl transition-all dark:text-white; }
-.label-pro { @apply block text-[11px] font-black opacity-40 uppercase mb-3 tracking-[0.2em] dark:text-slate-400; }
-.btn-calc { @apply w-full mt-8 py-6 rounded-[2rem] font-black text-white uppercase tracking-widest text-sm shadow-xl transition-all hover:scale-[1.02] active:scale-95; }
+.label-pro { @apply block text-[10px] font-black text-slate-400 uppercase mb-3 tracking-[0.2em]; }
+.select-pro { @apply w-full p-5 rounded-2xl bg-slate-100 dark:bg-surface-800 border-none outline-none font-bold text-sm dark:text-white cursor-pointer; }
 
-/* Glassmorphism Effect */
-.glass { @apply backdrop-blur-md bg-white/10 border border-white/20; }
+/* Resultados */
+.btn-calc { @apply w-full mt-10 py-6 rounded-[2rem] font-black text-white uppercase tracking-widest text-xs shadow-2xl transition-all hover:scale-[1.03] active:scale-95; }
 
-/* Animaciones */
+/* Secciones */
 .sec-content { display: none; }
-.sec-content.active { display: block; animation: ultraFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.sec-content.active { display: block; animation: zoomFade 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-@keyframes ultraFade {
-    from { opacity: 0; transform: translateY(40px) scale(0.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+@keyframes zoomFade {
+    from { opacity: 0; transform: scale(0.95) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* Custom Scroll */
-.custom-scroll::-webkit-scrollbar { width: 4px; }
-.custom-scroll::-webkit-scrollbar-thumb { background: #0066ff; border-radius: 10px; }
+/* Custom UI Elements */
 .no-scrollbar::-webkit-scrollbar { display: none; }
+.custom-scroll::-webkit-scrollbar { width: 5px; }
+.custom-scroll::-webkit-scrollbar-thumb { background: #0066ff; border-radius: 10px; }
 
-.theme-btn { @apply flex items-center justify-center p-4 rounded-2xl bg-slate-100 dark:bg-surface-800 hover:scale-105 transition-all w-full; }
-
-.job-card:hover { @apply border-brand-500 shadow-2xl shadow-brand-500/10; }
+.job-card { @apply bg-white dark:bg-surface-900 p-8 rounded-[3rem] border border-slate-100 dark:border-surface-800 hover:border-brand-500 transition-all hover:shadow-2xl hover:shadow-brand-500/10; }
