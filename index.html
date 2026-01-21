@@ -10,34 +10,35 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-slate-50 dark:bg-dark-950 flex">
+    <aside class="w-20 lg:w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-900 fixed h-full z-50 flex flex-col p-4">
+        <div class="mb-10 text-center lg:text-left px-2">
+            <h1 class="text-brand-500 font-black text-2xl hidden lg:block italic">SueldoPro<span class="text-slate-400">2026</span></h1>
+            <span class="lg:hidden font-black text-brand-500 text-2xl">S/</span>
+        </div>
+        <nav class="flex-1 space-y-2">
+            <button onclick="nav('neto')" id="m-neto" class="sidebar-btn active w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">💰 <span class="hidden lg:inline" data-t="m_neto">Neto</span></button>
+            <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">🔍 <span class="hidden lg:inline" data-t="m_radar">Radar</span></button>
+            <button onclick="nav('forex')" id="m-forex" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">📈 <span class="hidden lg:inline">Divisas</span></button>
+        </nav>
+    </aside>
+
     <main class="flex-1 ml-20 lg:ml-64 p-6 lg:p-10">
         <section id="sec-neto" class="sec-content active">
-            <div class="guide-box p-6 mt-6 rounded-2xl">
-                <h4 id="guide-neto-title" class="font-black text-brand-500 uppercase"></h4>
-                <p id="guide-neto-text" class="text-sm italic opacity-80"></p>
+            <h2 class="text-4xl font-black mb-8 italic">Calculadora <span class="text-brand-500">Neto</span></h2>
+            <div class="bg-white dark:bg-dark-900 p-8 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 max-w-2xl">
+                <input type="number" id="bruto" placeholder="Sueldo Bruto" class="w-full p-4 rounded-xl bg-slate-100 dark:bg-dark-800 text-2xl font-black mb-4 outline-none border-2 border-transparent focus:border-brand-500 transition-all">
+                <button onclick="runNeto()" class="w-full bg-brand-500 hover:bg-blue-600 text-white font-black py-4 rounded-xl transition-all shadow-lg shadow-blue-500/30">CALCULAR</button>
+            </div>
+            <div class="guide-box mt-10 max-w-2xl">
+                <h4 id="guide-neto-title" class="font-black text-brand-500 uppercase mb-2"></h4>
+                <p id="guide-neto-text" class="text-sm italic opacity-70"></p>
             </div>
         </section>
 
         <section id="sec-jobs" class="sec-content">
-            <div class="flex flex-col md:flex-row justify-between mb-8 gap-4">
-                <h2 class="text-4xl font-black italic">Radar <span class="text-brand-500">2026</span></h2>
-                <input type="text" id="job-search" placeholder="Busca entre 1,000 profesiones..." 
-                       class="p-4 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 outline-none w-full md:w-80">
-            </div>
+            <h2 class="text-4xl font-black mb-8 italic">Radar <span class="text-brand-500">1000 Oficios</span></h2>
+            <input type="text" id="job-search" placeholder="Busca entre miles de empleos..." class="w-full p-4 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 mb-8 outline-none focus:ring-2 ring-brand-500">
             <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
-        </section>
-
-        <section id="sec-forex" class="sec-content">
-            <h2 class="text-4xl font-black mb-8 italic">Mercado <span class="text-brand-500">Forex Live</span></h2>
-            <div class="grid lg:grid-cols-3 gap-8">
-                <div class="bg-white dark:bg-dark-900 p-6 rounded-3xl shadow-xl">
-                    <select id="currency-select" class="w-full p-4 rounded-xl bg-slate-100 dark:bg-dark-800 font-bold mb-4"></select>
-                    <div id="currency-result" class="text-3xl font-black text-brand-500 text-center py-6 border-t border-b my-4">S/ 0.00</div>
-                </div>
-                <div class="lg:col-span-2 bg-white dark:bg-dark-900 p-6 rounded-3xl shadow-xl min-h-[400px]">
-                    <canvas id="forexChart"></canvas>
-                </div>
-            </div>
         </section>
     </main>
 
