@@ -524,4 +524,43 @@ function initThemeDetection() {
 initThemeDetection();
 
 // Exponer función de cálculo globalmente
-window.calcularSueldoNeto = calcularSueldoNeto;
+window.calcularSueldoNeto = calcularSueldoNeto;function calcularSueldoNeto() {
+    const bruto = parseFloat(document.getElementById('bruto').value);
+    if (isNaN(bruto) || bruto <= 0) {
+        alert("Por favor, ingresa un sueldo válido.");
+        return;
+    }
+
+    const UIT = 5500;
+    const afp = bruto * 0.1184; // Promedio AFP 2026
+    const baseAnual = (bruto * 14) - (7 * UIT);
+    let impuestoAnual = 0;
+
+    if (baseAnual > 0) {
+        // Lógica simplificada de tramos
+        if (baseAnual <= 5 * UIT) impuestoAnual = baseAnual * 0.08;
+        else impuestoAnual = (5 * UIT * 0.08) + (baseAnual - 5 * UIT) * 0.14;
+    }
+
+    const impuestoMensual = impuestoAnual / 12;
+    const neto = bruto - afp - impuestoMensual;
+
+    // Inyectar resultado con estilo Pro
+    let resDiv = document.getElementById('resultado-calculo');
+    if (!resDiv) {
+        resDiv = document.createElement('div');
+        resDiv.id = 'resultado-calculo';
+        document.querySelector('#sec-neto .bg-white').appendChild(resDiv);
+    }
+
+    resDiv.innerHTML = `
+        <div class="mt-6 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border-2 border-blue-500">
+            <p class="text-sm text-blue-600 dark:text-blue-400 font-bold uppercase">Sueldo Neto Estimado</p>
+            <h3 class="text-4xl font-black text-blue-700 dark:text-blue-300">S/ ${neto.toLocaleString('es-PE', {minimumFractionDigits: 2})}</h3>
+            <div class="mt-4 text-xs opacity-70">
+                <p>Descuento AFP: S/ ${afp.toFixed(2)}</p>
+                <p>Retención 5ta: S/ ${impuestoMensual.toFixed(2)}</p>
+            </div>
+        </div>
+    `;
+}

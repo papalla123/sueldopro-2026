@@ -127,4 +127,33 @@ input:focus, select:focus {
     .lg\:ml-64 {
         margin-left: 80px;
     }
+}/* DISEÑO AGRESIVO 2026 */
+.active {
+    display: block !important;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.job-card {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    padding: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.job-card:hover {
+    transform: scale(1.05);
+    border-color: #0066ff;
+    box-shadow: 0 20px 25px -5px rgba(0, 102, 255, 0.1);
+}
+
+.dark .job-card {
+    background: #1e293b;
+    border-color: #334155;
+    color: white;
 }
