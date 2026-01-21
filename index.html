@@ -1,80 +1,84 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SueldoPro 2026 | Financial Suite</title>
+    <title>SueldoPro 2026 | Enterprise Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen flex flex-col lg:flex-row">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen flex flex-col lg:flex-row transition-colors duration-300">
     
-    <aside class="w-full lg:w-72 border-b lg:border-r border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-xl p-6 sticky top-0 z-50 flex lg:flex-col">
+    <aside class="w-full lg:w-72 border-b lg:border-r border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 sticky top-0 z-50 flex lg:flex-col">
         <div class="flex-1">
             <h1 class="text-2xl font-black mb-8 text-blue-600 tracking-tighter uppercase">SueldoPro<span class="text-slate-400">2026</span></h1>
             <nav class="flex lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0">
                 <button onclick="nav('calcs')" id="m-calcs" class="sidebar-btn active">📊 <span>Calculadoras</span></button>
-                <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn">🔎 <span>Radar 1000</span></button>
-                <button onclick="nav('forex')" id="m-forex" class="sidebar-btn">📈 <span>Divisas Pro</span></button>
+                <button onclick="nav('forex')" id="m-forex" class="sidebar-btn">💱 <span>Conversor Pro</span></button>
+                <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn">🔎 <span>Radar Oficios</span></button>
             </nav>
         </div>
         <div class="flex items-center justify-between mt-auto pt-6 border-t border-slate-200 dark:border-slate-800">
-            <button onclick="toggleTheme()" id="theme-btn" class="p-3 rounded-2xl bg-white dark:bg-slate-800 shadow-lg transition-all hover:scale-110 text-xl">🌙</button>
-            <span class="text-[10px] font-black opacity-30 uppercase tracking-widest">Premium v2.5</span>
+            <button onclick="toggleTheme()" class="theme-toggle-btn">
+                <span id="theme-icon">🌙</span>
+            </button>
+            <span class="text-[10px] font-black opacity-30 uppercase tracking-widest">Enterprise v3.0</span>
         </div>
     </aside>
 
     <main class="flex-1 p-4 lg:p-12">
         <section id="sec-calcs" class="sec-content active">
-            <h2 class="text-5xl font-black mb-10 tracking-tight">Finanzas <span class="text-blue-600">Personales</span></h2>
-            <div class="flex flex-wrap gap-2 mb-10">
+            <h2 class="text-5xl font-black mb-10 tracking-tight">Financial <span class="text-blue-600">Hub</span></h2>
+            <div class="flex flex-wrap gap-3 mb-10">
                 <button onclick="setCalc('neto')" class="calc-tab active" id="btn-neto">Sueldo Neto</button>
-                <button onclick="setCalc('empleador')" class="calc-tab" id="btn-empleador">Costo Empresa</button>
-                <button onclick="setCalc('vacaciones')" class="calc-tab" id="btn-vacaciones">Vacaciones</button>
+                <button onclick="setCalc('costo')" class="calc-tab" id="btn-costo">Costo Empresa</button>
                 <button onclick="setCalc('cuarta')" class="calc-tab" id="btn-cuarta">4ta Categoría</button>
-                <button onclick="setCalc('grati')" class="calc-tab" id="btn-grati">Grati/CTS</button>
+                <button onclick="setCalc('vacaciones')" class="calc-tab" id="btn-vacaciones">Vacaciones</button>
             </div>
 
             <div class="grid lg:grid-cols-5 gap-10">
-                <div class="lg:col-span-3 bg-slate-50 dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl">
+                <div class="lg:col-span-3 bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl">
                     <div id="calc-ui"></div>
                 </div>
-                <div class="lg:col-span-2 space-y-6">
-                    <div class="p-8 bg-blue-600 rounded-[2.5rem] text-white shadow-xl shadow-blue-500/20">
-                        <h4 class="font-bold mb-2 uppercase text-xs tracking-widest opacity-80">Tip del día</h4>
-                        <p id="calc-tip" class="text-lg font-medium leading-snug italic">"En 2026, la UIT proyectada de S/ 5,500 reduce el impacto del impuesto a la renta en sueldos medios."</p>
+                <div class="lg:col-span-2">
+                    <div class="p-8 bg-blue-600/5 dark:bg-blue-600/10 rounded-[2.5rem] border-2 border-dashed border-blue-500/20">
+                        <h4 class="font-bold text-blue-600 mb-4 flex items-center gap-2">📑 Guía Profesional</h4>
+                        <div id="guide-text" class="text-sm leading-relaxed opacity-80 space-y-4"></div>
                     </div>
                 </div>
             </div>
         </section>
 
         <section id="sec-forex" class="sec-content">
-            <h2 class="text-4xl font-black mb-8">Global <span class="text-blue-600">Forex Hub</span></h2>
-            <div class="grid lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-1 space-y-3" id="forex-list">
-                    </div>
-                <div class="lg:col-span-2 bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl">
-                    <div class="flex justify-between items-center mb-8">
+            <h2 class="text-4xl font-black mb-8">Conversor <span class="text-blue-600">Inteligente</span></h2>
+            <div class="grid lg:grid-cols-2 gap-10">
+                <div class="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] shadow-xl border border-slate-200 dark:border-slate-800">
+                    <div class="space-y-6">
                         <div>
-                            <h3 id="chart-title" class="text-2xl font-black">USD/PEN</h3>
-                            <p class="text-xs opacity-50 uppercase font-bold tracking-widest">Gráfico en tiempo real</p>
+                            <label class="block text-[10px] font-bold opacity-50 uppercase mb-2">Tengo (Soles)</label>
+                            <input type="number" id="forex-amount" oninput="convertCurrency()" placeholder="0.00" class="w-full p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 text-3xl font-black outline-none border-2 border-transparent focus:border-blue-500">
                         </div>
-                        <div class="text-right">
-                            <span id="forex-price" class="text-3xl font-black text-blue-600">3.750</span>
+                        <div>
+                            <label class="block text-[10px] font-bold opacity-50 uppercase mb-2">Quiero cambiar a:</label>
+                            <select id="forex-select" onchange="updateForexUI()" class="w-full p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold outline-none border-2 border-transparent focus:border-blue-500">
+                                </select>
+                        </div>
+                        <div class="p-6 bg-blue-600 rounded-2xl text-white">
+                            <p class="text-xs font-bold opacity-70 uppercase">Resultado estimado</p>
+                            <h3 id="forex-result" class="text-4xl font-black">0.00</h3>
                         </div>
                     </div>
-                    <canvas id="forexChart" height="180"></canvas>
+                </div>
+                <div class="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] shadow-xl border border-slate-200 dark:border-slate-800">
+                    <canvas id="forexChart"></canvas>
                 </div>
             </div>
         </section>
 
         <section id="sec-jobs" class="sec-content">
-            <div class="flex justify-between items-end mb-10">
-                <h2 class="text-4xl font-black italic">Radar <span class="text-blue-600">Mintra 2026</span></h2>
-                <input type="text" id="job-search" placeholder="Filtrar por nombre..." class="bg-slate-100 dark:bg-slate-800 p-3 rounded-xl border-none outline-none text-sm font-bold">
-            </div>
-            <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+            <h2 class="text-4xl font-black mb-8">Radar <span class="text-blue-600">Oficios 2026</span></h2>
+            <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
     </main>
 

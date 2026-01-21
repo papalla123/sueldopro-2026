@@ -1,32 +1,35 @@
-/* style.css */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
 
-:root { --blue: #0066ff; }
-body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.4s ease; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+.dark { background-color: #020617; }
 
 .sec-content { display: none; opacity: 0; }
-.sec-content.active { display: block !important; animation: slideUp 0.6s ease forwards; }
+.sec-content.active { display: block !important; animation: slideUp 0.5s ease forwards; }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(40px) scale(0.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .sidebar-btn {
-    @apply w-full flex items-center gap-4 p-4 rounded-2xl text-sm font-bold transition-all text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800;
+    @apply w-full flex items-center gap-4 p-4 rounded-2xl text-sm font-bold transition-all text-slate-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-slate-800;
 }
-.sidebar-btn.active { @apply bg-blue-600 text-white shadow-2xl shadow-blue-600/40; }
+.sidebar-btn.active { @apply bg-blue-600 text-white shadow-xl shadow-blue-600/30; }
 
 .calc-tab {
-    @apply px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-tighter border-2 border-slate-200 dark:border-slate-800 transition-all hover:border-blue-500;
+    @apply px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider border-2 border-slate-200 dark:border-slate-800 transition-all;
 }
-.calc-tab.active { @apply bg-blue-600 border-blue-600 text-white; }
+.calc-tab.active { @apply border-blue-600 bg-blue-600/5 text-blue-600; }
 
-.forex-item {
-    @apply p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-transparent cursor-pointer transition-all flex justify-between items-center;
+.theme-toggle-btn {
+    @apply p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-xl transition-transform hover:scale-110 active:scale-95 shadow-md;
 }
-.forex-item.active { @apply border-blue-600 bg-blue-600/5 ring-1 ring-blue-600; }
+
+.pro-btn {
+    @apply w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-3 uppercase tracking-widest text-xs;
+}
 
 .job-card {
-    @apply bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 transition-all hover:shadow-3xl hover:-translate-y-3;
+    @apply bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 transition-all hover:border-blue-500 hover:shadow-2xl;
 }

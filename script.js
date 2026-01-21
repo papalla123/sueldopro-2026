@@ -2,13 +2,13 @@ let currentCalc = 'neto';
 let currentForex = 'USD';
 let chart = null;
 
-// 1. TEMA DÍA/NOCHE
+// --- TEMA ---
 function toggleTheme() {
     const isDark = document.documentElement.classList.toggle('dark');
-    document.getElementById('theme-btn').innerText = isDark ? '🌙' : '☀️';
+    document.getElementById('theme-icon').innerText = isDark ? '☀️' : '🌙';
 }
 
-// 2. NAVEGACIÓN
+// --- NAVEGACIÓN ---
 function nav(id) {
     document.querySelectorAll('.sec-content').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
@@ -17,7 +17,7 @@ function nav(id) {
     if(id === 'forex') initForex();
 }
 
-// 3. CALCULADORAS
+// --- CALCULADORAS ---
 function setCalc(type) {
     currentCalc = type;
     document.querySelectorAll('.calc-tab').forEach(t => t.classList.remove('active'));
@@ -27,19 +27,48 @@ function setCalc(type) {
 
 function renderCalcUI() {
     const ui = document.getElementById('calc-ui');
+    const guide = document.getElementById('guide-text');
+    
     const configs = {
-        neto: { t:"Sueldo Neto", i:"Bruto Mensual", extra:`<select id="pension" class="w-full p-4 rounded-xl bg-white dark:bg-slate-800 mt-4 outline-none font-bold"><option value="0.12">AFP (12%)</option><option value="0.13">ONP (13%)</option></select>` },
-        vacaciones: { t:"Liquidación Vacaciones", i:"Sueldo Mensual", extra:`<input type="number" id="v-days" placeholder="Días pendientes" class="w-full p-4 rounded-xl bg-white dark:bg-slate-800 mt-4 outline-none font-bold">` },
-        cuarta: { t:"Recibos por Honorarios", i:"Monto del Recibo", extra:`<p class="text-[10px] mt-2 opacity-50 font-bold">RETENCIÓN AUTOMÁTICA DEL 8% SI SUPERA S/ 1,500</p>` }
+        neto: {
+            t: "Cálculo Sueldo Neto",
+            i: "Sueldo Bruto Mensual (S/)",
+            g: "Determina cuánto recibirás en tu cuenta bancaria después de descontar aportes de pensión (AFP/ONP) e impuesto a la renta. Basado en la normativa de 7 UIT vigentes para 2026.",
+            extra: `<select id="pension" class="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 mt-4 font-bold outline-none border-2 border-transparent focus:border-blue-500"><option value="0.12">AFP (Promedio 12%)</option><option value="0.13">ONP (Fijo 13%)</option></select>`
+        },
+        costo: {
+            t: "Costo Total de Empresa",
+            i: "Sueldo Ofrecido al Trabajador (S/)",
+            g: "Análisis para empleadores: incluye Essalud (9%), Gratificaciones (16.66%), CTS (8.33%) y Vacaciones. Es el presupuesto real que una empresa debe tener para contratar legalmente.",
+            extra: `<div class="p-4 bg-blue-500/10 rounded-xl mt-4 text-[10px] font-bold text-blue-600 italic">CÁLCULO BASADO EN RÉGIMEN GENERAL 2026</div>`
+        },
+        cuarta: {
+            t: "Recibos por Honorarios",
+            i: "Monto Bruto del Recibo (S/)",
+            g: "Para trabajadores independientes. La retención del 8% se aplica automáticamente si el recibo supera los S/ 1,500, a menos que cuentes con suspensión de retenciones.",
+            extra: ""
+        },
+        vacaciones: {
+            t: "Liquidación de Vacaciones",
+            i: "Sueldo Bruto Mensual (S/)",
+            g: "Calcula el pago por días de vacaciones no gozados o truncos. Se basa en el promedio de los últimos 6 meses de ingresos.",
+            extra: `<input type="number" id="v-days" placeholder="Días pendientes (Ej: 15)" class="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 mt-4 font-bold outline-none">`
+        }
     };
-    const c = configs[currentCalc] || configs.neto;
+
+    const c = configs[currentCalc];
     ui.innerHTML = `
-        <h3 class="text-3xl font-black mb-6 italic">${c.t}</h3>
-        <input type="number" id="main-val" placeholder="${c.i}" class="w-full p-6 rounded-2xl bg-white dark:bg-slate-800 text-4xl font-black border-2 border-transparent focus:border-blue-500 outline-none">
-        ${c.extra || ''}
-        <button onclick="processCalc()" class="w-full mt-6 bg-blue-600 text-white p-5 rounded-2xl font-black hover:bg-blue-700 shadow-xl">CALCULAR AHORA</button>
+        <h3 class="text-3xl font-black mb-6 italic text-blue-600">${c.t}</h3>
+        <label class="block text-[10px] font-black opacity-40 uppercase mb-2">${c.i}</label>
+        <input type="number" id="main-val" placeholder="0.00" class="w-full p-6 rounded-2xl bg-slate-100 dark:bg-slate-800 text-4xl font-black outline-none border-2 border-transparent focus:border-blue-500">
+        ${c.extra}
+        <button onclick="processCalc()" class="pro-btn">
+            <span>✨ Procesar Análisis</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+        </button>
         <div id="calc-res"></div>
     `;
+    guide.innerHTML = `<p>${c.g}</p><p class='pt-4 border-t border-blue-500/10'><b>Nota:</b> Estos valores son referenciales para el periodo fiscal 2026 en Perú.</p>`;
 }
 
 function processCalc() {
@@ -47,47 +76,55 @@ function processCalc() {
     const res = document.getElementById('calc-res');
     if(!val) return;
 
-    let total = 0;
+    let total = 0; let detail = "";
     if(currentCalc === 'neto') {
-        const p = val * parseFloat(document.getElementById('pension').value);
-        total = val - p;
-    } else if(currentCalc === 'vacaciones') {
-        const days = parseFloat(document.getElementById('v-days').value) || 0;
-        total = (val / 30) * days;
+        total = val * (1 - parseFloat(document.getElementById('pension').value));
+        detail = "Neto tras descuentos de ley.";
+    } else if(currentCalc === 'costo') {
+        total = val * 1.45; // Aprox Essalud + Grati + CTS + Vacas
+        detail = "Costo total mensual para el empleador.";
     } else if(currentCalc === 'cuarta') {
         total = val > 1500 ? val * 0.92 : val;
+        detail = val > 1500 ? "Con retención del 8%." : "Sin retención.";
+    } else if(currentCalc === 'vacaciones') {
+        const d = parseFloat(document.getElementById('v-days').value) || 0;
+        total = (val / 30) * d;
+        detail = `Pago por ${d} días.`;
     }
 
-    res.innerHTML = `<div class="mt-8 p-8 bg-slate-900 text-white rounded-[2rem] animate-pulse">
-        <p class="text-xs font-bold opacity-50 uppercase">Resultado Neto</p>
-        <h2 class="text-5xl font-black tracking-tighter">S/ ${total.toLocaleString()}</h2>
-    </div>`;
-}
-
-// 4. FOREX PRO
-function initForex() {
-    const list = document.getElementById('forex-list');
-    list.innerHTML = currencies.map(c => `
-        <div onclick="updateForex('${c.id}')" class="forex-item ${currentForex === c.id ? 'active' : ''}" id="fx-${c.id}">
-            <div><span class="font-black">${c.id}</span> <span class="text-[10px] opacity-50 ml-2">${c.n}</span></div>
-            <div class="font-bold">${c.p.toLocaleString()}</div>
+    res.innerHTML = `
+        <div class="mt-8 p-8 bg-slate-900 text-white rounded-[2.5rem] shadow-2xl animate-bounce-short">
+            <p class="text-xs font-bold opacity-50 uppercase tracking-widest mb-1">Resultado Final</p>
+            <h2 class="text-5xl font-black tracking-tighter">S/ ${total.toLocaleString(undefined, {minimumFractionDigits:2})}</h2>
+            <p class="text-xs mt-3 opacity-70">${detail}</p>
         </div>
-    `).join('');
-    updateForex(currentForex);
+    `;
 }
 
-function updateForex(id) {
-    currentForex = id;
-    const curr = currencies.find(c => c.id === id);
-    document.querySelectorAll('.forex-item').forEach(i => i.classList.remove('active'));
-    document.getElementById('fx-'+id).classList.add('active');
-    document.getElementById('chart-title').innerText = `${id}/PEN`;
-    document.getElementById('forex-price').innerText = curr.p.toLocaleString();
-    
-    renderChart(curr.h);
+// --- FOREX ---
+function initForex() {
+    const select = document.getElementById('forex-select');
+    if(!select.options.length) {
+        select.innerHTML = currencies.map(c => `<option value="${c.id}">${c.n} (${c.id})</option>`).join('');
+    }
+    updateForexUI();
 }
 
-function renderChart(history) {
+function updateForexUI() {
+    currentForex = document.getElementById('forex-select').value;
+    const curr = currencies.find(c => c.id === currentForex);
+    convertCurrency();
+    renderChart(curr.h, curr.id);
+}
+
+function convertCurrency() {
+    const amt = parseFloat(document.getElementById('forex-amount').value) || 0;
+    const curr = currencies.find(c => c.id === currentForex);
+    const res = amt / curr.p;
+    document.getElementById('forex-result').innerText = `${res.toLocaleString(undefined, {maximumFractionDigits:2})} ${curr.id}`;
+}
+
+function renderChart(history, label) {
     const ctx = document.getElementById('forexChart').getContext('2d');
     if(chart) chart.destroy();
     chart = new Chart(ctx, {
@@ -95,29 +132,29 @@ function renderChart(history) {
         data: {
             labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Hoy'],
             datasets: [{
+                label: label,
                 data: history,
-                borderColor: '#0066ff',
-                backgroundColor: 'rgba(0, 102, 255, 0.1)',
-                fill: true,
+                borderColor: '#2563eb',
                 tension: 0.4,
-                pointRadius: 0
+                fill: true,
+                backgroundColor: 'rgba(37, 99, 235, 0.1)'
             }]
         },
-        options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+        options: { plugins: { legend: { display: false } } }
     });
 }
 
-// 5. RADAR
-function renderJobs(q = "") {
+// --- RADAR ---
+function renderJobs() {
     const grid = document.getElementById('job-grid');
-    grid.innerHTML = jobs.filter(j => j.n.toLowerCase().includes(q.toLowerCase())).map(j => `
+    grid.innerHTML = jobs.map(j => `
         <div class="job-card">
-            <div class="text-5xl mb-4">${j.i}</div>
-            <h4 class="text-xl font-black text-blue-600 mb-2">${j.n}</h4>
-            <p class="text-xs opacity-60 mb-6 leading-relaxed">${j.d}</p>
-            <div class="flex justify-between items-center pt-4 border-t dark:border-slate-800">
-                <span class="font-black italic text-sm">S/ ${j.min.toLocaleString()} - ${j.max.toLocaleString()}</span>
-                <a href="${j.l}" target="_blank" class="bg-slate-900 text-white p-3 rounded-xl text-[10px] font-bold">INFO</a>
+            <span class="text-5xl">${j.i}</span>
+            <h4 class="text-xl font-black mt-4 text-blue-600 uppercase tracking-tighter">${j.n}</h4>
+            <p class="text-xs opacity-60 my-4 leading-relaxed">${j.d}</p>
+            <div class="pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                <span class="font-black text-sm italic">S/ ${j.min.toLocaleString()}</span>
+                <a href="${j.l}" class="text-[10px] font-black bg-slate-900 text-white px-4 py-2 rounded-lg">VER PLAZAS</a>
             </div>
         </div>
     `).join('');
@@ -126,5 +163,4 @@ function renderJobs(q = "") {
 window.onload = () => {
     renderCalcUI();
     renderJobs();
-    document.getElementById('job-search').addEventListener('input', (e) => renderJobs(e.target.value));
 };
