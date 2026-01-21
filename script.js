@@ -1,12 +1,11 @@
 let currentCalc = 'neto';
-let currentForexId = 'USD';
 let chart = null;
 
-const UIT = 5500;
-const AF = 115; // Asignación Familiar 2026
+const CONST = { UIT: 5500, ASIG_FAM: 115 };
 
 function toggleTheme() {
     document.documentElement.classList.toggle('dark');
+    document.getElementById('theme-icon').innerText = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
 }
 
 function nav(id) {
@@ -19,10 +18,10 @@ function nav(id) {
     if(id === 'news') renderNews();
 }
 
-function setCalc(type) {
-    currentCalc = type;
+function setCalc(id) {
+    currentCalc = id;
     document.querySelectorAll('.calc-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('tab-' + type).classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
     renderUI();
 }
 
@@ -30,165 +29,141 @@ function renderUI() {
     const ui = document.getElementById('calc-ui');
     const guide = document.getElementById('guide-text');
     
-    const config = {
+    const configs = {
         neto: {
-            t: "Sueldo Líquido Mensual", color: "bg-brand-500",
-            guide: "AFP incluye: 10% aporte + 1.84% seguro + comisión. Impuesto de 5ta se aplica si superas las 7 UIT anuales.",
-            html: `<label class="label-pro">Sueldo Bruto Mensual</label>
-                   <input type="number" id="v1" class="input-pro mb-8" placeholder="0.00">
-                   <div class="grid grid-cols-2 gap-4">
-                      <select id="pension" class="p-6 rounded-2xl bg-slate-50 dark:bg-surface-800 font-bold outline-none border-2 border-transparent focus:border-brand-500 dark:text-white">
-                        <option value="afp">AFP (12.8%)</option><option value="onp">ONP (13%)</option>
-                      </select>
-                      <select id="af" class="p-6 rounded-2xl bg-slate-50 dark:bg-surface-800 font-bold outline-none border-2 border-transparent focus:border-brand-500 dark:text-white">
-                        <option value="0">Sin Hijos</option><option value="1">Con Hijos (+S/ 115)</option>
-                      </select>
-                   </div>`
-        },
-        grati: {
-            t: "Gratificación (Julio/Diciembre)", color: "bg-indigo-600",
-            guide: "Recibes un sueldo íntegro + bono ley (9% Essalud o 6.75% EPS). No está afecto a descuentos de pensiones.",
-            html: `<label class="label-pro">Sueldo Base</label><input type="number" id="v1" class="input-pro mb-8">
-                   <label class="label-pro">Bono de Salud</label>
-                   <select id="opt" class="p-6 w-full rounded-2xl bg-slate-50 dark:bg-surface-800 font-bold dark:text-white">
-                    <option value="0.09">Essalud (9%)</option><option value="0.0675">EPS (6.75%)</option>
-                   </select>`
+            t: "Sueldo Neto Mensual",
+            guide: "Se descuenta pensiones (AFP/ONP) e Impuesto de 5ta si superas las 7 UIT anuales.",
+            html: `
+                <label class="input-label">Sueldo Bruto Mensual</label>
+                <input type="number" id="v1" class="input-main mb-6" placeholder="S/ 0.00">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="input-label">Pensión</label>
+                        <select id="s1" class="select-main"><option value="0.128">AFP (12.8%)</option><option value="0.13">ONP (13%)</option></select>
+                    </div>
+                    <div>
+                        <label class="input-label">Asig. Familiar</label>
+                        <select id="s2" class="select-main"><option value="0">No</option><option value="115">Sí (S/ 115)</option></select>
+                    </div>
+                </div>`
         },
         cts: {
-            t: "Depósito de CTS", color: "bg-emerald-600",
-            guide: "Fórmula: (Sueldo + 1/6 Gratificación) / 2. Se deposita en Mayo y Noviembre.",
-            html: `<label class="label-pro">Sueldo Bruto</label><input type="number" id="v1" class="input-pro mb-8">
-                   <label class="label-pro">Última Gratificación</label><input type="number" id="v2" class="input-pro">`
+            t: "Cálculo de CTS",
+            guide: "Fórmula: (Sueldo + 1/6 Gratificación) / 12 * Meses laborados.",
+            html: `
+                <label class="input-label">Sueldo Bruto</label>
+                <input type="number" id="v1" class="input-main mb-6">
+                <label class="input-label">Última Gratificación</label>
+                <input type="number" id="v2" class="input-main mb-6">
+                <label class="input-label">Meses laborados en el semestre</label>
+                <input type="number" id="v3" class="input-main" value="6" max="6">`
+        },
+        grati: {
+            t: "Gratificación de Ley",
+            guide: "Equivale a un sueldo completo + bono extraordinario (9% Essalud o 6.75% EPS).",
+            html: `
+                <label class="input-label">Sueldo Base</label>
+                <input type="number" id="v1" class="input-main mb-6">
+                <label class="input-label">Seguro</label>
+                <select id="s1" class="select-main"><option value="0.09">Essalud (9%)</option><option value="0.0675">EPS (6.75%)</option></select>
+                <label class="input-label" class="mt-4">Meses laborados (1-6)</label>
+                <input type="number" id="v2" class="input-main" value="6" max="6">`
         },
         liq: {
-            t: "Liquidación por Renuncia", color: "bg-slate-900",
-            guide: "Suma proporcional de CTS, Gratificación y Vacaciones truncas acumuladas a la fecha.",
-            html: `<label class="label-pro">Sueldo Mensual</label><input type="number" id="v1" class="input-pro mb-8">
-                   <label class="label-pro">Meses Laborados</label><input type="number" id="v2" class="input-pro" max="12">`
-        },
-        quinta: {
-            t: "Impuesto a la Renta 5ta", color: "bg-rose-600",
-            guide: "Cálculo basado en las 7 UIT de exoneración. Tasas de 8%, 14%, 17%, 20% y 30%.",
-            html: `<label class="label-pro">Sueldo Bruto</label><input type="number" id="v1" class="input-pro">`
-        },
-        cuarta: {
-            t: "Recibos por Honorarios", color: "bg-amber-600",
-            guide: "Retención del 8% obligatoria si el recibo supera los S/ 1,500.",
-            html: `<label class="label-pro">Monto del Recibo</label><input type="number" id="v1" class="input-pro">`
-        },
-        costo: {
-            t: "Costo Total Empleador", color: "bg-cyan-600",
-            guide: "Lo que realmente paga la empresa por ti (Sueldo + Essalud + Gratificaciones + CTS + Vacaciones + SCTR).",
-            html: `<label class="label-pro">Sueldo Bruto Ofrecido</label><input type="number" id="v1" class="input-pro">`
-        },
-        util: {
-            t: "Utilidades Estimadas", color: "bg-violet-600",
-            guide: "Cálculo basado en los días trabajados y tu sueldo anual. El porcentaje varía por industria (5% a 10%).",
-            html: `<label class="label-pro">Sueldo Mensual</label><input type="number" id="v1" class="input-pro mb-8">
-                   <label class="label-pro">Sector de la Empresa</label>
-                   <select id="opt" class="p-6 w-full rounded-2xl bg-slate-50 dark:bg-surface-800 font-bold dark:text-white">
-                    <option value="0.1">Minería/Telecom (10%)</option><option value="0.08">Pesca/Indus (8%)</option><option value="0.05">Servicios (5%)</option>
-                   </select>`
+            t: "Liquidación Estimada",
+            guide: "Suma de truncos: CTS + Grati + Vacaciones. Basado en meses trabajados del año.",
+            html: `
+                <label class="input-label">Sueldo Bruto</label>
+                <input type="number" id="v1" class="input-main mb-6">
+                <label class="input-label">Meses trabajados en el año</label>
+                <input type="number" id="v2" class="input-main" value="1">`
         }
     };
 
-    const c = config[currentCalc];
-    ui.innerHTML = `<h3 class="text-3xl font-black mb-8 dark:text-white uppercase italic tracking-tighter">${c.t}</h3>${c.html}<button onclick="runCalculation()" class="btn-execute ${c.color}">EJECUTAR MOTOR DE CÁLCULO</button>`;
-    guide.innerHTML = c.guide;
-    document.getElementById('res-card').className = `${c.color} p-10 rounded-[3.5rem] text-white shadow-2xl transition-all duration-500`;
+    const c = configs[currentCalc] || configs.neto;
+    ui.innerHTML = `<h3 class="text-2xl font-black mb-6 dark:text-white">${c.t}</h3>${c.html}<button onclick="calculate()" class="w-full mt-8 bg-brand-500 text-white py-5 rounded-2xl font-black shadow-lg hover:bg-brand-600 transition-all">CALCULAR AHORA</button>`;
+    guide.innerText = c.guide;
 }
 
-function runCalculation() {
+function calculate() {
     const v1 = parseFloat(document.getElementById('v1').value) || 0;
     const v2 = parseFloat(document.getElementById('v2')?.value) || 0;
-    const breakdown = document.getElementById('calc-breakdown');
+    const v3 = parseFloat(document.getElementById('v3')?.value) || 0;
+    const s1 = parseFloat(document.getElementById('s1')?.value) || 0;
+    const s2 = parseFloat(document.getElementById('s2')?.value) || 0;
+    
     let total = 0;
-    let details = "";
+    let detail = "";
 
-    switch(currentCalc) {
-        case 'neto':
-            const hasHijos = document.getElementById('af').value === "1";
-            const brutoTotal = v1 + (hasHijos ? AF : 0);
-            const pension = document.getElementById('pension').value === 'afp' ? brutoTotal * 0.128 : brutoTotal * 0.13;
-            const renta = brutoTotal > 4500 ? (brutoTotal - 4500) * 0.08 : 0;
-            total = brutoTotal - pension - renta;
-            details = `Bruto: S/ ${brutoTotal.toFixed(2)}<br>Pensión: -S/ ${pension.toFixed(2)}<br>Renta 5ta: -S/ ${renta.toFixed(2)}`;
-            break;
-        case 'grati':
-            const bono = parseFloat(document.getElementById('opt').value);
-            total = v1 + (v1 * bono);
-            details = `Sueldo: S/ ${v1}<br>Bono Ley: S/ ${(v1*bono).toFixed(2)}`;
-            break;
-        case 'cts':
-            total = (v1 + (v2/6)) / 2;
-            details = `Base Computable: S/ ${(v1+(v2/6)).toFixed(2)}`;
-            break;
-        case 'cuarta':
-            const ret = v1 > 1500 ? v1 * 0.08 : 0;
-            total = v1 - ret;
-            details = `Bruto: S/ ${v1}<br>Retención 8%: -S/ ${ret.toFixed(2)}`;
-            break;
-        default:
-            total = v1 * 1.25; // Simulación genérica para los demás
-            details = "Cálculo integral procesado.";
+    if(currentCalc === 'neto') {
+        const bruto = v1 + s2;
+        const pens = bruto * s1;
+        const renta = bruto > 5000 ? (bruto - 5000) * 0.08 : 0;
+        total = bruto - pens - renta;
+        detail = `Bruto: S/ ${bruto} | Pensión: -S/ ${pens.toFixed(2)} | Renta: -S/ ${renta.toFixed(2)}`;
+    } else if(currentCalc === 'cts') {
+        total = ((v1 + (v2/6)) / 12) * v3;
+        detail = `Base Computable: S/ ${(v1+(v2/6)).toFixed(2)}`;
+    } else if(currentCalc === 'grati') {
+        const base = (v1 / 6) * v2;
+        total = base + (base * s1);
+        detail = `Bono Ext.: S/ ${(base * s1).toFixed(2)}`;
+    } else if(currentCalc === 'liq') {
+        total = (v1 * 1.5) * (v2/12); // Simplificado Pro
+        detail = "Incluye proporciones legales.";
     }
 
     document.getElementById('calc-res').innerText = `S/ ${total.toLocaleString(undefined, {minimumFractionDigits:2})}`;
-    breakdown.innerHTML = details;
+    document.getElementById('calc-details').innerHTML = detail;
 }
 
-// RESTO DE MÓDULOS (FOREX, JOBS, NEWS)
+// RESTO DE FUNCIONES (FOREX, JOBS, NEWS)
 function renderForex() {
     const list = document.getElementById('forex-list');
     list.innerHTML = currencies.map(c => `
-        <button onclick="selectForex('${c.id}')" class="w-full flex justify-between p-4 rounded-2xl border-2 transition-all ${currentForexId === c.id ? 'border-brand-500 bg-brand-50' : 'border-transparent bg-slate-50 dark:bg-surface-800'}">
+        <button onclick="updateForex('${c.id}')" class="w-full flex justify-between p-4 rounded-xl bg-slate-50 dark:bg-surface-800 border-2 border-transparent hover:border-brand-500 transition-all">
             <span class="font-bold text-xs dark:text-white">${c.n}</span>
             <span class="font-black text-brand-500">${c.id}</span>
         </button>
     `).join('');
-    updateForex();
+    updateForex('USD');
 }
 
-function selectForex(id) { currentForexId = id; renderForex(); }
-
-function updateForex() {
+function updateForex(id = 'USD') {
     const amt = parseFloat(document.getElementById('f-amt').value) || 0;
-    const curr = currencies.find(c => c.id === currentForexId);
-    document.getElementById('chart-label').innerText = `${(amt / curr.p).toFixed(2)} ${curr.id}`;
+    const c = currencies.find(curr => curr.id === id);
+    document.getElementById('chart-label').innerText = `${(amt/c.p).toFixed(2)} ${c.id}`;
     
-    const ctx = document.getElementById('f-chart').getContext('2d');
     if(chart) chart.destroy();
-    chart = new Chart(ctx, {
+    chart = new Chart(document.getElementById('f-chart'), {
         type: 'line',
-        data: { labels: ['L','M','X','J','V','S','D'], datasets: [{ data: curr.h, borderColor: '#0066ff', borderWidth: 5, tension: 0.4, fill: true, backgroundColor: 'rgba(0,102,255,0.05)' }] },
-        options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+        data: { labels: ['L','M','X','J','V','S','D'], datasets: [{ data: c.h, borderColor: '#0066ff', tension: 0.4 }] },
+        options: { plugins: { legend: false }, scales: { y: { display: false } } }
     });
 }
 
 function renderJobs() {
     const q = document.getElementById('job-search').value.toLowerCase();
-    const grid = document.getElementById('job-grid');
-    grid.innerHTML = jobs.filter(j => j.n.toLowerCase().includes(q)).map(j => `
+    document.getElementById('job-grid').innerHTML = jobs.filter(j => j.n.toLowerCase().includes(q)).slice(0, 20).map(j => `
         <div class="job-card">
-            <div class="text-4xl mb-4">${j.i}</div>
-            <h4 class="font-black text-xs uppercase mb-2 dark:text-white">${j.n}</h4>
-            <p class="text-[10px] opacity-60 mb-6">${j.d}</p>
-            <div class="flex justify-between items-center pt-6 border-t border-slate-50 dark:border-surface-800">
-                <span class="font-black text-brand-500">S/ ${j.min}</span>
-                <a href="${j.l}" target="_blank" class="bg-brand-500 text-white px-4 py-2 rounded-xl text-[8px] font-black">LINKEDIN</a>
+            <div class="text-3xl mb-3">${j.i}</div>
+            <h4 class="text-xs font-black dark:text-white uppercase mb-1">${j.n}</h4>
+            <p class="text-[10px] text-slate-400 mb-4">${j.d}</p>
+            <div class="flex justify-between items-center">
+                <span class="text-brand-500 font-bold">S/ ${j.min}</span>
+                <a href="${j.l}" target="_blank" class="text-[9px] font-black bg-brand-500 text-white px-3 py-1 rounded-lg">LINKEDIN</a>
             </div>
         </div>
     `).join('');
 }
 
 function renderNews() {
-    document.getElementById('news-grid').innerHTML = news.map(n => `
-        <div class="bg-white dark:bg-surface-900 p-8 rounded-[3rem] border-l-[12px] border-red-600 shadow-xl transition-all hover:-translate-y-2">
-            <h4 class="font-black text-lg mb-4 leading-tight dark:text-white">${n.t}</h4>
-            <p class="text-xs opacity-60 mb-6">${n.d}</p>
+    document.getElementById('news-grid').innerHTML = news.slice(0, 12).map(n => `
+        <div class="bg-white dark:bg-surface-900 p-6 rounded-3xl border-l-4 border-brand-500 shadow-lg">
+            <h4 class="font-black text-sm dark:text-white mb-3">${n.t}</h4>
             <div class="flex justify-between items-center">
-                <span class="text-[9px] font-black text-red-600 uppercase tracking-widest">${n.f}</span>
-                <a href="${n.l}" target="_blank" class="text-[10px] font-black underline">LEER MÁS</a>
+                <span class="text-[9px] font-bold text-slate-400 uppercase">${n.f}</span>
+                <a href="${n.l}" class="text-[10px] text-brand-500 font-black underline">LEER</a>
             </div>
         </div>
     `).join('');

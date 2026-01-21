@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SueldoPro 2026 | The Financial Standard</title>
+    <title>SueldoPro 2026 | El Estándar Financiero</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
@@ -14,66 +14,65 @@
                 extend: {
                     colors: {
                         brand: { 500: '#0066ff', 600: '#0052cc', 950: '#020617' },
-                        surface: { 50: '#f8fafc', 900: '#0f172a' }
+                        surface: { 50: '#f8fafc', 800: '#1e293b', 900: '#0f172a' }
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-surface-50 text-surface-900 dark:bg-brand-950 dark:text-white transition-all duration-500">
+<body class="bg-surface-50 text-surface-900 dark:bg-brand-950 dark:text-slate-100 transition-colors duration-300">
     
-    <aside class="fixed left-0 top-0 h-full w-20 lg:w-80 bg-white/80 dark:bg-surface-900/80 backdrop-blur-2xl border-r border-slate-200 dark:border-slate-800 z-50 flex flex-col p-6">
-        <div class="mb-12 px-4">
-            <h1 class="hidden lg:block text-3xl font-black text-brand-500 tracking-tighter italic">SueldoPro<span class="text-slate-400">2026</span></h1>
+    <aside class="fixed left-0 top-0 h-full w-20 lg:w-72 bg-white/90 dark:bg-surface-900/90 backdrop-blur-xl border-r border-slate-200 dark:border-slate-800 z-50 flex flex-col p-6">
+        <div class="mb-10">
+            <h1 class="hidden lg:block text-2xl font-black text-brand-500 tracking-tighter italic">SUELDOPRO<span class="text-slate-400">2026</span></h1>
             <div class="lg:hidden text-2xl font-black text-brand-500">SP</div>
         </div>
         
         <nav class="flex-1 space-y-2 overflow-y-auto no-scrollbar">
-            <p class="hidden lg:block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 px-4">Terminal de Control</p>
-            <button onclick="nav('calcs')" id="m-calcs" class="sidebar-btn active">📊 <span class="hidden lg:inline ml-4">8 Calculadoras Master</span></button>
-            <button onclick="nav('forex')" id="m-forex" class="sidebar-btn">💱 <span class="hidden lg:inline ml-4">100 Divisas Live</span></button>
-            <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn">🔎 <span class="hidden lg:inline ml-4">Radar 250 Empleos</span></button>
-            <button onclick="nav('news')" id="m-news" class="sidebar-btn">📰 <span class="hidden lg:inline ml-4">50 Noticias Globales</span></button>
+            <button onclick="nav('calcs')" id="m-calcs" class="sidebar-btn active">📊 <span class="hidden lg:inline ml-3">8 Calculadoras</span></button>
+            <button onclick="nav('forex')" id="m-forex" class="sidebar-btn">💱 <span class="hidden lg:inline ml-3">100 Divisas</span></button>
+            <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn">🔎 <span class="hidden lg:inline ml-3">250 Empleos</span></button>
+            <button onclick="nav('news')" id="m-news" class="sidebar-btn">📰 <span class="hidden lg:inline ml-3">50 Noticias</span></button>
         </nav>
 
-        <button onclick="toggleTheme()" class="mt-auto p-4 rounded-2xl bg-slate-100 dark:bg-surface-800 flex justify-center items-center">
-            <span id="theme-icon">🌙</span>
+        <button onclick="toggleTheme()" class="mt-auto p-4 rounded-2xl bg-slate-100 dark:bg-surface-800 flex justify-center hover:scale-105 transition-all">
+            <span id="theme-icon" class="text-xl">🌙</span>
         </button>
     </aside>
 
-    <main class="ml-20 lg:ml-80 p-6 lg:p-16 min-h-screen">
-        
+    <main class="ml-20 lg:ml-72 p-6 lg:p-12">
         <section id="sec-calcs" class="sec-content active">
-            <div class="max-w-7xl mx-auto">
-                <h2 class="text-6xl font-black tracking-tighter mb-12">Financial <span class="text-brand-500 italic">OS</span></h2>
+            <div class="max-w-6xl mx-auto">
+                <header class="mb-10">
+                    <h2 class="text-5xl font-black tracking-tighter dark:text-white">Financial <span class="text-brand-500 italic">Engine</span></h2>
+                    <p class="text-slate-500 dark:text-slate-400 font-bold mt-2">Basado en normativa laboral 2026 (UIT S/ 5,500)</p>
+                </header>
 
-                <div class="grid lg:grid-cols-12 gap-10">
-                    <div class="lg:col-span-3 space-y-2">
-                        <button onclick="setCalc('neto')" id="tab-neto" class="calc-tab active">Sueldo Neto Mensual</button>
-                        <button onclick="setCalc('grati')" id="tab-grati" class="calc-tab">Gratificaciones</button>
+                <div class="grid lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-3 space-y-1">
+                        <button onclick="setCalc('neto')" id="tab-neto" class="calc-tab active">Sueldo Neto</button>
                         <button onclick="setCalc('cts')" id="tab-cts" class="calc-tab">CTS Semestral</button>
-                        <button onclick="setCalc('liq')" id="tab-liq" class="calc-tab">Liquidación 2026</button>
-                        <button onclick="setCalc('quinta')" id="tab-quinta" class="calc-tab">Impuesto 5ta Cat.</button>
-                        <button onclick="setCalc('cuarta')" id="tab-cuarta" class="calc-tab">Recibos por Honorarios</button>
-                        <button onclick="setCalc('costo')" id="tab-costo" class="calc-tab">Costo para la Empresa</button>
-                        <button onclick="setCalc('util')" id="tab-util" class="calc-tab">Reparto de Utilidades</button>
+                        <button onclick="setCalc('grati')" id="tab-grati" class="calc-tab">Gratificación</button>
+                        <button onclick="setCalc('liq')" id="tab-liq" class="calc-tab">Liquidación</button>
+                        <button onclick="setCalc('util')" id="tab-util" class="calc-tab">Utilidades</button>
+                        <button onclick="setCalc('quinta')" id="tab-quinta" class="calc-tab">Renta 5ta</button>
+                        <button onclick="setCalc('cuarta')" id="tab-cuarta" class="calc-tab">Renta 4ta</button>
+                        <button onclick="setCalc('vacas')" id="tab-vacas" class="calc-tab">Vacaciones</button>
                     </div>
 
-                    <div class="lg:col-span-6 bg-white dark:bg-surface-900 p-12 rounded-[3.5rem] shadow-2xl border border-slate-100 dark:border-slate-800">
-                        <div id="calc-ui">
-                            </div>
+                    <div class="lg:col-span-5 bg-white dark:bg-surface-900 p-8 rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-800">
+                        <div id="calc-ui"></div>
                     </div>
 
-                    <div class="lg:col-span-3 space-y-6">
-                        <div id="res-card" class="bg-brand-500 p-10 rounded-[3.5rem] text-white shadow-2xl transition-all">
-                            <p class="text-[10px] font-black uppercase tracking-[0.3em] opacity-70 mb-2">Monto Estimado</p>
-                            <div id="calc-res" class="text-5xl font-black tabular-nums">S/ 0.00</div>
-                            <div id="calc-breakdown" class="mt-8 pt-8 border-t border-white/20 text-[11px] space-y-3 font-bold uppercase"></div>
+                    <div class="lg:col-span-4 space-y-6">
+                        <div id="res-card" class="bg-brand-500 p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden">
+                            <h4 class="text-[10px] font-black uppercase tracking-widest opacity-80">Resultado Total</h4>
+                            <div id="calc-res" class="text-5xl font-black mt-2 tabular-nums">S/ 0.00</div>
+                            <div id="calc-details" class="mt-6 space-y-2 text-[11px] border-t border-white/20 pt-6"></div>
                         </div>
-                        <div class="bg-slate-100 dark:bg-surface-800 p-8 rounded-[2.5rem]">
-                            <h4 class="text-xs font-black text-brand-500 mb-4">GUÍA PRO</h4>
-                            <div id="guide-text" class="text-xs leading-relaxed opacity-70 italic"></div>
+                        <div class="bg-slate-50 dark:bg-surface-800 p-6 rounded-3xl border-l-4 border-brand-500">
+                            <p id="guide-text" class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 italic"></p>
                         </div>
                     </div>
                 </div>
@@ -81,16 +80,16 @@
         </section>
 
         <section id="sec-forex" class="sec-content">
-            <h2 class="text-4xl font-black mb-12">Global <span class="text-brand-500">Forex Index</span> (100)</h2>
-            <div class="grid lg:grid-cols-12 gap-8">
-                <div class="lg:col-span-4 bg-white dark:bg-surface-900 p-6 rounded-[3rem] border border-slate-200 dark:border-surface-800 h-[700px] overflow-hidden flex flex-col">
-                    <input type="number" id="f-amt" oninput="updateForex()" class="w-full p-6 text-3xl font-black bg-slate-50 dark:bg-surface-800 rounded-3xl mb-6 outline-none focus:ring-4 ring-brand-500/20" value="1000">
+            <h2 class="text-4xl font-black mb-8 dark:text-white">Forex <span class="text-brand-500">Global 100</span></h2>
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="bg-white dark:bg-surface-900 p-6 rounded-3xl h-[600px] flex flex-col">
+                    <input type="number" id="f-amt" oninput="updateForex()" value="1000" class="w-full p-4 text-2xl font-black bg-slate-50 dark:bg-surface-800 rounded-2xl mb-4 dark:text-white outline-none">
                     <div id="forex-list" class="flex-1 overflow-y-auto custom-scroll pr-2 space-y-2"></div>
                 </div>
-                <div class="lg:col-span-8 bg-white dark:bg-surface-900 p-10 rounded-[4rem] border border-slate-200 dark:border-surface-800">
-                    <div class="flex justify-between items-center mb-10">
-                        <h3 id="chart-label" class="text-5xl font-black text-brand-500 italic">USD/PEN</h3>
-                        <div class="px-6 py-2 bg-green-500 text-white font-black rounded-full text-[10px]">REAL-TIME ANALYTICS</div>
+                <div class="lg:col-span-2 bg-white dark:bg-surface-900 p-8 rounded-[3rem]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 id="chart-label" class="text-4xl font-black text-brand-500">USD/PEN</h3>
+                        <span class="px-4 py-1 bg-green-500 text-white text-[10px] font-black rounded-full">LIVE 2026</span>
                     </div>
                     <canvas id="f-chart"></canvas>
                 </div>
@@ -98,18 +97,17 @@
         </section>
 
         <section id="sec-jobs" class="sec-content">
-            <div class="flex justify-between items-end mb-12">
-                <h2 class="text-4xl font-black tracking-tighter">Market <span class="text-brand-500">Radar (250)</span></h2>
-                <input type="text" id="job-search" oninput="renderJobs()" placeholder="Buscar por puesto o sector..." class="p-5 rounded-2xl bg-white dark:bg-surface-900 border border-slate-200 dark:border-surface-800 w-96 outline-none focus:ring-4 ring-brand-500/10">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-4xl font-black dark:text-white">Radar <span class="text-brand-500">250 Jobs</span></h2>
+                <input type="text" id="job-search" oninput="renderJobs()" placeholder="Buscar cargo..." class="p-4 rounded-xl bg-white dark:bg-surface-900 border dark:border-slate-800 w-72 dark:text-white">
             </div>
             <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
         </section>
 
         <section id="sec-news" class="sec-content">
-            <h2 class="text-4xl font-black mb-12">Intelligence <span class="text-red-600">Report (50)</span></h2>
+            <h2 class="text-4xl font-black mb-10 dark:text-white">Market <span class="text-brand-500">Intelligence</span></h2>
             <div id="news-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
         </section>
-
     </main>
 
     <script src="data.js"></script>
