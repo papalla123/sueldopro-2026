@@ -367,18 +367,31 @@ const app = {
         }).join('');
         
         formHTML += `
-            <button onclick="app.executeCalculation()" class="btn-primary mt-4 sm:mt-6">
+            <button id="calc-execute-btn" class="btn-primary mt-4 sm:mt-6">
                 ${state.currentLang === 'es' ? 'CALCULAR AHORA' : 'CALCULATE NOW'}
             </button>
         `;
         
         container.innerHTML = formHTML;
         
+        // Add event listener to the calculate button
+        document.getElementById('calc-execute-btn')?.addEventListener('click', () => {
+            this.executeCalculation();
+        });
+        
         document.getElementById('legal-info').textContent = calc.legalInfo[state.currentLang];
         
         // Reset results
         document.getElementById('main-result').textContent = 'S/ 0.00';
         document.getElementById('result-details').innerHTML = '';
+        
+        // Re-setup calculator tab listeners
+        document.querySelectorAll('[data-calc]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const calc = e.currentTarget.getAttribute('data-calc');
+                this.selectCalculator(calc);
+            });
+        });
     },
 
     executeCalculation() {
@@ -718,7 +731,6 @@ const app = {
         const list = document.getElementById('forex-list');
         list.innerHTML = window.CURRENCIES.map(currency => `
             <button 
-                onclick="app.selectCurrency('${currency.code}')" 
                 data-currency="${currency.code}"
                 class="currency-card ${currency.code === state.selectedCurrency ? 'active' : ''}"
             >
@@ -729,6 +741,14 @@ const app = {
                 <div class="text-sm font-black text-brand-500">${currency.code}</div>
             </button>
         `).join('');
+        
+        // Add click listeners to currency cards
+        document.querySelectorAll('[data-currency]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const code = e.currentTarget.getAttribute('data-currency');
+                this.selectCurrency(code);
+            });
+        });
     },
 
     filterCurrencies() {
@@ -1332,6 +1352,32 @@ document.addEventListener('DOMContentLoaded', () => {
     app.renderJobs();
     app.renderNews();
     
+    // Setup navigation buttons
+    document.querySelectorAll('[data-nav]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const section = e.currentTarget.getAttribute('data-nav');
+            app.navigate(section);
+        });
+    });
+    
+    // Setup calculator tabs
+    document.querySelectorAll('[data-calc]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const calc = e.currentTarget.getAttribute('data-calc');
+            app.selectCalculator(calc);
+        });
+    });
+    
+    // Setup theme toggle
+    document.getElementById('theme-toggle')?.addEventListener('click', () => {
+        app.toggleTheme();
+    });
+    
+    // Setup language toggle
+    document.getElementById('lang-toggle')?.addEventListener('click', () => {
+        app.toggleLanguage();
+    });
+    
     // Performance optimization: Debounce input handlers
     const debounce = (func, wait) => {
         let timeout;
@@ -1345,28 +1391,46 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     };
     
-    // Add debounced listeners for intelligence module
-    ['eq-planilla', 'sem-salary', 'esc-cts', 'esc-years', 'esc-expense', 'esc-salary'].forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.addEventListener('input', debounce(() => {
-                if (id.startsWith('eq-')) app.calculateEquivalence();
-                if (id.startsWith('sem-')) app.calculateSemaphore();
-                if (id.startsWith('esc-')) app.calculateEscape();
-            }, 300));
+    // Intelligence module inputs (will be set up when section loads)
+    document.addEventListener('input', (e) => {
+        const id = e.target.id;
+        if (id && id.startsWith('eq-')) {
+            debounce(() => app.calculateEquivalence(), 300)();
         }
+        if (id && id.startsWith('sem-')) {
+            debounce(() => app.calculateSemaphore(), 300)();
+        }
+        if (id && id.startsWith('esc-')) {
+            debounce(() => app.calculateEscape(), 300)();
+        }
+        if (id === 'comp-salary' || id === 'comp-sector' || id === 'comp-level') {
+            debounce(() => app.updateComparison(), 300)();
+        }
+        if (id === 'forex-amount' || id === 'forex-search') {
+            if (id === 'forex-amount') debounce(() => app.updateForex(), 300)();
+            if (id === 'forex-search') debounce(() => app.filterCurrencies(), 300)();
+        }
+        if (id === 'job-search') {
+            debounce(() => app.filterJobs(), 300)();
+        }
+    });
+    
+    // Setup sector filters
+    document.querySelectorAll('[data-sector]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const sector = e.currentTarget.getAttribute('data-sector');
+            app.filterJobsBySector(sector);
+        });
+    });
+    
+    // Setup share button
+    document.getElementById('share-result-btn')?.addEventListener('click', () => {
+        app.shareResult();
     });
 });
 
-// Expose app globally for onclick handlers
-window.app = app;
-
-// Service Worker registration for PWA capabilities (optional)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        // Can be implemented later for offline functionality
-    });
-}-xs text-slate-500 dark:text-slate-400 font-bold mb-2">${state.currentLang === 'es' ? 'Tu Percentil' : 'Your Percentile'}</div>
+// Expose app globally for dynamic content
+window.app = app;-xs text-slate-500 dark:text-slate-400 font-bold mb-2">${state.currentLang === 'es' ? 'Tu Percentil' : 'Your Percentile'}</div>
                 <div class="text-2xl sm:text-3xl font-black text-brand-500">${Math.round(percentile)}%</div>
             </div>
             <div class="stat-card">
