@@ -1,4 +1,9 @@
-// BLOQUE #1 – JOBS (1–100)
+const i18n = {
+    es: {
+        g_neto_t: "Calculadora de Sueldo Neto 2026",
+        g_neto_txt: "Cálculo actualizado con la UIT de S/ 5,500 y escalas de 5ta Categoría."
+    }
+};// BLOQUE #1 – JOBS (1–100)
 const jobs = [
 {n:"Ingeniero de Minas",min:9000,max:22000,i:"⛏️",d:"Gestión técnica y operativa de proyectos mineros de gran escala",l:"https://www.google.com/search?q=trabajo+de+ingeniero+de+minas"},
 {n:"Operador de Maquinaria Minera",min:4500,max:9000,i:"🚜",d:"Manejo especializado de equipos pesados en operaciones mineras seguras",l:"https://www.google.com/search?q=trabajo+de+operador+maquinaria+minera"},

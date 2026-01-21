@@ -12,7 +12,7 @@
     <aside class="w-20 lg:w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-900 fixed h-full z-50 flex flex-col p-4">
         <nav class="flex-1 space-y-2">
             <button onclick="nav('neto')" id="m-neto" class="sidebar-btn active w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">💰 <span class="hidden lg:inline">Sueldo Neto</span></button>
-            <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">🔍 <span class="hidden lg:inline">Radar 1000</span></button>
+            <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">🔎 <span class="hidden lg:inline">Radar 1000</span></button>
             <button onclick="nav('forex')" id="m-forex" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">📈 <span class="hidden lg:inline">Divisas</span></button>
         </nav>
     </aside>
@@ -21,8 +21,20 @@
         <section id="sec-neto" class="sec-content active">
             <h2 class="text-4xl font-black mb-8 italic">Sueldo <span class="text-brand-500">Neto</span></h2>
             <div class="bg-white dark:bg-dark-900 p-8 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 max-w-lg">
-                <input type="number" id="bruto" placeholder="Sueldo Bruto S/" class="w-full p-4 rounded-xl bg-slate-100 dark:bg-dark-800 text-2xl font-black mb-4 outline-none border-2 border-transparent focus:border-brand-500 transition-all">
-                <button onclick="alert('Calculando...')" class="w-full bg-brand-500 hover:bg-blue-600 text-white font-black py-4 rounded-xl transition-all shadow-lg shadow-blue-500/30">CALCULAR</button>
+                <input 
+                    type="number" 
+                    id="bruto" 
+                    placeholder="Sueldo Bruto S/" 
+                    class="w-full p-4 rounded-xl bg-slate-100 dark:bg-dark-800 text-2xl font-black mb-4 outline-none border-2 border-transparent focus:border-brand-500 transition-all"
+                    onkeypress="if(event.key === 'Enter') calcularSueldoNeto()"
+                >
+                <button 
+                    onclick="calcularSueldoNeto()" 
+                    class="w-full bg-brand-500 hover:bg-blue-600 text-white font-black py-4 rounded-xl transition-all shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-[1.02] active:scale-[0.98]"
+                >
+                    CALCULAR SUELDO NETO
+                </button>
+                <!-- El resultado se insertará aquí dinámicamente -->
             </div>
             <div class="guide-box p-6 mt-10 rounded-2xl max-w-lg">
                 <h4 id="guide-neto-title" class="font-black text-brand-500 uppercase mb-2"></h4>

@@ -54,20 +54,17 @@ body {
 
 /* 4. TARJETAS DE OFICIOS (RADAR) */
 .job-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    transition: var(--transition);
-}
-
-.dark .job-card {
-    background: #1e293b;
-    border-color: #334155;
+    background: linear-gradient(145deg, #ffffff, #f1f5f9);
+    border-radius: 24px;
+    border: 1px solid rgba(0, 102, 255, 0.1);
+    box-shadow: 10px 10px 20px #d1d5db, -10px -10px 20px #ffffff;
+    transition: all 0.4s ease;
 }
 
 .job-card:hover {
-    transform: translateY(-8px);
-    border-color: var(--brand-blue);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    transform: translateY(-12px) scale(1.02);
+    border-color: #0066ff;
+    box-shadow: 0 20px 25px -5px rgba(0, 102, 255, 0.2);
 }
 
 /* 5. GUÍAS DE CALCULADORA */
