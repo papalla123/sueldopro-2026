@@ -3,40 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SueldoPro 2026 | El Radar de Oficios</title>
+    <title>SueldoPro 2026 | Tech Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 flex flex-col lg:flex-row">
-    <aside class="w-full lg:w-64 border-b lg:border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sticky top-0 z-50">
-        <h1 class="text-xl font-black mb-6 text-blue-600 hidden lg:block">SUELDOPRO 2026</h1>
-        <nav class="flex lg:flex-col gap-2">
-            <button onclick="nav('neto')" id="m-neto" class="sidebar-btn active flex-1 lg:flex-none flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">💰 <span>Sueldo Neto</span></button>
-            <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn flex-1 lg:flex-none flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">🔍 <span>Radar 1000</span></button>
-        </nav>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col lg:flex-row min-h-screen">
+    
+    <aside class="w-full lg:w-64 border-b lg:border-r border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 sticky top-0 z-50 flex lg:flex-col justify-between">
+        <div>
+            <h1 class="text-xl font-black mb-6 text-blue-600 hidden lg:block tracking-tighter">SUELDOPRO <span class="text-slate-400">2026</span></h1>
+            <nav class="flex lg:flex-col gap-2 overflow-x-auto">
+                <button onclick="nav('neto')" id="m-neto" class="sidebar-btn active">💰 <span>Calculadoras</span></button>
+                <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn">🔍 <span>Radar 1000</span></button>
+                <button onclick="nav('news')" id="m-news" class="sidebar-btn">📰 <span>Noticias</span></button>
+                <button onclick="nav('forex')" id="m-forex" class="sidebar-btn">💱 <span>Divisas</span></button>
+            </nav>
+        </div>
+        <button onclick="toggleTheme()" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 ml-4 lg:ml-0 lg:mt-4">🌓</button>
     </aside>
 
     <main class="flex-1 p-4 lg:p-10">
         <section id="sec-neto" class="sec-content active">
-            <h2 class="text-4xl font-black mb-8 italic text-slate-800 dark:text-white">Calculadora <span class="text-blue-600">Neto 2026</span></h2>
-            <div class="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 max-w-lg">
-                <label class="block text-xs font-bold mb-2 opacity-50 uppercase">Ingresa Sueldo Bruto (Mensual)</label>
-                <input type="number" id="bruto" placeholder="Ej: 5000" class="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 text-2xl font-black mb-4 outline-none border-2 border-transparent focus:border-blue-500 text-slate-800 dark:text-white">
-                <button onclick="calcularSueldoNeto()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl transition-all shadow-lg shadow-blue-500/30">CALCULAR AHORA</button>
-                <div id="resultado-calculo"></div>
+            <h2 class="text-4xl font-black mb-8 tracking-tight">Hub de <span class="text-blue-600">Finanzas</span></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <button onclick="setCalc('peru')" class="calc-tab active">Sueldo Perú</button>
+                <button onclick="setCalc('gratificacion')" class="calc-tab">Gratificación</button>
+                <button onclick="setCalc('cts')" class="calc-tab">CTS</button>
+                <button onclick="setCalc('utilidades')" class="calc-tab">Utilidades</button>
+                <button onclick="setCalc('renta')" class="calc-tab">Renta 5ta</button>
+                <button onclick="setCalc('liquidación')" class="calc-tab">Liquidación</button>
+                <button onclick="setCalc('independiente')" class="calc-tab">Recibo x Honorarios</button>
+                <button onclick="setCalc('bono')" class="calc-tab">Bonos Ley</button>
             </div>
-            <div class="mt-10 p-6 bg-blue-50/50 dark:bg-blue-900/10 border-l-4 border-blue-600 rounded-r-2xl max-w-lg">
-                <h4 class="font-black text-blue-600 uppercase mb-2">Base Legal 2026</h4>
-                <p class="text-sm italic opacity-80 text-slate-600 dark:text-slate-300">Cálculos proyectados con la UIT de S/ 5,500. Se aplican descuentos de AFP (11.84%) y escalas de Impuesto a la Renta de 5ta categoría.</p>
+
+            <div class="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-2xl border border-blue-500/20 max-w-2xl">
+                <div id="calc-container">
+                    <label id="input-label" class="block text-xs font-bold mb-2 opacity-50 uppercase">Sueldo Bruto Mensual</label>
+                    <input type="number" id="main-input" placeholder="Ej: 5000" class="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 text-2xl font-black mb-4 outline-none border-2 border-transparent focus:border-blue-500">
+                    <button onclick="ejecutarCalculo()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl transition-all shadow-lg shadow-blue-500/40">PROCESAR DATOS</button>
+                </div>
+                <div id="resultado-calculo"></div>
             </div>
         </section>
 
         <section id="sec-jobs" class="sec-content">
-            <h2 class="text-4xl font-black mb-8 italic text-slate-800 dark:text-white">Radar <span class="text-blue-600">1000</span></h2>
-            <div class="max-w-xl mb-8">
-                <input type="text" id="job-search" placeholder="Busca un oficio o profesión..." class="w-full p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm outline-none focus:border-blue-500 text-slate-800 dark:text-white">
-            </div>
-            <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <h2 class="text-4xl font-black mb-8">Radar <span class="text-blue-600">Oficios</span></h2>
+            <input type="text" id="job-search" placeholder="Busca entre 1000 profesiones..." class="w-full max-w-xl p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm outline-none focus:border-blue-500">
+            <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8"></div>
+        </section>
+
+        <section id="sec-news" class="sec-content">
+            <h2 class="text-4xl font-black mb-8 italic text-slate-800 dark:text-white text-center md:text-left">
+                Portal de <span class="text-blue-600">Noticias Económicas</span>
+            </h2>
+            <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+        </section>
+
+        <section id="sec-forex" class="sec-content">
+            <h2 class="text-4xl font-black mb-8 tracking-tight text-center md:text-left">
+                Mercado de <span class="text-blue-600">Divisas Real-Time</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="forex-grid">
                 </div>
         </section>
     </main>

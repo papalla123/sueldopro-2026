@@ -1,9 +1,21 @@
-// data.js - Base de Datos
+// data.js - Base de Datos Global
 const jobs = [
-    {n:"Ingeniero de Minas", min:9000, max:22000, i:"⛏️", d:"Gestión técnica y operativa de proyectos mineros.", l:"https://www.google.com/search?q=trabajo+ingeniero+minas+peru"},
-    {n:"Ingeniero de IA", min:9000, max:28000, i:"🤖", d:"Desarrollo de sistemas inteligentes y LLMs.", l:"https://www.google.com/search?q=trabajo+ia+peru"},
-    {n:"Arquitecto de IA", min:15000, max:35000, i:"🧠", d:"Diseño de infraestructuras para IA empresarial.", l:"#"},
-    {n:"Influencer", min:4000, max:30000, i:"🌟", d:"Monetización de audiencias digitales masivas.", l:"#"},
-    {n:"Médico General", min:7000, max:16000, i:"🩺", d:"Atención integral en salud pública y privada.", l:"#"},
-    {n:"Desarrollador Web", min:5000, max:15000, i:"💻", d:"Creación de aplicaciones web modernas.", l:"#"}
+    {n:"Ingeniero de IA", min:9500, max:32000, i:"🤖", d:"Especialista en modelos generativos y automatización."},
+    {n:"Arquitecto Cloud", min:8500, max:25000, i:"☁️", d:"Diseño de infraestructura escalable en AWS/Azure."},
+    {n:"Desarrollador Fullstack", min:5000, max:18000, i:"💻", d:"Creación de aplicaciones web de alto rendimiento."},
+    {n:"Data Scientist", min:7000, max:22000, i:"📊", d:"Análisis predictivo con Python y Big Data."},
+    {n:"UX/UI Designer", min:4000, max:14000, i:"🎨", d:"Diseño de experiencias centradas en el usuario."},
+    {n:"Gerente de Proyectos Tech", min:12000, max:35000, i:"🚀", d:"Liderazgo de equipos ágiles multidisciplinarios."}
+];
+
+const news = [
+    {t:"UIT 2026: ¿Cómo afecta tu sueldo?", d:"El nuevo valor de S/ 5,500 redefine el impuesto a la renta.", f:"21 Ene", i:"📈"},
+    {t:"Auge de IA en Perú", d:"Empresas locales aumentan presupuesto en tecnología un 40%.", f:"20 Ene", i:"🤖"},
+    {t:"Ley de Teletrabajo", d:"Nuevas actualizaciones sobre el pago de servicios de internet.", f:"19 Ene", i:"🏠"}
+];
+
+const forexData = [
+    {n:"Dólar (USD/PEN)", c:3.75, v:-0.02},
+    {n:"Euro (EUR/PEN)", c:4.10, v:0.01},
+    {n:"Bitcoin (BTC/USD)", c:102000, v:1.50}
 ];
