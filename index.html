@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SueldoPro 2026 | Global Edition</title>
+    <title>SueldoPro 2026 | Global Supremacy</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -29,9 +29,9 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         .guide-box { border-left: 5px solid #0066ff; background: rgba(0, 102, 255, 0.05); }
         .job-card:hover { transform: translateY(-5px); border-color: #0066ff; }
+        .lang-active { background: #0066ff; color: white; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #0066ff; border-radius: 10px; }
-        .lang-active { background: #0066ff; color: white; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-dark-950 text-slate-800 dark:text-slate-200 min-h-screen flex">
@@ -44,25 +44,25 @@
 
         <nav class="flex-1 space-y-1">
             <p data-t="cat_calc" class="hidden lg:block text-[10px] font-black text-slate-400 px-4 mb-2 uppercase tracking-widest">Cálculos</p>
-            <button onclick="nav('neto')" id="m-neto" class="sidebar-btn active w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all"><span class="nav-icon">💰</span> <span data-t="m_neto">Neto</span></button>
-            <button onclick="nav('cuarta')" id="m-cuarta" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all"><span>📝</span> <span data-t="m_cuarta">4ta Cat</span></button>
-            <button onclick="nav('costo')" id="m-costo" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all"><span>🏢</span> <span data-t="m_costo">Empresa</span></button>
-            <button onclick="nav('vac')" id="m-vac" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all"><span>🌴</span> <span data-t="m_vac">Vacaciones</span></button>
-            <button onclick="nav('grati')" id="m-grati" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all"><span>🎁</span> <span data-t="m_grati">Grati</span></button>
-            <button onclick="nav('cts')" id="m-cts" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all"><span>🏦</span> <span data-t="m_cts">CTS</span></button>
-            <button onclick="nav('liq')" id="m-liq" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all"><span>⚖️</span> <span data-t="m_liq">Liquidación</span></button>
+            <button onclick="nav('neto')" id="m-neto" class="sidebar-btn active w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">💰 <span class="hidden lg:inline" data-t="m_neto">Neto</span></button>
+            <button onclick="nav('cuarta')" id="m-cuarta" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">📝 <span class="hidden lg:inline" data-t="m_cuarta">4ta Cat</span></button>
+            <button onclick="nav('costo')" id="m-costo" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">🏢 <span class="hidden lg:inline" data-t="m_costo">Empresa</span></button>
+            <button onclick="nav('vac')" id="m-vac" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">🌴 <span class="hidden lg:inline" data-t="m_vac">Vacaciones</span></button>
+            <button onclick="nav('grati')" id="m-grati" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">🎁 <span class="hidden lg:inline" data-t="m_grati">Grati</span></button>
+            <button onclick="nav('cts')" id="m-cts" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">🏦 <span class="hidden lg:inline" data-t="m_cts">CTS</span></button>
+            <button onclick="nav('liq')" id="m-liq" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">⚖️ <span class="hidden lg:inline" data-t="m_liq">Liquidación</span></button>
             
             <p data-t="cat_market" class="hidden lg:block text-[10px] font-black text-slate-400 px-4 mt-6 mb-2 uppercase tracking-widest">Mercado</p>
-            <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all"><span>🔍</span> <span data-t="m_radar">Radar 2026</span></button>
-            <button onclick="nav('blog')" id="m-blog" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all"><span>📰</span> <span data-t="m_news">Noticias</span></button>
-            <button onclick="nav('forex')" id="m-forex" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all"><span>💱</span> <span data-t="m_forex">Divisas</span></button>
+            <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">🔍 <span class="hidden lg:inline" data-t="m_radar">Radar 2026</span></button>
+            <button onclick="nav('blog')" id="m-blog" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">📰 <span class="hidden lg:inline" data-t="m_news">Noticias</span></button>
+            <button onclick="nav('forex')" id="m-forex" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">💱 <span class="hidden lg:inline" data-t="m_forex">Divisas</span></button>
         </nav>
 
         <div class="mt-4 flex gap-1 p-1 bg-slate-100 dark:bg-dark-800 rounded-xl">
             <button onclick="setLang('es')" id="btn-es" class="flex-1 py-1 text-[10px] font-bold rounded-lg lang-active">ES</button>
             <button onclick="setLang('en')" id="btn-en" class="flex-1 py-1 text-[10px] font-bold rounded-lg">EN</button>
         </div>
-        <button onclick="toggleTheme()" class="mt-2 w-full p-3 rounded-xl bg-slate-100 dark:bg-dark-800 text-[10px] font-black uppercase tracking-tighter">🌓 Theme</button>
+        <button onclick="toggleTheme()" class="mt-2 w-full p-3 rounded-xl bg-slate-100 dark:bg-dark-800 text-[10px] font-black uppercase tracking-tighter">🌓 Tema</button>
     </aside>
 
     <main class="flex-1 ml-20 lg:ml-64 p-6 lg:p-10">
@@ -81,12 +81,12 @@
                 <div class="bg-brand-500 rounded-[2.5rem] p-10 flex flex-col justify-center text-white shadow-2xl">
                     <p data-t="net_result_label" class="text-xs font-black uppercase opacity-80">Saldo Líquido a Cobrar</p>
                     <h2 id="out-neto" class="text-6xl font-black italic">S/ 0.00</h2>
-                    <button onclick="genPDF()" data-t="btn_pdf" class="mt-6 bg-white text-brand-500 px-6 py-2 rounded-full text-xs font-black hover:bg-slate-100 transition-all uppercase">Exportar PDF</button>
+                    <button onclick="genPDF()" data-t="btn_pdf" class="mt-6 bg-white text-brand-500 px-6 py-2 rounded-full text-xs font-black hover:bg-slate-100 transition-all uppercase tracking-tighter">Exportar PDF</button>
                 </div>
             </div>
-            <div class="guide-box p-8 rounded-3xl dark:bg-white/5">
-                <h4 data-t="guide_net_title" class="font-black text-brand-500 mb-4 uppercase text-sm">📖 Guía de Uso: Sueldo Neto</h4>
-                <p id="guide-net-text" class="text-lg text-slate-600 dark:text-slate-300 leading-relaxed italic">Esta herramienta determina el monto exacto que ingresará a tu cuenta bancaria...</p>
+            <div class="guide-box p-8 rounded-3xl dark:bg-white/5 shadow-inner">
+                <h4 data-t="guide_net_title" class="font-black text-brand-500 mb-4 uppercase text-sm tracking-widest">📖 Guía de Uso: Sueldo Neto</h4>
+                <p id="guide-net-text" class="text-lg text-slate-600 dark:text-slate-300 leading-relaxed italic"></p>
             </div>
         </section>
 
@@ -99,12 +99,12 @@
                 </div>
                 <div class="bg-dark-900 border-2 border-brand-500 rounded-[2.5rem] p-10 flex flex-col justify-center text-center">
                     <h2 id="out-q-neto" class="text-5xl font-black text-white italic">S/ 0.00</h2>
-                    <p id="out-q-ret" class="text-red-500 font-black mt-2 text-lg italic">Retención (8%)</p>
+                    <p id="out-q-ret" class="text-red-500 font-black mt-2 text-lg italic"></p>
                 </div>
             </div>
-            <div class="guide-box p-8 rounded-3xl dark:bg-white/5">
-                <h4 data-t="guide_q_title" class="font-black text-brand-500 mb-4 uppercase text-sm">📖 Guía de Uso: 4ta Categoría</h4>
-                <p id="guide-q-text" class="text-lg text-slate-600 dark:text-slate-300 leading-relaxed italic">Utilizado por trabajadores independientes...</p>
+            <div class="guide-box p-8 rounded-3xl dark:bg-white/5 shadow-inner">
+                <h4 data-t="guide_q_title" class="font-black text-brand-500 mb-4 uppercase text-sm tracking-widest">📖 Guía de Uso: 4ta Categoría</h4>
+                <p id="guide-q-text" class="text-lg text-slate-600 dark:text-slate-300 leading-relaxed italic"></p>
             </div>
         </section>
 
@@ -122,14 +122,14 @@
             </div>
             <div class="guide-box p-8 rounded-3xl dark:bg-white/5">
                 <h4 data-t="guide_c_title" class="font-black text-brand-500 mb-4 uppercase text-sm">📖 Guía de Uso: Costo Empresa</h4>
-                <p id="guide-c-text" class="text-lg text-slate-600 dark:text-slate-300 leading-relaxed italic">Fundamental para emprendedores y gerentes de RRHH...</p>
+                <p id="guide-c-text" class="text-lg text-slate-600 dark:text-slate-300 leading-relaxed italic"></p>
             </div>
         </section>
 
         <section id="sec-vac" class="sec-content">
             <h2 class="text-4xl font-black mb-8 italic"><span data-t="v_h2_1">Vacaciones</span> <span class="text-brand-500" data-t="v_h2_2">Truncas</span></h2>
             <div class="grid lg:grid-cols-2 gap-8 mb-10">
-                <div class="bg-white dark:bg-dark-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 space-y-4">
+                <div class="bg-white dark:bg-dark-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 space-y-4 shadow-xl">
                     <input type="number" id="v-bruto" oninput="runVac()" placeholder="Sueldo Bruto" class="w-full bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold">
                     <div class="grid grid-cols-2 gap-4">
                         <input type="number" id="v-meses" oninput="runVac()" placeholder="Meses" class="bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold">
@@ -142,7 +142,46 @@
             </div>
             <div class="guide-box p-8 rounded-3xl dark:bg-white/5">
                 <h4 data-t="guide_v_title" class="font-black text-brand-500 mb-4 uppercase text-sm">📖 Guía de Uso: Vacaciones</h4>
-                <p id="guide-v-text" class="text-lg text-slate-600 dark:text-slate-300 leading-relaxed italic">Calcula la compensación por el tiempo de descanso no gozado...</p>
+                <p id="guide-v-text" class="text-lg text-slate-600 dark:text-slate-300 leading-relaxed italic"></p>
+            </div>
+        </section>
+
+        <section id="sec-grati" class="sec-content">
+            <h2 class="text-4xl font-black mb-8 italic"><span data-t="g_h2_1">Cálculo de</span> <span class="text-brand-500" data-t="g_h2_2">Gratificación</span></h2>
+            <div class="grid lg:grid-cols-2 gap-8 mb-10">
+                <div class="bg-white dark:bg-dark-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 space-y-4 shadow-xl">
+                    <input type="number" id="g-bruto" oninput="runGrati()" value="2000" class="w-full bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold">
+                    <input type="number" id="g-meses" oninput="runGrati()" value="6" max="6" class="w-full bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold">
+                </div>
+                <div class="bg-blue-600 rounded-[2.5rem] p-10 text-white flex flex-col justify-center text-center shadow-xl">
+                    <h2 id="out-grati" class="text-5xl font-black italic">S/ 0.00</h2>
+                    <p class="text-xs font-bold mt-2 text-blue-200">INCLUYE BONO LEY 30334 (9%)</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-cts" class="sec-content">
+            <h2 class="text-4xl font-black mb-8 italic"><span data-t="cts_h2_1">Depósito</span> <span class="text-brand-500" data-t="cts_h2_2">CTS</span></h2>
+            <div class="max-w-2xl bg-white dark:bg-dark-900 p-10 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl mb-10">
+                <label class="text-xs font-black text-slate-500 uppercase">Sueldo + 1/6 de Gratificación</label>
+                <input type="number" id="c-sueldo" oninput="runCTS()" value="3000" class="w-full bg-slate-50 dark:bg-dark-950 p-5 mt-2 rounded-2xl text-4xl font-black border-none outline-none">
+                <div class="mt-8 bg-brand-500 text-white p-10 rounded-3xl text-center shadow-lg">
+                    <h2 id="out-cts" class="text-5xl font-black italic">S/ 0.00</h2>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-liq" class="sec-content">
+            <h2 class="text-4xl font-black mb-8 italic"><span data-t="l_h2_1">Simulador de</span> <span class="text-brand-500" data-t="l_h2_2">Liquidación</span></h2>
+            <div class="grid lg:grid-cols-2 gap-8 mb-10">
+                <div class="bg-white dark:bg-dark-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 space-y-4 shadow-xl">
+                    <input type="number" id="l-bruto" oninput="runLiq()" placeholder="Último Sueldo Bruto" class="w-full bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold">
+                    <input type="number" id="l-meses" oninput="runLiq()" placeholder="Meses laborados" class="w-full bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold">
+                    <input type="number" id="l-vac" oninput="runLiq()" placeholder="Días vacaciones truncas" class="w-full bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold">
+                </div>
+                <div class="bg-dark-950 border-2 border-brand-500 rounded-[2.5rem] p-10 flex flex-col justify-center text-center text-white shadow-2xl">
+                    <h2 id="out-liq" class="text-6xl font-black text-brand-500 italic">S/ 0.00</h2>
+                </div>
             </div>
         </section>
 
@@ -150,7 +189,7 @@
             <div class="flex flex-col lg:flex-row justify-between items-center mb-10 gap-6">
                 <h2 class="text-4xl font-black italic"><span data-t="j_h2_1">Radar Salarial</span> <span class="text-brand-500" data-t="j_h2_2">Global 2026</span></h2>
                 <div class="relative w-full lg:w-96">
-                    <input type="text" id="j-search" onkeyup="runJobs()" placeholder="Buscar..." class="bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl outline-none w-full shadow-2xl font-bold">
+                    <input type="text" id="j-search" onkeyup="runJobs()" placeholder="Buscar en las 30 carreras..." class="bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl outline-none w-full shadow-2xl font-bold">
                 </div>
             </div>
             <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
@@ -170,7 +209,9 @@
                         <option value="3.85">🇺🇸 Dólar (USD)</option>
                         <option value="4.15">🇪🇺 Euro (EUR)</option>
                         <option value="4.82">🇬🇧 Libra (GBP)</option>
-                        <option value="2.82">🇨🇦 Dólar Canadiense</option>
+                        <option value="4.35">🇨🇭 CHF</option>
+                        <option value="2.82">🇨🇦 CAD</option>
+                        <option value="2.55">🇦🇺 AUD</option>
                     </select>
                     <div class="bg-brand-500 p-8 rounded-3xl text-center text-white shadow-xl">
                         <p data-t="fx_label" class="text-xs font-black uppercase mb-2 opacity-80">Conversión a Soles (PEN)</p>
@@ -186,7 +227,6 @@
     </main>
 
     <script>
-        // DICCIONARIO DE TRADUCCIÓN
         const i18n = {
             es: {
                 cat_calc: "Cálculos", cat_market: "Mercado",
@@ -206,7 +246,11 @@
                 guide_v_title: "📖 Guía de Uso: Vacaciones",
                 guide_v_text: "Compensación por descanso no gozado. Corresponden 30 días por año laborado en el régimen general.",
                 j_h2_1: "Radar Salarial", j_h2_2: "Global 2026", fx_label: "Conversión a Soles (PEN)",
-                n_h2_1: "Data", n_h2_2: "Stream Laboral"
+                n_h2_1: "Data", n_h2_2: "Stream Laboral",
+                g_h2_1: "Cálculo de", g_h2_2: "Gratificación",
+                cts_h2_1: "Depósito", cts_h2_2: "CTS",
+                l_h2_1: "Simulador de", l_h2_2: "Liquidación",
+                job_verify: "Verificar en Portal Oficial →", ret_label: "Retención"
             },
             en: {
                 cat_calc: "Calculations", cat_market: "Market",
@@ -226,49 +270,79 @@
                 guide_v_title: "📖 User Guide: Vacations",
                 guide_v_text: "Compensation for unused rest days. In the general regime, workers are entitled to 30 days per year of service.",
                 j_h2_1: "Salary", j_h2_2: "Radar 2026", fx_label: "Conversion to Soles (PEN)",
-                n_h2_1: "Labor", n_h2_2: "Data Stream"
+                n_h2_1: "Labor", n_h2_2: "Data Stream",
+                g_h2_1: "Bonus", g_h2_2: "Calculation",
+                cts_h2_1: "Fund", cts_h2_2: "Deposit",
+                l_h2_1: "Final", l_h2_2: "Settlement",
+                job_verify: "Verify on Official Portal →", ret_label: "Withholding"
             }
         };
+
+        const jobs = [
+            {n:"Arquitecto Cloud / IA", min:10000, max:24000, i:"🤖", l:"https://www.linkedin.com/salary/"},
+            {n:"Médico Especialista", min:9000, max:18000, i:"🩺", l:"https://www.gob.pe/minsa"},
+            {n:"Ingeniero de Minas Sr.", min:8500, max:21000, i:"⛏️", l:"https://www.snmpe.org.pe/"},
+            {n:"Software Engineer L5", min:6000, max:14000, i:"💻", l:"https://www.ponteencarrera.pe/"},
+            {n:"Chef de Alta Cocina", min:4500, max:11000, i:"👨‍🍳", l:"https://www.turismo.pe"},
+            {n:"Abogado Corporativo", min:6500, max:16000, i:"⚖️", l:"https://www.cal.org.pe/"},
+            {n:"Data Scientist Senior", min:8000, max:17500, i:"📊", l:"https://www.glassdoor.com"},
+            {n:"Piloto de Línea Aérea", min:13000, max:30000, i:"✈️", l:"https://www.dgac.gob.pe"},
+            {n:"Enfermero SCTR Minería", min:4200, max:8500, i:"💉", l:"https://www.cep.org.pe/"},
+            {n:"Diseñador UX/UI Lead", min:5000, max:12000, i:"🎨", l:"https://www.behance.net/"},
+            {n:"Project Manager PMP", min:7500, max:15000, i:"📅", l:"https://www.pmi.org.pe/"},
+            {n:"Contador Auditor Sr.", min:4800, max:10500, i:"📈", l:"https://www.ccpl.org.pe/"},
+            {n:"Ingeniero Agroindustrial", min:3800, max:9000, i:"🚜", l:"https://www.agrobanco.com.pe"},
+            {n:"Operador de Maquinaria Pesada", min:4000, max:8500, i:"🏗️", l:"https://www.tecsup.edu.pe"},
+            {n:"Especialista Ciberseguridad", min:9000, max:20000, i:"🛡️", l:"https://www.isc2.org/"},
+            {n:"Psicólogo Clínico", min:3000, max:7000, i:"🧠", l:"https://www.cpsp.pe/"},
+            {n:"Traductor Jurado", min:3500, max:8000, i:"🗣️", l:"https://www.traduccionperu.com/"},
+            {n:"Veterinario de Fauna", min:3200, max:7500, i:"🐾", l:"https://www.cmvp.org.pe/"},
+            {n:"E-commerce Manager", min:5500, max:13000, i:"🛒", l:"https://www.capece.org.pe/"},
+            {n:"Analista de Riesgos", min:4500, max:11000, i:"📉", l:"https://www.asbanc.com.pe/"},
+            {n:"Biólogo Marino (Pesca)", min:4000, max:9500, i:"🐟", l:"https://www.imarpe.gob.pe"},
+            {n:"Geólogo Explorador", min:7000, max:18000, i:"🌍", l:"https://www.ingemmet.gob.pe"},
+            {n:"Periodista Digital", min:2800, max:6000, i:"🎙️", l:"https://www.cpp.pe/"},
+            {n:"Arquitecto Urbanista", min:4500, max:11000, i:"🏛️", l:"https://www.cap.org.pe/"},
+            {n:"Economista de Mercado", min:5000, max:13000, i:"💹", l:"https://www.bcrp.gob.pe"},
+            {n:"Entrenador Personal Cert.", min:2500, max:7000, i:"💪", l:"https://www.ipd.gob.pe"},
+            {n:"Ingeniero Textil", min:3500, max:8500, i:"🧵", l:"https://www.senati.edu.pe"},
+            {n:"Especialista en Aduanas", min:4000, max:9000, i:"📦", l:"https://www.sunat.gob.pe"},
+            {n:"Productor Audiovisual", min:3500, max:10000, i:"🎬", l:"https://www.dafo.cultura.pe"},
+            {n:"Gestor de Residuos (ESG)", min:4500, max:11000, i:"♻️", l:"https://www.minam.gob.pe"}
+        ];
+
+        const news = [
+            {t:"Actualización UIT 2026", s:"MEF", c:"La UIT sube a S/ 5,500. Esto cambia los tramos del Impuesto a la Renta.", f:"https://www.gob.pe/mef"},
+            {t:"Bono Ley 30334", s:"El Peruano", c:"Se mantiene la inafectación de aportes en gratificaciones.", f:"https://elperuano.pe"},
+            {t:"Suspensión de 4ta", s:"SUNAT", c:"Nuevo tope de S/ 45,000 para no retener el 8%.", f:"https://sunat.gob.pe"},
+            {t:"Reforma de Pensiones", s:"SBS", c:"Entran en vigor nuevos multifondos con activos digitales.", f:"https://www.sbs.gob.pe"},
+            {t:"Sueldo Mínimo 2026", s:"MTPE", c:"Inicia el debate técnico para elevar la RMV a S/ 1,150.", f:"https://www.gob.pe/mtpe"},
+            {t:"Teletrabajo Híbrido", s:"Gestión", c:"Nueva normativa obliga a cubrir costos de internet y luz.", f:"https://gestion.pe"},
+            {t:"Empleo Joven", s:"PRODUCE", c:"Subsidios para sueldos de trabajadores menores a 24 años.", f:"https://www.gob.pe/produce"},
+            {t:"Feriados 2026", s:"El Comercio", c:"Lista oficial de los 16 feriados nacionales.", f:"https://elcomercio.pe"},
+            {t:"Fiscalización SUNAFIL", s:"SUNAFIL", c:"Campaña contra la informalidad en construcción.", f:"https://www.gob.pe/sunafil"},
+            {t:"Seguridad Social", s:"ESSALUD", c:"Nuevos servicios de telemedicina para zonas remotas.", f:"https://www.essalud.gob.pe"},
+            {t:"Doble Imposición", s:"Cancillería", c:"Perú firma convenio con Japón para evitar doble pago.", f:"https://www.gob.pe/rree"},
+            {t:"Inteligencia Artificial", s:"MTPE", c:"Programa gratuito de reconversión laboral técnica.", f:"https://www.gob.pe/mtpe"}
+        ];
 
         let currentLang = 'es';
 
         function setLang(lang) {
             currentLang = lang;
             document.querySelectorAll('[data-t]').forEach(el => {
-                const key = el.getAttribute('data-t');
-                el.innerText = i18n[lang][key];
+                el.innerText = i18n[lang][el.getAttribute('data-t')];
             });
-            // Update guides specifically
             document.getElementById('guide-net-text').innerText = i18n[lang].guide_net_text;
             document.getElementById('guide-q-text').innerText = i18n[lang].guide_q_text;
             document.getElementById('guide-c-text').innerText = i18n[lang].guide_c_text;
             document.getElementById('guide-v-text').innerText = i18n[lang].guide_v_text;
-            
-            // Buttons UI
             document.getElementById('btn-es').classList.toggle('lang-active', lang === 'es');
             document.getElementById('btn-en').classList.toggle('lang-active', lang === 'en');
+            runCuarta(); renderJobs(jobs); renderNews();
         }
 
-        // DATA DIVISAS & OFICIOS (Mantenemos los 30 oficios y 12 noticias de la versión anterior)
-        const forexData = { "3.85": [3.81, 3.84, 3.82, 3.86, 3.85], "4.15": [4.10, 4.12, 4.11, 4.18, 4.15], "4.82": [4.75, 4.78, 4.80, 4.85, 4.82], "2.82": [2.78, 2.80, 2.81, 2.83, 2.82] };
-
-        const jobs = [
-            {n:"Arquitecto Cloud / IA", min:10000, max:24000, i:"🤖"},
-            {n:"Médico Especialista", min:9000, max:18000, i:"🩺"},
-            {n:"Software Engineer L5", min:6000, max:14000, i:"💻"},
-            {n:"Data Scientist Senior", min:8000, max:17500, i:"📊"},
-            {n:"Chef de Alta Cocina", min:4500, max:11000, i:"👨‍🍳"},
-            {n:"Especialista Ciberseguridad", min:9000, max:20000, i:"🛡️"}
-            // (Se pueden añadir los 30 de nuevo aquí)
-        ];
-
-        const news = [
-            {t:"Actualización UIT 2026", s:"MEF", c:"La UIT sube a S/ 5,500. Esto cambia los tramos del Impuesto a la Renta.", f:"#"},
-            {t:"Teletrabajo Híbrido", s:"Gestión", c:"Nueva normativa obliga a cubrir costos de internet y luz.", f:"#"},
-            {t:"Reforma de Pensiones", s:"SBS", c:"Entran en vigor nuevos multifondos con mayor exposición.", f:"#"}
-        ];
-
-        // LÓGICAS DE CÁLCULO (IGUAL QUE ANTES)
+        // FUNCIONES DE CÁLCULO COMPLETAS
         function runNeto() {
             const b = parseFloat(document.getElementById('n-bruto').value) || 0;
             const h = parseFloat(document.getElementById('n-hijos').value);
@@ -280,7 +354,7 @@
             const b = parseFloat(document.getElementById('q-bruto').value) || 0;
             const ret = b > 1500 ? b * 0.08 : 0;
             document.getElementById('out-q-neto').innerText = 'S/ ' + (b - ret).toLocaleString('en-US',{minimumFractionDigits:2});
-            document.getElementById('out-q-ret').innerText = (currentLang === 'es' ? 'Retención' : 'Withholding') + ' (8%): S/ ' + ret.toFixed(2);
+            document.getElementById('out-q-ret').innerText = i18n[currentLang].ret_label + ' (8%): S/ ' + ret.toFixed(2);
         }
         function runCosto() {
             const b = parseFloat(document.getElementById('e-bruto').value) || 0;
@@ -292,27 +366,35 @@
             const d = parseFloat(document.getElementById('v-dias').value) || 0;
             document.getElementById('out-vac').innerText = 'S/ ' + ((b/12*m) + (b/360*d)).toLocaleString('en-US',{minimumFractionDigits:2});
         }
+        function runGrati() {
+            const b = parseFloat(document.getElementById('g-bruto').value) || 0;
+            const m = parseFloat(document.getElementById('g-meses').value) || 0;
+            document.getElementById('out-grati').innerText = 'S/ ' + (((b/6)*m)*1.09).toLocaleString('en-US',{minimumFractionDigits:2});
+        }
+        function runCTS() {
+            const b = parseFloat(document.getElementById('c-sueldo').value) || 0;
+            document.getElementById('out-cts').innerText = 'S/ ' + ((b + b/6)/2).toLocaleString('en-US',{minimumFractionDigits:2});
+        }
+        function runLiq() {
+            const b = parseFloat(document.getElementById('l-bruto').value) || 0;
+            const m = parseFloat(document.getElementById('l-meses').value) || 0;
+            const v = parseFloat(document.getElementById('l-vac').value) || 0;
+            const res = (((b + b/6)/12)*m) + (((b/6)*m)*1.09) + ((b/30)*v);
+            document.getElementById('out-liq').innerText = 'S/ ' + res.toLocaleString('en-US',{minimumFractionDigits:2});
+        }
 
+        // FOREX & CHARTS
+        const forexData = { "3.85": [3.81, 3.84, 3.82, 3.86, 3.85], "4.15": [4.10, 4.12, 4.11, 4.18, 4.15], "4.82": [4.75, 4.78, 4.80, 4.85, 4.82], "4.35": [4.30, 4.33, 4.31, 4.36, 4.35], "2.82": [2.78, 2.80, 2.81, 2.83, 2.82], "2.55": [2.50, 2.52, 2.54, 2.56, 2.55] };
         let chart;
         function initChart(rate) {
             const ctx = document.getElementById('forexChart').getContext('2d');
             if(chart) chart.destroy();
             chart = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Today'],
-                    datasets: [{
-                        label: 'PEN',
-                        data: forexData[rate] || [0,0,0,0,0],
-                        borderColor: '#0066ff',
-                        backgroundColor: 'rgba(0, 102, 255, 0.1)',
-                        fill: true, tension: 0.4, borderWidth: 4
-                    }]
-                },
+                data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Today'], datasets: [{ label: 'PEN', data: forexData[rate], borderColor: '#0066ff', tension: 0.4 }] },
                 options: { responsive: true, maintainAspectRatio: false }
             });
         }
-
         function runForex() {
             const v = parseFloat(document.getElementById('f-in').value) || 0;
             const r = document.getElementById('f-sel').value;
@@ -320,6 +402,7 @@
             initChart(r);
         }
 
+        // RENDERS
         function renderJobs(data) {
             document.getElementById('job-grid').innerHTML = data.map(j => `
                 <div class="job-card bg-white dark:bg-dark-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-xl transition-all">
@@ -327,18 +410,21 @@
                     <h4 class="font-black text-xl h-14 leading-tight">${j.n}</h4>
                     <div class="flex justify-between mt-6 border-t pt-4">
                         <div><p class="text-[10px] text-slate-400 font-black uppercase">Min</p><p class="font-bold text-lg">S/ ${j.min}</p></div>
-                        <div class="text-right"><p class="text-[10px] text-brand-500 font-black uppercase">Max</p><p class="text-2xl font-black text-brand-500 italic">S/ ${j.max}</p></div>
+                        <div class="text-right"><p class="text-[10px] text-brand-500 font-black uppercase tracking-widest">Max</p><p class="text-2xl font-black text-brand-500 italic">S/ ${j.max}</p></div>
                     </div>
+                    <a href="${j.l}" target="_blank" class="block mt-6 py-3 bg-slate-50 dark:bg-dark-800 text-center text-[10px] font-black rounded-xl hover:bg-brand-500 hover:text-white transition-all uppercase">${i18n[currentLang].job_verify}</a>
                 </div>
             `).join('');
         }
-
         function renderNews() {
             document.getElementById('news-grid').innerHTML = news.map(n => `
-                <div class="bg-white dark:bg-dark-900 p-6 rounded-[2rem] border-t-4 border-brand-500 shadow-md">
-                    <span class="text-[10px] font-black text-brand-500 uppercase">${n.s}</span>
-                    <h4 class="font-bold text-lg mt-2">${n.t}</h4>
-                    <p class="text-xs text-slate-500 mt-4">${n.c}</p>
+                <div class="bg-white dark:bg-dark-900 p-6 rounded-[2rem] border-t-4 border-brand-500 shadow-md flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] font-black text-brand-500 uppercase">${n.s}</span>
+                        <h4 class="font-bold text-lg mt-2">${n.t}</h4>
+                        <p class="text-xs text-slate-500 mt-4">${n.c}</p>
+                    </div>
+                    <a href="${n.f}" target="_blank" class="mt-6 text-[10px] font-black text-brand-500 hover:underline italic uppercase tracking-tighter">View Source →</a>
                 </div>
             `).join('');
         }
@@ -350,16 +436,18 @@
             document.getElementById('m-' + id).classList.add('active');
             window.scrollTo(0,0);
         }
-
         function toggleTheme() { document.documentElement.classList.toggle('dark'); }
         function runJobs() {
             const q = document.getElementById('j-search').value.toLowerCase();
             renderJobs(jobs.filter(x => x.n.toLowerCase().includes(q)));
         }
+        function genPDF() {
+            const element = document.createElement('div');
+            element.innerHTML = `<h1 style="color:#0066ff">Reporte SueldoPro 2026</h1><p>Sueldo Bruto: S/ ${document.getElementById('n-bruto').value}</p><p>Sueldo Neto: ${document.getElementById('out-neto').innerText}</p>`;
+            html2pdf().from(element).save('SueldoPro_Report.pdf');
+        }
 
-        window.onload = () => {
-            setLang('es'); renderNews(); renderJobs(jobs); runForex(); runNeto(); runCosto();
-        };
+        window.onload = () => { setLang('es'); runForex(); runNeto(); runCosto(); runGrati(); runCTS(); };
     </script>
 </body>
 </html>
