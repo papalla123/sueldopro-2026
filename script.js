@@ -1,6 +1,5 @@
-let currentCalc = 'neto';
+let currentCalc = 'cts';
 let chart = null;
-
 const CONST = { UIT: 5500, ASIG_FAM: 115 };
 
 function toggleTheme() {
@@ -30,16 +29,27 @@ function renderUI() {
     const guide = document.getElementById('guide-text');
     
     const configs = {
+        cts: {
+            t: "Cálculo de CTS Semestral",
+            guide: "Fórmula: (Sueldo + 1/6 Gratificación) / 12 * Meses laborados. Se deposita en Mayo y Noviembre.",
+            html: `
+                <label class="input-label">Sueldo Bruto Actual</label>
+                <input type="number" id="v1" class="input-main mb-6" placeholder="0.00">
+                <label class="input-label">Última Gratificación recibida</label>
+                <input type="number" id="v2" class="input-main mb-6" placeholder="0.00">
+                <label class="input-label">Meses laborados en el semestre</label>
+                <input type="number" id="v3" class="input-main" value="6" max="6">`
+        },
         neto: {
             t: "Sueldo Neto Mensual",
-            guide: "Se descuenta pensiones (AFP/ONP) e Impuesto de 5ta si superas las 7 UIT anuales.",
+            guide: "Cálculo tras descuentos de AFP/ONP e Impuesto a la Renta de 5ta categoría.",
             html: `
                 <label class="input-label">Sueldo Bruto Mensual</label>
-                <input type="number" id="v1" class="input-main mb-6" placeholder="S/ 0.00">
+                <input type="number" id="v1" class="input-main mb-6" placeholder="0.00">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="input-label">Pensión</label>
-                        <select id="s1" class="select-main"><option value="0.128">AFP (12.8%)</option><option value="0.13">ONP (13%)</option></select>
+                        <label class="input-label">Sistema Pensión</label>
+                        <select id="s1" class="select-main"><option value="0.12">AFP (12%)</option><option value="0.13">ONP (13%)</option></select>
                     </div>
                     <div>
                         <label class="input-label">Asig. Familiar</label>
@@ -47,41 +57,28 @@ function renderUI() {
                     </div>
                 </div>`
         },
-        cts: {
-            t: "Cálculo de CTS",
-            guide: "Fórmula: (Sueldo + 1/6 Gratificación) / 12 * Meses laborados.",
-            html: `
-                <label class="input-label">Sueldo Bruto</label>
-                <input type="number" id="v1" class="input-main mb-6">
-                <label class="input-label">Última Gratificación</label>
-                <input type="number" id="v2" class="input-main mb-6">
-                <label class="input-label">Meses laborados en el semestre</label>
-                <input type="number" id="v3" class="input-main" value="6" max="6">`
-        },
         grati: {
-            t: "Gratificación de Ley",
-            guide: "Equivale a un sueldo completo + bono extraordinario (9% Essalud o 6.75% EPS).",
+            t: "Gratificación (Julio/Dic)",
+            guide: "Equivale a 1 sueldo completo + bono extraordinario de salud (9% Essalud o 6.75% EPS).",
             html: `
                 <label class="input-label">Sueldo Base</label>
                 <input type="number" id="v1" class="input-main mb-6">
+                <label class="input-label">Meses laborados (1-6)</label>
+                <input type="number" id="v2" class="input-main mb-6" value="6">
                 <label class="input-label">Seguro</label>
-                <select id="s1" class="select-main"><option value="0.09">Essalud (9%)</option><option value="0.0675">EPS (6.75%)</option></select>
-                <label class="input-label" class="mt-4">Meses laborados (1-6)</label>
-                <input type="number" id="v2" class="input-main" value="6" max="6">`
+                <select id="s1" class="select-main"><option value="0.09">Essalud (9%)</option><option value="0.0675">EPS (6.75%)</option></select>`
         },
-        liq: {
-            t: "Liquidación Estimada",
-            guide: "Suma de truncos: CTS + Grati + Vacaciones. Basado en meses trabajados del año.",
+        cuarta: {
+            t: "Recibos por Honorarios",
+            guide: "Retención obligatoria del 8% si el monto supera los S/ 1,500.",
             html: `
-                <label class="input-label">Sueldo Bruto</label>
-                <input type="number" id="v1" class="input-main mb-6">
-                <label class="input-label">Meses trabajados en el año</label>
-                <input type="number" id="v2" class="input-main" value="1">`
+                <label class="input-label">Monto del Recibo</label>
+                <input type="number" id="v1" class="input-main">`
         }
     };
 
-    const c = configs[currentCalc] || configs.neto;
-    ui.innerHTML = `<h3 class="text-2xl font-black mb-6 dark:text-white">${c.t}</h3>${c.html}<button onclick="calculate()" class="w-full mt-8 bg-brand-500 text-white py-5 rounded-2xl font-black shadow-lg hover:bg-brand-600 transition-all">CALCULAR AHORA</button>`;
+    const c = configs[currentCalc] || configs.cts;
+    ui.innerHTML = `<h3 class="text-2xl font-black mb-6 dark:text-white uppercase tracking-tighter">${c.t}</h3>${c.html}<button onclick="calculate()" class="w-full mt-8 bg-brand-500 text-white py-5 rounded-2xl font-black shadow-lg hover:bg-brand-600 transition-all">EJECUTAR CÁLCULO</button>`;
     guide.innerText = c.guide;
 }
 
@@ -95,34 +92,37 @@ function calculate() {
     let total = 0;
     let detail = "";
 
-    if(currentCalc === 'neto') {
+    if (currentCalc === 'cts') {
+        const base = v1 + (v2 / 6);
+        total = (base / 12) * v3;
+        detail = `Base computable: S/ ${base.toFixed(2)}<br>Meses considerados: ${v3}`;
+    } else if (currentCalc === 'neto') {
         const bruto = v1 + s2;
         const pens = bruto * s1;
-        const renta = bruto > 5000 ? (bruto - 5000) * 0.08 : 0;
+        const proyectado = (bruto * 14) - (7 * CONST.UIT);
+        const renta = proyectado > 0 ? (proyectado * 0.08) / 12 : 0;
         total = bruto - pens - renta;
-        detail = `Bruto: S/ ${bruto} | Pensión: -S/ ${pens.toFixed(2)} | Renta: -S/ ${renta.toFixed(2)}`;
-    } else if(currentCalc === 'cts') {
-        total = ((v1 + (v2/6)) / 12) * v3;
-        detail = `Base Computable: S/ ${(v1+(v2/6)).toFixed(2)}`;
-    } else if(currentCalc === 'grati') {
+        detail = `Bruto: S/ ${bruto.toFixed(2)}<br>Pensión: -S/ ${pens.toFixed(2)}<br>Renta 5ta: -S/ ${renta.toFixed(2)}`;
+    } else if (currentCalc === 'grati') {
         const base = (v1 / 6) * v2;
         total = base + (base * s1);
-        detail = `Bono Ext.: S/ ${(base * s1).toFixed(2)}`;
-    } else if(currentCalc === 'liq') {
-        total = (v1 * 1.5) * (v2/12); // Simplificado Pro
-        detail = "Incluye proporciones legales.";
+        detail = `Gratificación: S/ ${base.toFixed(2)}<br>Bono Ley: S/ ${(base * s1).toFixed(2)}`;
+    } else if (currentCalc === 'cuarta') {
+        const ret = v1 > 1500 ? v1 * 0.08 : 0;
+        total = v1 - ret;
+        detail = `Monto Bruto: S/ ${v1}<br>Retención (8%): -S/ ${ret.toFixed(2)}`;
     }
 
     document.getElementById('calc-res').innerText = `S/ ${total.toLocaleString(undefined, {minimumFractionDigits:2})}`;
     document.getElementById('calc-details').innerHTML = detail;
 }
 
-// RESTO DE FUNCIONES (FOREX, JOBS, NEWS)
+// RESTO DE FUNCIONES
 function renderForex() {
     const list = document.getElementById('forex-list');
     list.innerHTML = currencies.map(c => `
-        <button onclick="updateForex('${c.id}')" class="w-full flex justify-between p-4 rounded-xl bg-slate-50 dark:bg-surface-800 border-2 border-transparent hover:border-brand-500 transition-all">
-            <span class="font-bold text-xs dark:text-white">${c.n}</span>
+        <button onclick="updateForex('${c.id}')" class="w-full flex justify-between p-3 rounded-xl bg-slate-50 dark:bg-surface-800 border-2 border-transparent hover:border-brand-500 transition-all">
+            <span class="font-bold text-[10px] dark:text-slate-300 uppercase">${c.n}</span>
             <span class="font-black text-brand-500">${c.id}</span>
         </button>
     `).join('');
@@ -131,14 +131,15 @@ function renderForex() {
 
 function updateForex(id = 'USD') {
     const amt = parseFloat(document.getElementById('f-amt').value) || 0;
-    const c = currencies.find(curr => curr.id === id);
-    document.getElementById('chart-label').innerText = `${(amt/c.p).toFixed(2)} ${c.id}`;
+    const curr = currencies.find(c => c.id === id);
+    document.getElementById('chart-label').innerText = `${(amt / curr.p).toFixed(2)} ${curr.id}`;
     
-    if(chart) chart.destroy();
-    chart = new Chart(document.getElementById('f-chart'), {
+    if (chart) chart.destroy();
+    const ctx = document.getElementById('f-chart').getContext('2d');
+    chart = new Chart(ctx, {
         type: 'line',
-        data: { labels: ['L','M','X','J','V','S','D'], datasets: [{ data: c.h, borderColor: '#0066ff', tension: 0.4 }] },
-        options: { plugins: { legend: false }, scales: { y: { display: false } } }
+        data: { labels: ['L','M','X','J','V','S','D'], datasets: [{ data: [curr.p, curr.p*1.02, curr.p*0.98, curr.p*1.01, curr.p], borderColor: '#0066ff', tension: 0.4 }] },
+        options: { plugins: { legend: false } }
     });
 }
 
@@ -146,25 +147,23 @@ function renderJobs() {
     const q = document.getElementById('job-search').value.toLowerCase();
     document.getElementById('job-grid').innerHTML = jobs.filter(j => j.n.toLowerCase().includes(q)).slice(0, 20).map(j => `
         <div class="job-card">
-            <div class="text-3xl mb-3">${j.i}</div>
+            <div class="text-3xl mb-4">${j.i}</div>
             <h4 class="text-xs font-black dark:text-white uppercase mb-1">${j.n}</h4>
-            <p class="text-[10px] text-slate-400 mb-4">${j.d}</p>
+            <p class="text-[10px] text-slate-400 mb-6">${j.d}</p>
             <div class="flex justify-between items-center">
-                <span class="text-brand-500 font-bold">S/ ${j.min}</span>
-                <a href="${j.l}" target="_blank" class="text-[9px] font-black bg-brand-500 text-white px-3 py-1 rounded-lg">LINKEDIN</a>
+                <span class="text-brand-500 font-bold">S/ ${j.min.toFixed(0)}</span>
+                <a href="${j.l}" target="_blank" class="text-[9px] font-black bg-brand-500 text-white px-3 py-1 rounded-lg">VER VACANTE</a>
             </div>
         </div>
     `).join('');
 }
 
 function renderNews() {
-    document.getElementById('news-grid').innerHTML = news.slice(0, 12).map(n => `
-        <div class="bg-white dark:bg-surface-900 p-6 rounded-3xl border-l-4 border-brand-500 shadow-lg">
-            <h4 class="font-black text-sm dark:text-white mb-3">${n.t}</h4>
-            <div class="flex justify-between items-center">
-                <span class="text-[9px] font-bold text-slate-400 uppercase">${n.f}</span>
-                <a href="${n.l}" class="text-[10px] text-brand-500 font-black underline">LEER</a>
-            </div>
+    document.getElementById('news-grid').innerHTML = news.map(n => `
+        <div class="bg-white dark:bg-surface-900 p-6 rounded-3xl border-l-4 border-brand-500 shadow-md">
+            <h4 class="font-black text-sm dark:text-white mb-2">${n.t}</h4>
+            <p class="text-[10px] text-slate-500 mb-4">${n.d}</p>
+            <span class="text-[9px] font-bold text-brand-500 uppercase">${n.f}</span>
         </div>
     `).join('');
 }
