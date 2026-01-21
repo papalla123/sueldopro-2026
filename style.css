@@ -1,37 +1,37 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
 
-body { font-family: 'Plus Jakarta Sans', sans-serif; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; cursor: default; }
 
-/* FIX MODO OSCURO */
-.dark body { background-color: #020617; color: #f1f5f9; }
-.dark .text-slate-600 { color: #94a3b8 !important; }
-.dark .bg-slate-50 { background-color: #1e293b !important; }
+/* Sidebar Premium */
+.sidebar-btn { @apply w-full flex items-center p-5 rounded-[1.5rem] text-sm font-bold transition-all text-slate-400 dark:text-slate-500 hover:bg-brand-50 dark:hover:bg-surface-800; }
+.sidebar-btn.active { @apply bg-brand-500 text-white shadow-2xl shadow-brand-500/40; }
 
-/* Sidebar Buttons */
-.sidebar-btn { @apply w-full flex items-center p-4 rounded-2xl text-sm font-bold transition-all text-slate-500 dark:text-slate-400 hover:bg-brand-50 dark:hover:bg-dark-800; }
-.sidebar-btn.active { @apply bg-brand-500 text-white shadow-xl shadow-brand-500/40 hover:bg-brand-600; }
+/* Pildoras de Navegación */
+.tab-pill { @apply px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest transition-all bg-white dark:bg-surface-900 text-slate-400 border-2 border-slate-100 dark:border-surface-800 whitespace-nowrap; }
+.tab-pill.active { @apply border-brand-500 text-brand-500 bg-brand-50 dark:bg-brand-500/10 shadow-lg; }
 
-/* Tab Buttons (Calculadoras) */
-.tab-btn { @apply px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest border-2 border-transparent transition-all whitespace-nowrap lg:w-full lg:text-left; }
-.tab-btn { @apply bg-slate-100 text-slate-500 dark:bg-dark-800 dark:text-slate-400; }
-.tab-btn.active { @apply border-brand-500 text-brand-500 bg-white dark:bg-dark-900 shadow-lg; }
+/* UI de Calculadora */
+.input-pro { @apply w-full p-6 rounded-3xl bg-slate-50 dark:bg-surface-800 border-2 border-transparent focus:border-brand-500 outline-none font-black text-3xl transition-all dark:text-white; }
+.label-pro { @apply block text-[11px] font-black opacity-40 uppercase mb-3 tracking-[0.2em] dark:text-slate-400; }
+.btn-calc { @apply w-full mt-8 py-6 rounded-[2rem] font-black text-white uppercase tracking-widest text-sm shadow-xl transition-all hover:scale-[1.02] active:scale-95; }
 
-/* Inputs Estilizados */
-.input-pro { @apply w-full p-5 rounded-2xl bg-slate-50 dark:bg-dark-800 border-2 border-transparent focus:border-brand-500 outline-none font-black text-2xl transition-all dark:text-white; }
-.label-pro { @apply block text-[10px] font-black opacity-40 uppercase mb-2 tracking-widest dark:text-slate-300; }
+/* Glassmorphism Effect */
+.glass { @apply backdrop-blur-md bg-white/10 border border-white/20; }
 
-/* Botón de Cálculo */
-.btn-calc { @apply w-full mt-6 py-5 rounded-2xl font-black text-white uppercase tracking-widest text-xs shadow-2xl transition-all hover:scale-[1.02] active:scale-95; }
-
-/* Animaciones de Secciones */
+/* Animaciones */
 .sec-content { display: none; }
-.sec-content.active { display: block; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.sec-content.active { display: block; animation: ultraFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes ultraFade {
+    from { opacity: 0; transform: translateY(40px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Scrollbar */
+/* Custom Scroll */
 .custom-scroll::-webkit-scrollbar { width: 4px; }
 .custom-scroll::-webkit-scrollbar-thumb { background: #0066ff; border-radius: 10px; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+.theme-btn { @apply flex items-center justify-center p-4 rounded-2xl bg-slate-100 dark:bg-surface-800 hover:scale-105 transition-all w-full; }
+
+.job-card:hover { @apply border-brand-500 shadow-2xl shadow-brand-500/10; }
