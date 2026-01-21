@@ -1,0 +1,63 @@
+// script.js
+let chart;
+
+function renderJobs(filter = "") {
+    const grid = document.getElementById('job-grid');
+    const filtered = jobs.filter(j => j.n.toLowerCase().includes(filter.toLowerCase()));
+    
+    grid.innerHTML = filtered.map(j => `
+        <div class="bg-white dark:bg-dark-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-hover transition-all">
+            <div class="text-4xl mb-3">${j.i}</div>
+            <h4 class="font-bold text-xl">${j.n}</h4>
+            <p class="text-xs text-slate-500 my-2">${j.d}</p>
+            <div class="flex justify-between items-end mt-4">
+                <div><span class="text-[10px] block uppercase opacity-50">Sueldo Max</span><span class="text-2xl font-black text-brand-500">S/ ${j.max}</span></div>
+                <a href="${j.l}" target="_blank" class="text-xs font-black text-brand-500 underline">Info oficial →</a>
+            </div>
+        </div>
+    `).join('');
+}
+
+// BUSCADOR EN TIEMPO REAL
+document.getElementById('job-search')?.addEventListener('input', (e) => {
+    renderJobs(e.target.value);
+});
+
+// LÓGICA DE DIVISAS Y GRÁFICAS
+function updateForex() {
+    const sel = document.getElementById('currency-select');
+    const rate = sel.value;
+    // Aquí podrías integrar una API real de forex en el futuro
+    renderChart(rate);
+}
+
+function renderChart(rate) {
+    const ctx = document.getElementById('forexChart').getContext('2d');
+    if(chart) chart.destroy();
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie'],
+            datasets: [{
+                label: 'Variación PEN',
+                data: [rate*0.98, rate*1.01, rate, rate*0.99, rate],
+                borderColor: '#0066ff',
+                backgroundColor: 'rgba(0, 102, 255, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+}
+
+// Inicialización
+window.onload = () => {
+    renderJobs();
+    // Cargar select de divisas
+    const sel = document.getElementById('currency-select');
+    Object.keys(exchangeRates).forEach(curr => {
+        sel.innerHTML += `<option value="${exchangeRates[curr]}">${curr}</option>`;
+    });
+    renderChart(3.85);
+};

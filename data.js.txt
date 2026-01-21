@@ -1,0 +1,28 @@
+// data.js
+const i18n = {
+    es: {
+        g_neto_t: "Guía Maestra: Sueldo Neto",
+        g_neto_txt: "El sueldo neto es lo que realmente llega a tu bolsillo... (aquí extenderás el texto a detalle)",
+        // Repite para todas las calculadoras
+    },
+    en: { /* Traducciones... */ }
+};
+
+// PLANTILLA PARA 1000 OFICIOS
+const jobs = [
+    {n:"Arquitecto Cloud", min:12000, max:25000, i:"🤖", d:"Diseña infraestructuras en la nube escalables.", l:"https://linkedin.com/jobs"},
+    {n:"Científico de Datos", min:9000, max:18000, i:"📊", d:"Analiza patrones masivos de información.", l:"https://glassdoor.com"},
+    // ... Copia y pega esta estructura hasta llegar a 1000
+];
+
+// PLANTILLA PARA 60 NOTICIAS
+const news = [
+    {t:"Reforma Laboral 2026", s:"MEF", c:"Detalles del nuevo decreto ley...", f:"https://elperuano.pe"},
+    // ... Repite hasta 60
+];
+
+// TODAS LAS DIVISAS (Principales 30 para empezar)
+const exchangeRates = {
+    "USD": 3.85, "EUR": 4.15, "GBP": 4.80, "JPY": 0.025, "BRL": 0.75, "MXN": 0.21, "CLP": 0.004
+    // Agregaremos dinámicamente más
+};
