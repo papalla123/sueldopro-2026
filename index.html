@@ -2,19 +2,12 @@
 <html lang="es" class="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="theme-color" content="#3b82f6">
-    <meta name="description" content="Plataforma fintech líder en Perú para calculadoras salariales, análisis financiero y decisiones laborales inteligentes.">
-    <title>SueldoPro 2026 | Fintech Intelligence Platform</title>
-    
-    <!-- Preload critical resources -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://cdn.tailwindcss.com">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SueldoPro 2026 | Calculadora Profesional de Sueldos y Beneficios Laborales</title>
+    <meta name="description" content="Calculadora profesional de CTS, gratificación, liquidación y más. Normativa peruana 2026.">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="style.css">
-    
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -22,397 +15,253 @@
                 extend: {
                     colors: {
                         brand: {
-                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe',
-                            500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
-                            900: '#1e3a8a', 950: '#020617'
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            950: '#020617'
                         },
-                        success: { 500: '#10b981', 600: '#059669' },
-                        warning: { 500: '#f59e0b', 600: '#d97706' },
-                        danger: { 500: '#ef4444', 600: '#dc2626' }
+                        surface: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            800: '#1e293b',
+                            900: '#0f172a'
+                        }
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.4s ease-out',
-                        'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-                        'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'bounce-subtle': 'bounceSubtle 1s ease-in-out infinite'
-                    },
-                    boxShadow: {
-                        'glow': '0 0 20px rgba(59, 130, 246, 0.4)',
-                        'glow-lg': '0 0 40px rgba(59, 130, 246, 0.6)',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'pulse-soft': 'pulseSoft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-brand-950 dark:via-slate-900 dark:to-brand-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+<body class="bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-brand-950 dark:via-slate-900 dark:to-brand-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen">
     
-    <!-- Mobile Menu Toggle -->
-    <button id="mobile-menu-toggle" class="fixed top-4 left-4 z-50 lg:hidden p-3 bg-white dark:bg-surface-900 rounded-xl shadow-lg">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-        </svg>
-    </button>
-
     <!-- Sidebar Navigation -->
-    <aside id="sidebar" class="fixed left-0 top-0 h-full w-20 lg:w-80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-r border-slate-200/50 dark:border-slate-800/50 z-40 transition-all duration-300 shadow-xl -translate-x-full lg:translate-x-0">
-        <div class="flex flex-col h-full">
-            <!-- Logo Header -->
-            <div class="p-6 lg:p-8 border-b border-slate-200/50 dark:border-slate-800/50">
-                <div class="flex items-center justify-between">
-                    <div class="hidden lg:block">
-                        <h1 class="flex items-baseline gap-1">
-                            <span class="text-3xl font-black text-brand-600 dark:text-brand-500 tracking-tighter">SUELDO</span>
-                            <span class="text-3xl font-black text-slate-400 dark:text-slate-500">PRO</span>
-                        </h1>
-                        <div class="flex items-center gap-2 mt-2">
-                            <span class="text-[9px] font-bold text-slate-400 tracking-widest">PERÚ 2026</span>
-                            <span class="px-2 py-0.5 bg-gradient-to-r from-brand-500 to-brand-600 text-white text-[8px] font-black rounded-full">FINTECH</span>
-                        </div>
-                    </div>
-                    <div class="lg:hidden text-2xl font-black text-brand-600 dark:text-brand-500">SP</div>
-                </div>
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-20 lg:w-80 bg-white/80 dark:bg-surface-900/80 backdrop-blur-2xl border-r border-slate-200/50 dark:border-slate-800/50 z-50 flex flex-col transition-all duration-300 shadow-xl">
+        <div class="p-6 lg:p-8 border-b border-slate-200/50 dark:border-slate-800/50">
+            <div class="flex items-center justify-between">
+                <h1 class="hidden lg:block">
+                    <span class="text-3xl font-black text-brand-600 dark:text-brand-500 tracking-tighter">SUELDO</span>
+                    <span class="text-3xl font-black text-slate-400 dark:text-slate-500">PRO</span>
+                    <div class="text-[10px] font-bold text-slate-400 tracking-widest mt-1">PERÚ 2026</div>
+                </h1>
+                <div class="lg:hidden text-2xl font-black text-brand-600 dark:text-brand-500">SP</div>
             </div>
+        </div>
+        
+        <nav class="flex-1 p-4 lg:p-6 space-y-2 overflow-y-auto scrollbar-thin">
+            <button onclick="navigateTo('calculators')" data-nav="calculators" class="nav-btn active group">
+                <span class="nav-icon">📊</span>
+                <span class="hidden lg:flex flex-col items-start flex-1">
+                    <span class="font-bold text-sm">Calculadoras</span>
+                    <span class="text-[10px] opacity-60">8 herramientas</span>
+                </span>
+            </button>
             
-            <!-- Navigation Menu -->
-            <nav class="flex-1 p-4 lg:p-6 space-y-2 overflow-y-auto custom-scrollbar">
-                <button data-nav="calculators" class="nav-btn active">
-                    <span class="nav-icon">📊</span>
-                    <div class="hidden lg:flex flex-col items-start flex-1">
-                        <span class="font-bold text-sm" data-i18n="nav.calculators">Calculadoras</span>
-                        <span class="text-[10px] opacity-60" data-i18n="nav.calculators_sub">8 herramientas</span>
-                    </div>
-                </button>
-                
-                <button data-nav="intelligence" class="nav-btn">
-                    <span class="nav-icon">🧠</span>
-                    <div class="hidden lg:flex flex-col items-start flex-1">
-                        <span class="font-bold text-sm" data-i18n="nav.intelligence">Inteligencia Salarial</span>
-                        <span class="text-[10px] opacity-60">NEW</span>
-                    </div>
-                    <span class="hidden lg:block px-2 py-0.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[8px] font-black rounded-full animate-pulse-glow">AI</span>
-                </button>
-                
-                <button data-nav="comparator" class="nav-btn">
-                    <span class="nav-icon">📈</span>
-                    <div class="hidden lg:flex flex-col items-start flex-1">
-                        <span class="font-bold text-sm" data-i18n="nav.comparator">Comparador</span>
-                        <span class="text-[10px] opacity-60" data-i18n="nav.comparator_sub">Por industria</span>
-                    </div>
-                </button>
-                
-                <button data-nav="forex" class="nav-btn">
-                    <span class="nav-icon">💱</span>
-                    <div class="hidden lg:flex flex-col items-start flex-1">
-                        <span class="font-bold text-sm" data-i18n="nav.forex">Tipo de Cambio</span>
-                        <span class="text-[10px] opacity-60">100+ divisas</span>
-                    </div>
-                </button>
-                
-                <button data-nav="jobs" class="nav-btn">
-                    <span class="nav-icon">🔍</span>
-                    <div class="hidden lg:flex flex-col items-start flex-1">
-                        <span class="font-bold text-sm" data-i18n="nav.jobs">Empleos</span>
-                        <span class="text-[10px] opacity-60">250+ vacantes</span>
-                    </div>
-                </button>
-                
-                <button data-nav="news" class="nav-btn">
-                    <span class="nav-icon">📰</span>
-                    <div class="hidden lg:flex flex-col items-start flex-1">
-                        <span class="font-bold text-sm" data-i18n="nav.news">Noticias</span>
-                        <span class="text-[10px] opacity-60" data-i18n="nav.news_sub">Actualidad</span>
-                    </div>
-                </button>
-            </nav>
+            <button onclick="navigateTo('comparator')" data-nav="comparator" class="nav-btn group">
+                <span class="nav-icon">📈</span>
+                <span class="hidden lg:flex flex-col items-start flex-1">
+                    <span class="font-bold text-sm">Comparador Salarial</span>
+                    <span class="text-[10px] opacity-60">Por industria y cargo</span>
+                </span>
+            </button>
+            
+            <button onclick="navigateTo('forex')" data-nav="forex" class="nav-btn group">
+                <span class="nav-icon">💱</span>
+                <span class="hidden lg:flex flex-col items-start flex-1">
+                    <span class="font-bold text-sm">Tipo de Cambio</span>
+                    <span class="text-[10px] opacity-60">100+ divisas en tiempo real</span>
+                </span>
+            </button>
+            
+            <button onclick="navigateTo('jobs')" data-nav="jobs" class="nav-btn group">
+                <span class="nav-icon">🔍</span>
+                <span class="hidden lg:flex flex-col items-start flex-1">
+                    <span class="font-bold text-sm">Empleos</span>
+                    <span class="text-[10px] opacity-60">250+ vacantes</span>
+                </span>
+            </button>
+            
+            <button onclick="navigateTo('news')" data-nav="news" class="nav-btn group">
+                <span class="nav-icon">📰</span>
+                <span class="hidden lg:flex flex-col items-start flex-1">
+                    <span class="font-bold text-sm">Noticias</span>
+                    <span class="text-[10px] opacity-60">Actualidad laboral</span>
+                </span>
+            </button>
+        </nav>
 
-            <!-- Footer Controls -->
-            <div class="p-4 lg:p-6 border-t border-slate-200/50 dark:border-slate-800/50 space-y-3">
-                <!-- Language Toggle -->
-                <button id="lang-toggle" class="w-full p-3 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center gap-2 hover:scale-105 transition-all shadow-md group">
-                    <span class="text-xl">🌐</span>
-                    <span class="hidden lg:inline text-xs font-bold" id="lang-text">ES</span>
-                </button>
-                
-                <!-- Theme Toggle -->
-                <button id="theme-toggle" class="w-full p-3 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center gap-2 hover:scale-105 transition-all shadow-md group">
-                    <span id="theme-icon" class="text-xl group-hover:rotate-180 transition-transform duration-500">🌙</span>
-                </button>
-            </div>
+        <div class="p-4 lg:p-6 border-t border-slate-200/50 dark:border-slate-800/50 space-y-3">
+            <button onclick="toggleTheme()" class="w-full p-4 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-surface-800 dark:to-slate-800 flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg group">
+                <span id="theme-icon" class="text-2xl group-hover:rotate-180 transition-transform duration-500">🌙</span>
+            </button>
         </div>
     </aside>
 
-    <!-- Main Content Area -->
-    <main class="lg:ml-80 min-h-screen">
+    <!-- Main Content -->
+    <main class="ml-20 lg:ml-80 min-h-screen">
         
-        <!-- Legal Disclaimer Banner -->
-        <div class="sticky top-0 z-30 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800/30 px-6 py-3 backdrop-blur-sm">
-            <div class="max-w-7xl mx-auto flex items-center gap-3 text-xs">
-                <span class="text-amber-600 dark:text-amber-400">⚖️</span>
-                <p class="text-amber-800 dark:text-amber-300 font-medium">
-                    <span data-i18n="disclaimer">Los cálculos son referenciales basados en la normativa peruana 2026. Consulte con un especialista para casos específicos.</span>
-                </p>
-            </div>
-        </div>
-
         <!-- Section: Calculators -->
         <section id="sec-calculators" class="section-content active">
-            <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
-                <header class="mb-8 lg:mb-12 animate-fade-in">
+            <div class="max-w-7xl mx-auto p-6 lg:p-12">
+                
+                <!-- Header -->
+                <header class="mb-12 animate-fade-in">
                     <div class="flex items-center gap-3 mb-4">
-                        <div class="w-1.5 lg:w-2 h-10 lg:h-12 bg-gradient-to-b from-brand-500 to-brand-600 rounded-full"></div>
+                        <div class="w-2 h-12 bg-gradient-to-b from-brand-500 to-brand-600 rounded-full"></div>
                         <div>
-                            <h2 class="text-3xl sm:text-4xl lg:text-6xl font-black tracking-tighter dark:text-white">
-                                <span data-i18n="calc.title">Motor</span> <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-blue-600" data-i18n="calc.title_2">Financiero</span>
+                            <h2 class="text-5xl lg:text-6xl font-black tracking-tighter dark:text-white">
+                                Motor <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-blue-600">Financiero</span>
                             </h2>
-                            <p class="text-slate-500 dark:text-slate-400 font-bold mt-2 text-[10px] sm:text-xs tracking-widest uppercase flex items-center gap-2 flex-wrap">
+                            <p class="text-slate-500 dark:text-slate-400 font-bold mt-2 text-xs tracking-widest uppercase flex items-center gap-2">
                                 <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                                <span data-i18n="calc.subtitle">Normativa Peruana 2026 • UIT S/ 5,500</span>
+                                Normativa Peruana 2026 • UIT S/ 5,500
                             </p>
                         </div>
                     </div>
                 </header>
 
-                <div class="grid lg:grid-cols-12 gap-6 lg:gap-8">
+                <div class="grid lg:grid-cols-12 gap-8">
+                    
                     <!-- Calculator Tabs -->
-                    <div class="lg:col-span-3 space-y-2 order-2 lg:order-1">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 px-2" data-i18n="calc.select">Selecciona cálculo</p>
-                        <button data-calc="cts" class="calc-tab-btn active">
-                            <span class="text-xl sm:text-2xl">💰</span>
+                    <div class="lg:col-span-3 space-y-2">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 px-2">Selecciona cálculo</p>
+                        <button onclick="selectCalculator('cts')" data-calc="cts" class="calc-tab-btn active">
+                            <span class="text-2xl">💰</span>
                             <div class="flex-1 text-left">
-                                <div class="font-bold text-xs sm:text-sm">CTS</div>
-                                <div class="text-[9px] sm:text-[10px] opacity-60" data-i18n="calc.cts_sub">Compensación</div>
+                                <div class="font-bold text-sm">CTS</div>
+                                <div class="text-[10px] opacity-60">Compensación por Tiempo</div>
                             </div>
                         </button>
-                        <button data-calc="neto" class="calc-tab-btn">
-                            <span class="text-xl sm:text-2xl">📋</span>
+                        
+                        <button onclick="selectCalculator('neto')" data-calc="neto" class="calc-tab-btn">
+                            <span class="text-2xl">📋</span>
                             <div class="flex-1 text-left">
-                                <div class="font-bold text-xs sm:text-sm" data-i18n="calc.neto">Sueldo Neto</div>
-                                <div class="text-[9px] sm:text-[10px] opacity-60" data-i18n="calc.neto_sub">Líquido mensual</div>
+                                <div class="font-bold text-sm">Sueldo Neto</div>
+                                <div class="text-[10px] opacity-60">Líquido mensual</div>
                             </div>
                         </button>
-                        <button data-calc="gratificacion" class="calc-tab-btn">
-                            <span class="text-xl sm:text-2xl">🎁</span>
+                        
+                        <button onclick="selectCalculator('gratificacion')" data-calc="gratificacion" class="calc-tab-btn">
+                            <span class="text-2xl">🎁</span>
                             <div class="flex-1 text-left">
-                                <div class="font-bold text-xs sm:text-sm" data-i18n="calc.grat">Gratificación</div>
-                                <div class="text-[9px] sm:text-[10px] opacity-60">Jul/Dic</div>
+                                <div class="font-bold text-sm">Gratificación</div>
+                                <div class="text-[10px] opacity-60">Julio y Diciembre</div>
                             </div>
                         </button>
-                        <button data-calc="liquidacion" class="calc-tab-btn">
-                            <span class="text-xl sm:text-2xl">📄</span>
+                        
+                        <button onclick="selectCalculator('liquidacion')" data-calc="liquidacion" class="calc-tab-btn">
+                            <span class="text-2xl">📄</span>
                             <div class="flex-1 text-left">
-                                <div class="font-bold text-xs sm:text-sm" data-i18n="calc.liq">Liquidación</div>
-                                <div class="text-[9px] sm:text-[10px] opacity-60" data-i18n="calc.liq_sub">Cese laboral</div>
+                                <div class="font-bold text-sm">Liquidación</div>
+                                <div class="text-[10px] opacity-60">Cese laboral</div>
                             </div>
                         </button>
-                        <button data-calc="quinta" class="calc-tab-btn">
-                            <span class="text-xl sm:text-2xl">🏢</span>
+                        
+                        <button onclick="selectCalculator('quinta')" data-calc="quinta" class="calc-tab-btn">
+                            <span class="text-2xl">🏢</span>
                             <div class="flex-1 text-left">
-                                <div class="font-bold text-xs sm:text-sm">Renta 5ta</div>
-                                <div class="text-[9px] sm:text-[10px] opacity-60">Planilla</div>
+                                <div class="font-bold text-sm">Renta 5ta</div>
+                                <div class="text-[10px] opacity-60">Planilla</div>
                             </div>
                         </button>
-                        <button data-calc="cuarta" class="calc-tab-btn">
-                            <span class="text-xl sm:text-2xl">📝</span>
+                        
+                        <button onclick="selectCalculator('cuarta')" data-calc="cuarta" class="calc-tab-btn">
+                            <span class="text-2xl">📝</span>
                             <div class="flex-1 text-left">
-                                <div class="font-bold text-xs sm:text-sm">Renta 4ta</div>
-                                <div class="text-[9px] sm:text-[10px] opacity-60">Honorarios</div>
+                                <div class="font-bold text-sm">Renta 4ta</div>
+                                <div class="text-[10px] opacity-60">Recibos honorarios</div>
                             </div>
                         </button>
-                        <button data-calc="utilidades" class="calc-tab-btn">
-                            <span class="text-xl sm:text-2xl">💎</span>
+                        
+                        <button onclick="selectCalculator('utilidades')" data-calc="utilidades" class="calc-tab-btn">
+                            <span class="text-2xl">💎</span>
                             <div class="flex-1 text-left">
-                                <div class="font-bold text-xs sm:text-sm" data-i18n="calc.util">Utilidades</div>
-                                <div class="text-[9px] sm:text-[10px] opacity-60" data-i18n="calc.util_sub">Reparto anual</div>
+                                <div class="font-bold text-sm">Utilidades</div>
+                                <div class="text-[10px] opacity-60">Reparto anual</div>
                             </div>
                         </button>
-                        <button data-calc="vacaciones" class="calc-tab-btn">
-                            <span class="text-xl sm:text-2xl">🏖️</span>
+                        
+                        <button onclick="selectCalculator('vacaciones')" data-calc="vacaciones" class="calc-tab-btn">
+                            <span class="text-2xl">🏖️</span>
                             <div class="flex-1 text-left">
-                                <div class="font-bold text-xs sm:text-sm" data-i18n="calc.vac">Vacaciones</div>
-                                <div class="text-[9px] sm:text-[10px] opacity-60" data-i18n="calc.vac_sub">Descanso</div>
+                                <div class="font-bold text-sm">Vacaciones</div>
+                                <div class="text-[10px] opacity-60">Descanso remunerado</div>
                             </div>
                         </button>
                     </div>
 
                     <!-- Calculator Form -->
-                    <div class="lg:col-span-5 order-1 lg:order-2">
-                        <div class="bg-white dark:bg-slate-900 rounded-2xl lg:rounded-[2rem] shadow-xl border border-slate-200/50 dark:border-slate-800/50 p-6 sm:p-8 lg:p-10">
+                    <div class="lg:col-span-5">
+                        <div class="bg-white dark:bg-surface-900 rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-slate-800/50 p-8 lg:p-10">
                             <div id="calculator-form"></div>
                         </div>
                     </div>
 
                     <!-- Results Panel -->
-                    <div class="lg:col-span-4 space-y-4 sm:space-y-6 order-3">
-                        <div class="relative overflow-hidden bg-gradient-to-br from-brand-500 via-brand-600 to-brand-700 rounded-2xl lg:rounded-[2rem] p-6 sm:p-8 text-white shadow-2xl">
-                            <div class="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-white/10 rounded-full blur-3xl -mr-24 sm:-mr-32 -mt-24 sm:-mt-32"></div>
+                    <div class="lg:col-span-4 space-y-6">
+                        <!-- Main Result Card -->
+                        <div class="relative overflow-hidden bg-gradient-to-br from-brand-500 to-brand-700 rounded-[2rem] p-8 text-white shadow-2xl">
+                            <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
                             <div class="relative z-10">
                                 <div class="flex items-center justify-between mb-4">
-                                    <h4 class="text-[10px] font-black uppercase tracking-widest opacity-80" data-i18n="result.title">Resultado</h4>
+                                    <h4 class="text-[10px] font-black uppercase tracking-widest opacity-80">Resultado</h4>
                                     <span class="px-3 py-1 bg-white/20 rounded-full text-[9px] font-bold backdrop-blur-sm">2026</span>
                                 </div>
-                                <div id="main-result" class="text-4xl sm:text-5xl lg:text-6xl font-black tabular-nums mb-6">S/ 0.00</div>
-                                <div id="result-details" class="space-y-3 pt-6 border-t border-white/20 text-xs sm:text-sm font-medium"></div>
+                                <div id="main-result" class="text-5xl lg:text-6xl font-black tabular-nums mb-6">S/ 0.00</div>
+                                <div id="result-details" class="space-y-3 pt-6 border-t border-white/20 text-sm font-medium"></div>
                             </div>
                         </div>
 
-                        <div class="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 rounded-2xl lg:rounded-3xl p-4 sm:p-6 border-l-4 border-amber-500">
+                        <!-- Info Card -->
+                        <div class="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 rounded-3xl p-6 border-l-4 border-amber-500">
                             <div class="flex items-start gap-3">
-                                <span class="text-xl sm:text-2xl">💡</span>
+                                <span class="text-2xl">💡</span>
                                 <div>
-                                    <h5 class="font-bold text-xs sm:text-sm mb-2 text-amber-900 dark:text-amber-400" data-i18n="info.legal">Información Legal</h5>
-                                    <p id="legal-info" class="text-[10px] sm:text-xs leading-relaxed text-amber-800 dark:text-amber-300/80"></p>
+                                    <h5 class="font-bold text-sm mb-2 text-amber-900 dark:text-amber-400">Información Legal</h5>
+                                    <p id="legal-info" class="text-xs leading-relaxed text-amber-800 dark:text-amber-300/80"></p>
                                 </div>
                             </div>
                         </div>
 
-                        <button id="share-result-btn" class="w-full p-3 sm:p-4 rounded-xl lg:rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 font-bold text-xs sm:text-sm group">
+                        <!-- Share Button -->
+                        <button onclick="shareResult()" class="w-full p-4 rounded-2xl bg-slate-100 dark:bg-surface-800 hover:bg-slate-200 dark:hover:bg-surface-700 transition-all flex items-center justify-center gap-2 font-bold text-sm group">
                             <span class="group-hover:scale-110 transition-transform">📤</span>
-                            <span data-i18n="result.share">Compartir resultado</span>
+                            Compartir resultado
                         </button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Section: Intelligence (NEW) -->
-        <section id="sec-intelligence" class="section-content">
-            <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
-                <header class="mb-8 lg:mb-12">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-1.5 lg:w-2 h-10 lg:h-12 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full animate-pulse-glow"></div>
-                        <div>
-                            <h2 class="text-3xl sm:text-4xl lg:text-6xl font-black mb-2 dark:text-white">
-                                <span data-i18n="intel.title">Inteligencia</span> <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-600">Salarial</span>
-                            </h2>
-                            <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm" data-i18n="intel.subtitle">Decisiones financieras basadas en data real</p>
-                        </div>
-                    </div>
-                </header>
-
-                <div class="grid lg:grid-cols-3 gap-6 lg:gap-8">
-                    <!-- 1. Freelance vs Planilla -->
-                    <div class="bg-white dark:bg-slate-900 rounded-2xl lg:rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xl">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-2xl shadow-lg">⚖️</div>
-                            <div>
-                                <h3 class="text-base sm:text-lg font-black dark:text-white" data-i18n="intel.freelance_title">Freelance vs Planilla</h3>
-                                <p class="text-[10px] text-slate-500" data-i18n="intel.freelance_sub">Equivalencia real</p>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <div class="form-group">
-                                <label class="form-label" data-i18n="intel.salary_planilla">Sueldo en Planilla</label>
-                                <input type="number" id="eq-planilla" class="form-input text-base sm:text-lg" placeholder="5000">
-                            </div>
-                            
-                            <div class="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 rounded-xl border-l-4 border-purple-500">
-                                <div class="text-[10px] font-black text-purple-600 dark:text-purple-400 mb-2" data-i18n="intel.freelance_need">Debes facturar</div>
-                                <div id="eq-result" class="text-2xl sm:text-3xl font-black text-purple-600 dark:text-purple-400 mb-3">S/ 0</div>
-                                <div id="eq-breakdown" class="space-y-2 text-xs text-purple-800 dark:text-purple-300"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 2. Market Semaphore -->
-                    <div class="bg-white dark:bg-slate-900 rounded-2xl lg:rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xl">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-2xl shadow-lg">🚦</div>
-                            <div>
-                                <h3 class="text-base sm:text-lg font-black dark:text-white" data-i18n="intel.market_title">Semáforo de Mercado</h3>
-                                <p class="text-[10px] text-slate-500" data-i18n="intel.market_sub">Posición salarial</p>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <div class="form-group">
-                                <label class="form-label" data-i18n="intel.your_salary">Tu sueldo</label>
-                                <input type="number" id="sem-salary" class="form-input text-base sm:text-lg" placeholder="4500">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label" data-i18n="intel.sector">Sector</label>
-                                <select id="sem-sector" class="form-select">
-                                    <option value="tecnologia">Tecnología</option>
-                                    <option value="mineria">Minería</option>
-                                    <option value="finanzas">Finanzas</option>
-                                    <option value="salud">Salud</option>
-                                    <option value="comercio">Comercio</option>
-                                    <option value="educacion">Educación</option>
-                                </select>
-                            </div>
-                            
-                            <div id="semaphore-result" class="p-4 sm:p-6 rounded-xl text-center"></div>
-                        </div>
-                    </div>
-
-                    <!-- 3. Escape Route Calculator -->
-                    <div class="bg-white dark:bg-slate-900 rounded-2xl lg:rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xl">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-2xl shadow-lg">🚪</div>
-                            <div>
-                                <h3 class="text-base sm:text-lg font-black dark:text-white" data-i18n="intel.escape_title">Ruta de Escape</h3>
-                                <p class="text-[10px] text-slate-500" data-i18n="intel.escape_sub">Autonomía financiera</p>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="form-group">
-                                    <label class="form-label" data-i18n="intel.current_cts">CTS Actual</label>
-                                    <input type="number" id="esc-cts" class="form-input text-sm" placeholder="8000">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" data-i18n="intel.time_worked">Años Lab.</label>
-                                    <input type="number" id="esc-years" class="form-input text-sm" placeholder="2">
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label" data-i18n="intel.monthly_expense">Gasto Mensual</label>
-                                <input type="number" id="esc-expense" class="form-input text-base sm:text-lg" placeholder="2500">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label" data-i18n="intel.monthly_salary">Sueldo Mensual</label>
-                                <input type="number" id="esc-salary" class="form-input text-base sm:text-lg" placeholder="5000">
-                            </div>
-                            
-                            <div id="escape-result" class="p-4 sm:p-6 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 rounded-xl border-l-4 border-orange-500">
-                                <div class="text-[10px] font-black text-orange-600 dark:text-orange-400 mb-2" data-i18n="intel.survive_time">Puedes vivir</div>
-                                <div id="esc-months" class="text-2xl sm:text-3xl font-black text-orange-600 dark:text-orange-400 mb-3">0 meses</div>
-                                <div id="esc-breakdown" class="space-y-2 text-xs text-orange-800 dark:text-orange-300"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Section: Comparator -->
+        <!-- Section: Salary Comparator -->
         <section id="sec-comparator" class="section-content">
-            <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
-                <header class="mb-8 lg:mb-12">
-                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-4 dark:text-white">
-                        <span data-i18n="comp.title">Comparador</span> <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-purple-600">Salarial</span>
+            <div class="max-w-7xl mx-auto p-6 lg:p-12">
+                <header class="mb-12">
+                    <h2 class="text-5xl font-black mb-4 dark:text-white">
+                        Comparador <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-purple-600">Salarial</span>
                     </h2>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm" data-i18n="comp.subtitle">Compara tu sueldo con el mercado peruano</p>
+                    <p class="text-slate-500 dark:text-slate-400">Compara tu sueldo con el mercado peruano</p>
                 </header>
 
-                <div class="grid lg:grid-cols-3 gap-6 lg:gap-8">
+                <div class="grid lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-1 space-y-4">
                         <div class="form-group">
-                            <label class="form-label" data-i18n="comp.your_salary">Tu sueldo bruto mensual</label>
+                            <label class="form-label">Tu sueldo bruto mensual</label>
                             <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-xl sm:text-2xl font-black text-slate-400">S/</span>
-                                <input type="number" id="comp-salary" class="form-input pl-12 sm:pl-16" placeholder="0.00">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-black text-slate-400">S/</span>
+                                <input type="number" id="comp-salary" class="form-input pl-16" placeholder="0.00" oninput="updateComparison()">
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" data-i18n="comp.sector">Sector</label>
-                            <select id="comp-sector" class="form-select">
+                            <label class="form-label">Sector</label>
+                            <select id="comp-sector" class="form-select" onchange="updateComparison()">
                                 <option value="tecnologia">Tecnología</option>
                                 <option value="mineria">Minería</option>
                                 <option value="finanzas">Finanzas</option>
@@ -423,8 +272,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" data-i18n="comp.level">Nivel</label>
-                            <select id="comp-level" class="form-select">
+                            <label class="form-label">Nivel</label>
+                            <select id="comp-level" class="form-select" onchange="updateComparison()">
                                 <option value="junior">Junior (0-2 años)</option>
                                 <option value="middle">Middle (3-5 años)</option>
                                 <option value="senior">Senior (6-10 años)</option>
@@ -433,9 +282,9 @@
                         </div>
                     </div>
 
-                    <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl lg:rounded-[2rem] p-6 sm:p-8 border dark:border-slate-800 shadow-xl">
+                    <div class="lg:col-span-2 bg-white dark:bg-surface-900 rounded-[2rem] p-8 border dark:border-slate-800">
                         <canvas id="comparison-chart"></canvas>
-                        <div id="comparison-stats" class="mt-6 sm:mt-8 grid grid-cols-3 gap-3 sm:gap-4"></div>
+                        <div id="comparison-stats" class="mt-8 grid grid-cols-3 gap-4"></div>
                     </div>
                 </div>
             </div>
@@ -443,38 +292,38 @@
 
         <!-- Section: Forex -->
         <section id="sec-forex" class="section-content">
-            <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
-                <header class="mb-8 lg:mb-12">
-                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-4 dark:text-white">
-                        <span data-i18n="forex.title">Tipo de</span> <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-emerald-600">Cambio</span>
+            <div class="max-w-7xl mx-auto p-6 lg:p-12">
+                <header class="mb-12">
+                    <h2 class="text-5xl font-black mb-4 dark:text-white">
+                        Tipo de <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-emerald-600">Cambio</span>
                     </h2>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm">100+ divisas en tiempo real</p>
+                    <p class="text-slate-500 dark:text-slate-400">100+ divisas en tiempo real</p>
                 </header>
 
-                <div class="grid lg:grid-cols-3 gap-6 lg:gap-8">
-                    <div class="bg-white dark:bg-slate-900 rounded-2xl lg:rounded-3xl p-4 sm:p-6 border dark:border-slate-800 flex flex-col shadow-xl">
-                        <div class="form-group mb-4 sm:mb-6">
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <div class="bg-white dark:bg-surface-900 rounded-3xl p-6 border dark:border-slate-800 flex flex-col">
+                        <div class="form-group mb-6">
                             <label class="form-label">Monto en PEN</label>
                             <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-lg sm:text-xl font-black text-slate-400">S/</span>
-                                <input type="number" id="forex-amount" class="form-input pl-12 sm:pl-14 text-xl sm:text-2xl" value="1000">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-black text-slate-400">S/</span>
+                                <input type="number" id="forex-amount" class="form-input pl-14 text-2xl" value="1000" oninput="updateForex()">
                             </div>
                         </div>
 
-                        <input type="text" id="forex-search" placeholder="Buscar divisa..." class="form-input mb-4 text-sm">
+                        <input type="text" id="forex-search" placeholder="Buscar divisa..." class="form-input mb-4 text-sm" oninput="filterCurrencies()">
 
-                        <div id="forex-list" class="flex-1 overflow-y-auto space-y-2 custom-scrollbar pr-2"></div>
+                        <div id="forex-list" class="flex-1 overflow-y-auto space-y-2 custom-scroll pr-2"></div>
                     </div>
 
-                    <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl lg:rounded-[2rem] p-6 sm:p-8 border dark:border-slate-800 shadow-xl">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
+                    <div class="lg:col-span-2 bg-white dark:bg-surface-900 rounded-[2rem] p-8 border dark:border-slate-800">
+                        <div class="flex justify-between items-center mb-8">
                             <div>
-                                <h3 id="forex-pair" class="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-500">USD/PEN</h3>
-                                <p id="forex-converted" class="text-lg sm:text-xl lg:text-2xl font-bold text-slate-600 dark:text-slate-400 mt-2">0.00 USD</p>
+                                <h3 id="forex-pair" class="text-4xl font-black text-brand-500">USD/PEN</h3>
+                                <p id="forex-converted" class="text-2xl font-bold text-slate-600 dark:text-slate-400 mt-2">0.00 USD</p>
                             </div>
-                            <div class="flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-500 text-white rounded-full">
+                            <div class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-full">
                                 <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                                <span class="text-[9px] sm:text-[10px] font-black">ACTUALIZADO</span>
+                                <span class="text-[10px] font-black">ACTUALIZADO</span>
                             </div>
                         </div>
                         <canvas id="forex-chart"></canvas>
@@ -485,50 +334,42 @@
 
         <!-- Section: Jobs -->
         <section id="sec-jobs" class="section-content">
-            <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
-                <header class="mb-8 lg:mb-12 flex flex-col gap-4 sm:gap-6">
+            <div class="max-w-7xl mx-auto p-6 lg:p-12">
+                <header class="mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
-                        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-4 dark:text-white">
-                            <span data-i18n="jobs.title">Radar de</span> <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-600">Empleos</span>
+                        <h2 class="text-5xl font-black mb-4 dark:text-white">
+                            Radar de <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-600">Empleos</span>
                         </h2>
-                        <p class="text-slate-500 dark:text-slate-400 text-sm">250+ oportunidades laborales</p>
+                        <p class="text-slate-500 dark:text-slate-400">250+ oportunidades laborales</p>
                     </div>
-                    <input type="text" id="job-search" placeholder="🔍 Buscar cargo o industria..." class="form-input w-full">
+                    <input type="text" id="job-search" placeholder="🔍 Buscar cargo o industria..." class="form-input w-full md:w-96" oninput="filterJobs()">
                 </header>
 
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-                    <button data-sector="all" class="sector-filter active">Todos</button>
-                    <button data-sector="tecnologia" class="sector-filter">Tecnología</button>
-                    <button data-sector="finanzas" class="sector-filter">Finanzas</button>
-                    <button data-sector="salud" class="sector-filter">Salud</button>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <button onclick="filterJobsBySector('all')" data-sector="all" class="sector-filter active">Todos</button>
+                    <button onclick="filterJobsBySector('tecnologia')" data-sector="tecnologia" class="sector-filter">Tecnología</button>
+                    <button onclick="filterJobsBySector('finanzas')" data-sector="finanzas" class="sector-filter">Finanzas</button>
+                    <button onclick="filterJobsBySector('salud')" data-sector="salud" class="sector-filter">Salud</button>
                 </div>
 
-                <div id="jobs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"></div>
+                <div id="jobs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
             </div>
         </section>
 
         <!-- Section: News -->
         <section id="sec-news" class="section-content">
-            <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
-                <header class="mb-8 lg:mb-12">
-                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-4 dark:text-white">
-                        <span data-i18n="news.title">Actualidad</span> <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-600">Laboral</span>
+            <div class="max-w-7xl mx-auto p-6 lg:p-12">
+                <header class="mb-12">
+                    <h2 class="text-5xl font-black mb-4 dark:text-white">
+                        Actualidad <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-600">Laboral</span>
                     </h2>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm" data-i18n="news.subtitle">Últimas noticias del mercado peruano</p>
+                    <p class="text-slate-500 dark:text-slate-400">Últimas noticias del mercado peruano</p>
                 </header>
 
-                <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"></div>
+                <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </div>
         </section>
     </main>
-
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-2xl">
-            <div class="w-16 h-16 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p class="mt-4 text-center font-bold">Calculando...</p>
-        </div>
-    </div>
 
     <script src="data.js"></script>
     <script src="script.js"></script>
