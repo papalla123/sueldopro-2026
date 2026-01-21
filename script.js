@@ -5,7 +5,10 @@
 // ==========================================
 
 class AppInitializer {
-    constructor() {
+   // Al inicio de script.js, justo después de: const appInit = new AppInitializer();
+if (window.dataIsLoaded) {
+    appInit.markDataReady();
+} constructor() {
         this.dataReady = false;
         this.domReady = false;
         this.resolvers = {
