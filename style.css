@@ -1,136 +1,18 @@
-/* style.css - SueldoPro 2026 Professional Edition */
-
-/* 1. CONFIGURACIÓN BASE */
+/* style.css - Definiciones Visuales */
 :root {
-    --brand-blue: #0066ff;
-    --brand-dark: #0f172a;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --blue: #0066ff;
 }
 
-body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    transition: var(--transition);
-    overflow-x: hidden;
-}
-
-/* 2. SIDEBAR E INTERFAZ */
-.sidebar-btn {
-    transition: var(--transition);
-    color: #64748b; /* slate-500 */
-}
-
-.sidebar-btn:hover {
-    background-color: rgba(0, 102, 255, 0.1);
-    color: var(--brand-blue);
-}
-
-.sidebar-btn.active {
-    background: var(--brand-blue);
-    color: white !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 102, 255, 0.3);
-}
-
-/* 3. CONTROL DE SECCIONES (LOGICA DE NAVEGACIÓN) */
+/* Ocultar secciones por defecto */
 .sec-content {
     display: none;
     opacity: 0;
 }
 
+/* Mostrar sección activa con animación */
 .sec-content.active {
-    display: block;
-    animation: slideUp 0.5s forwards;
-}
-
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* 4. TARJETAS DE OFICIOS (RADAR) */
-.job-card {
-    background: linear-gradient(145deg, #ffffff, #f1f5f9);
-    border-radius: 24px;
-    border: 1px solid rgba(0, 102, 255, 0.1);
-    box-shadow: 10px 10px 20px #d1d5db, -10px -10px 20px #ffffff;
-    transition: all 0.4s ease;
-}
-
-.job-card:hover {
-    transform: translateY(-12px) scale(1.02);
-    border-color: #0066ff;
-    box-shadow: 0 20px 25px -5px rgba(0, 102, 255, 0.2);
-}
-
-/* 5. GUÍAS DE CALCULADORA */
-.guide-box {
-    border-left: 5px solid var(--brand-blue);
-    background: rgba(0, 102, 255, 0.03);
-    padding: 1.5rem;
-    border-radius: 0 1rem 1rem 0;
-}
-
-.dark .guide-box {
-    background: rgba(0, 102, 255, 0.08);
-}
-
-/* 6. INPUTS Y FORMULARIOS */
-input[type="number"], 
-input[type="text"], 
-select {
-    transition: var(--transition);
-}
-
-input:focus, select:focus {
-    box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
-    border-color: var(--brand-blue);
-}
-
-/* 7. SCROLLBAR PERSONALIZADO */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-    background: #334155;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--brand-blue);
-}
-
-/* 8. CONTENEDOR DE GRÁFICAS */
-#forexChart {
-    width: 100% !important;
-    height: 350px !important;
-}
-
-/* 9. RESPONSIVIDAD */
-@media (max-width: 1024px) {
-    aside {
-        width: 80px;
-    }
-    .lg\:ml-64 {
-        margin-left: 80px;
-    }
-}/* DISEÑO AGRESIVO 2026 */
-.active {
     display: block !important;
-    animation: fadeIn 0.5s ease forwards;
+    animation: fadeIn 0.4s ease forwards;
 }
 
 @keyframes fadeIn {
@@ -138,33 +20,33 @@ input:focus, select:focus {
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* Botones Sidebar */
+.sidebar-btn {
+    color: #64748b;
+    background: transparent;
+}
+
+.sidebar-btn:hover {
+    background: rgba(0, 102, 255, 0.05);
+    color: var(--blue);
+}
+
+.sidebar-btn.active {
+    background: var(--blue);
+    color: white !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 102, 255, 0.3);
+}
+
+/* Tarjetas de Trabajo */
 .job-card {
-    background: white;
-    border-radius: 20px;
-    border: 1px solid #e2e8f0;
-    padding: 1.5rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .job-card:hover {
-    transform: scale(1.05);
-    border-color: #0066ff;
-    box-shadow: 0 20px 25px -5px rgba(0, 102, 255, 0.1);
+    transform: translateY(-8px);
+    border-color: var(--blue) !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
-.dark .job-card {
-    background: #1e293b;
-    border-color: #334155;
-    color: white;
-}/* FORZAR VISIBILIDAD DE SECCIÓN ACTIVA */
-.sec-content.active {
-    display: block !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    animation: fadeIn 0.4s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+/* Modo oscuro manual para Vercel */
+.dark body { background-color: #020617; }
