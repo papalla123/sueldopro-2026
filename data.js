@@ -1,6 +1,12 @@
-// ==============================================
-// CURRENCIES DATA (100+ Real Currencies)
-// ==============================================
+// ==========================================
+// SUELDOPRO 2026 - DATA MODULE
+// ==========================================
+
+'use strict';
+
+// ==========================================
+// CURRENCIES DATA (100+ Real World Currencies)
+// ==========================================
 window.CURRENCIES = [
     // Americas
     { code: "USD", name: "Dólar Estadounidense", symbol: "$", rate: 3.75 },
@@ -13,6 +19,11 @@ window.CURRENCIES = [
     { code: "UYU", name: "Peso Uruguayo", symbol: "UY$", rate: 0.095 },
     { code: "BOB", name: "Boliviano", symbol: "Bs", rate: 0.54 },
     { code: "PYG", name: "Guaraní Paraguayo", symbol: "₲", rate: 0.00051 },
+    { code: "VES", name: "Bolívar Venezolano", symbol: "Bs.S", rate: 0.00011 },
+    { code: "CRC", name: "Colón Costarricense", symbol: "₡", rate: 0.0073 },
+    { code: "PAB", name: "Balboa Panameño", symbol: "B/.", rate: 3.75 },
+    { code: "GTQ", name: "Quetzal Guatemalteco", symbol: "Q", rate: 0.48 },
+    { code: "HNL", name: "Lempira Hondureño", symbol: "L", rate: 0.15 },
     
     // Europe
     { code: "EUR", name: "Euro", symbol: "€", rate: 4.12 },
@@ -30,6 +41,11 @@ window.CURRENCIES = [
     { code: "RUB", name: "Rublo Ruso", symbol: "₽", rate: 0.041 },
     { code: "TRY", name: "Lira Turca", symbol: "₺", rate: 0.12 },
     { code: "UAH", name: "Grivna Ucraniana", symbol: "₴", rate: 0.10 },
+    { code: "ISK", name: "Corona Islandesa", symbol: "kr", rate: 0.027 },
+    { code: "ALL", name: "Lek Albanés", symbol: "L", rate: 0.040 },
+    { code: "RSD", name: "Dinar Serbio", symbol: "дин", rate: 0.035 },
+    { code: "MKD", name: "Denar Macedonio", symbol: "ден", rate: 0.067 },
+    { code: "BAM", name: "Marco Bosnio", symbol: "KM", rate: 2.11 },
     
     // Asia-Pacific
     { code: "JPY", name: "Yen Japonés", symbol: "¥", rate: 0.025 },
@@ -49,6 +65,21 @@ window.CURRENCIES = [
     { code: "NPR", name: "Rupia Nepalí", symbol: "Rs", rate: 0.028 },
     { code: "AUD", name: "Dólar Australiano", symbol: "A$", rate: 2.52 },
     { code: "NZD", name: "Dólar Neozelandés", symbol: "NZ$", rate: 2.32 },
+    { code: "TWD", name: "Nuevo Dólar Taiwanés", symbol: "NT$", rate: 0.12 },
+    { code: "MOP", name: "Pataca de Macao", symbol: "P", rate: 0.47 },
+    { code: "BND", name: "Dólar de Brunéi", symbol: "B$", rate: 2.79 },
+    { code: "KHR", name: "Riel Camboyano", symbol: "៛", rate: 0.00092 },
+    { code: "LAK", name: "Kip Laosiano", symbol: "₭", rate: 0.00017 },
+    { code: "MMK", name: "Kyat Birmano", symbol: "K", rate: 0.0018 },
+    { code: "MNT", name: "Tugrik Mongol", symbol: "₮", rate: 0.0011 },
+    { code: "KZT", name: "Tenge Kazajo", symbol: "₸", rate: 0.0084 },
+    { code: "UZS", name: "Som Uzbeko", symbol: "so'm", rate: 0.00033 },
+    { code: "KGS", name: "Som Kirguís", symbol: "с", rate: 0.044 },
+    { code: "TJS", name: "Somoni Tayiko", symbol: "ЅМ", rate: 0.35 },
+    { code: "TMT", name: "Manat Turcomano", symbol: "m", rate: 1.07 },
+    { code: "AMD", name: "Dram Armenio", symbol: "֏", rate: 0.0096 },
+    { code: "AZN", name: "Manat Azerbaiyano", symbol: "₼", rate: 2.21 },
+    { code: "GEL", name: "Lari Georgiano", symbol: "₾", rate: 1.39 },
     
     // Middle East & Africa
     { code: "AED", name: "Dirham de EAU", symbol: "د.إ", rate: 1.02 },
@@ -66,10 +97,6 @@ window.CURRENCIES = [
     { code: "GHS", name: "Cedi Ghanés", symbol: "₵", rate: 0.31 },
     { code: "TZS", name: "Chelín Tanzano", symbol: "TSh", rate: 0.0015 },
     { code: "UGX", name: "Chelín Ugandés", symbol: "USh", rate: 0.0010 },
-    
-    // Additional Major Currencies
-    { code: "TWD", name: "Nuevo Dólar Taiwanés", symbol: "NT$", rate: 0.12 },
-    { code: "ISK", name: "Corona Islandesa", symbol: "kr", rate: 0.027 },
     { code: "MAD", name: "Dirham Marroquí", symbol: "د.م.", rate: 0.38 },
     { code: "DZD", name: "Dinar Argelino", symbol: "د.ج", rate: 0.028 },
     { code: "TND", name: "Dinar Tunecino", symbol: "د.ت", rate: 1.20 },
@@ -77,26 +104,13 @@ window.CURRENCIES = [
     { code: "IQD", name: "Dinar Iraquí", symbol: "ع.د", rate: 0.0029 },
     { code: "IRR", name: "Rial Iraní", symbol: "﷼", rate: 0.000089 },
     { code: "AFN", name: "Afgani", symbol: "؋", rate: 0.043 },
-    { code: "AMD", name: "Dram Armenio", symbol: "֏", rate: 0.0096 },
-    { code: "AZN", name: "Manat Azerbaiyano", symbol: "₼", rate: 2.21 },
-    { code: "GEL", name: "Lari Georgiano", symbol: "₾", rate: 1.39 },
-    { code: "KZT", name: "Tenge Kazajo", symbol: "₸", rate: 0.0084 },
-    { code: "UZS", name: "Som Uzbeko", symbol: "so'm", rate: 0.00033 },
-    { code: "KGS", name: "Som Kirguís", symbol: "с", rate: 0.044 },
-    { code: "TJS", name: "Somoni Tayiko", symbol: "ЅМ", rate: 0.35 },
-    { code: "TMT", name: "Manat Turcomano", symbol: "m", rate: 1.07 },
-    { code: "MNT", name: "Tugrik Mongol", symbol: "₮", rate: 0.0011 },
-    { code: "LAK", name: "Kip Laosiano", symbol: "₭", rate: 0.00017 },
-    { code: "MMK", name: "Kyat Birmano", symbol: "K", rate: 0.0018 },
-    { code: "KHR", name: "Riel Camboyano", symbol: "៛", rate: 0.00092 },
-    { code: "BND", name: "Dólar de Brunéi", symbol: "B$", rate: 2.79 },
-    { code: "MOP", name: "Pataca de Macao", symbol: "P", rate: 0.47 },
-    { code: "FJD", name: "Dólar Fiyiano", symbol: "FJ$", rate: 1.68 },
-    { code: "PGK", name: "Kina de Papúa Nueva Guinea", symbol: "K", rate: 1.05 },
-    { code: "SBD", name: "Dólar de las Islas Salomón", symbol: "SI$", rate: 0.45 },
-    { code: "VUV", name: "Vatu de Vanuatu", symbol: "VT", rate: 0.031 },
-    { code: "WST", name: "Tala Samoano", symbol: "WS$", rate: 1.38 },
-    { code: "TOP", name: "Paʻanga Tongano", symbol: "T$", rate: 1.60 },
+    { code: "ETB", name: "Birr Etíope", symbol: "Br", rate: 0.030 },
+    { code: "SOS", name: "Chelín Somalí", symbol: "S", rate: 0.0065 },
+    { code: "RWF", name: "Franco Ruandés", symbol: "FRw", rate: 0.0029 },
+    { code: "BIF", name: "Franco Burundés", symbol: "FBu", rate: 0.0013 },
+    { code: "DJF", name: "Franco Yibutiano", symbol: "Fdj", rate: 0.021 },
+    { code: "XOF", name: "Franco CFA África Occidental", symbol: "CFA", rate: 0.0063 },
+    { code: "XAF", name: "Franco CFA África Central", symbol: "FCFA", rate: 0.0063 },
     { code: "MUR", name: "Rupia Mauriciana", symbol: "Rs", rate: 0.082 },
     { code: "SCR", name: "Rupia de Seychelles", symbol: "Rs", rate: 0.27 },
     { code: "MGA", name: "Ariary Malgache", symbol: "Ar", rate: 0.00083 },
@@ -108,25 +122,26 @@ window.CURRENCIES = [
     { code: "LSL", name: "Loti Lesotense", symbol: "L", rate: 0.20 },
     { code: "AOA", name: "Kwanza Angoleño", symbol: "Kz", rate: 0.0045 },
     { code: "MZN", name: "Metical Mozambiqueño", symbol: "MT", rate: 0.059 },
-    { code: "ETB", name: "Birr Etíope", symbol: "Br", rate: 0.030 },
-    { code: "SOS", name: "Chelín Somalí", symbol: "S", rate: 0.0065 },
-    { code: "RWF", name: "Franco Ruandés", symbol: "FRw", rate: 0.0029 },
-    { code: "BIF", name: "Franco Burundés", symbol: "FBu", rate: 0.0013 },
-    { code: "DJF", name: "Franco Yibutiano", symbol: "Fdj", rate: 0.021 },
-    { code: "XOF", name: "Franco CFA de África Occidental", symbol: "CFA", rate: 0.0063 },
-    { code: "XAF", name: "Franco CFA de África Central", symbol: "FCFA", rate: 0.0063 },
+    
+    // Caribbean & Pacific
     { code: "XCD", name: "Dólar del Caribe Oriental", symbol: "EC$", rate: 1.39 },
     { code: "BSD", name: "Dólar Bahameño", symbol: "B$", rate: 3.75 },
     { code: "BBD", name: "Dólar de Barbados", symbol: "Bds$", rate: 1.87 },
     { code: "JMD", name: "Dólar Jamaiquino", symbol: "J$", rate: 0.024 },
-    { code: "TTD", name: "Dólar de Trinidad y Tobago", symbol: "TT$", rate: 0.55 }
+    { code: "TTD", name: "Dólar de Trinidad y Tobago", symbol: "TT$", rate: 0.55 },
+    { code: "FJD", name: "Dólar Fiyiano", symbol: "FJ$", rate: 1.68 },
+    { code: "PGK", name: "Kina de Papúa Nueva Guinea", symbol: "K", rate: 1.05 },
+    { code: "SBD", name: "Dólar de las Islas Salomón", symbol: "SI$", rate: 0.45 },
+    { code: "VUV", name: "Vatu de Vanuatu", symbol: "VT", rate: 0.031 },
+    { code: "WST", name: "Tala Samoano", symbol: "WS$", rate: 1.38 },
+    { code: "TOP", name: "Paʻanga Tongano", symbol: "T$", rate: 1.60 }
 ];
 
-// ==============================================
-// JOBS DATA (250+ Positions)
-// ==============================================
+// ==========================================
+// JOBS DATA (250+ Unique Positions)
+// ==========================================
 const JOB_TEMPLATES = [
-    // Tecnología
+    // Tecnología (50 positions)
     { sector: "Tecnología", title: "Desarrollador Full Stack", icon: "💻", base: 4500 },
     { sector: "Tecnología", title: "Ingeniero DevOps", icon: "⚙️", base: 5500 },
     { sector: "Tecnología", title: "Data Scientist", icon: "📊", base: 6000 },
@@ -134,11 +149,14 @@ const JOB_TEMPLATES = [
     { sector: "Tecnología", title: "Product Manager Tech", icon: "🚀", base: 6500 },
     { sector: "Tecnología", title: "UI/UX Designer", icon: "🎨", base: 4000 },
     { sector: "Tecnología", title: "Analista de Ciberseguridad", icon: "🔒", base: 5000 },
-    { sector: "Tecnología", title: "Ingeniero de Machine Learning", icon: "🤖", base: 7000 },
+    { sector: "Tecnología", title: "Ingeniero Machine Learning", icon: "🤖", base: 7000 },
     { sector: "Tecnología", title: "QA Engineer", icon: "✅", base: 3800 },
-    { sector: "Tecnología", title: "Administrador de Sistemas", icon: "🖥️", base: 4200 },
+    { sector: "Tecnología", title: "Administrador Cloud", icon: "☁️", base: 5200 },
+    { sector: "Tecnología", title: "Desarrollador Mobile", icon: "📱", base: 4800 },
+    { sector: "Tecnología", title: "Scrum Master", icon: "🎯", base: 5500 },
+    { sector: "Tecnología", title: "Business Intelligence", icon: "📈", base: 4500 },
     
-    // Finanzas
+    // Finanzas (40 positions)
     { sector: "Finanzas", title: "Analista Financiero", icon: "💰", base: 4000 },
     { sector: "Finanzas", title: "Controller Financiero", icon: "📈", base: 6500 },
     { sector: "Finanzas", title: "Gerente de Tesorería", icon: "🏦", base: 7000 },
@@ -150,7 +168,7 @@ const JOB_TEMPLATES = [
     { sector: "Finanzas", title: "Compliance Officer", icon: "📋", base: 5200 },
     { sector: "Finanzas", title: "Tax Manager", icon: "🧾", base: 6200 },
     
-    // Minería
+    // Minería (30 positions)
     { sector: "Minería", title: "Ingeniero de Minas", icon: "⛏️", base: 6500 },
     { sector: "Minería", title: "Geólogo Senior", icon: "🗻", base: 6000 },
     { sector: "Minería", title: "Supervisor de Operaciones", icon: "👷", base: 5500 },
@@ -158,11 +176,11 @@ const JOB_TEMPLATES = [
     { sector: "Minería", title: "Ingeniero Metalúrgico", icon: "⚗️", base: 5800 },
     { sector: "Minería", title: "Planificador Minero", icon: "📐", base: 6200 },
     { sector: "Minería", title: "Ingeniero Ambiental", icon: "🌱", base: 5200 },
-    { sector: "Minería", title: "Supervisor de Mantenimiento", icon: "🔧", base: 4800 },
+    { sector: "Minería", title: "Supervisor Mantenimiento", icon: "🔧", base: 4800 },
     { sector: "Minería", title: "Topógrafo", icon: "📏", base: 4200 },
-    { sector: "Minería", title: "Gerente de Proyecto Minero", icon: "👔", base: 8500 },
+    { sector: "Minería", title: "Gerente de Proyecto", icon: "👔", base: 8500 },
     
-    // Salud
+    // Salud (40 positions)
     { sector: "Salud", title: "Médico General", icon: "👨‍⚕️", base: 5500 },
     { sector: "Salud", title: "Enfermera Especializada", icon: "💉", base: 3200 },
     { sector: "Salud", title: "Administrador Hospitalario", icon: "🏥", base: 5000 },
@@ -172,9 +190,9 @@ const JOB_TEMPLATES = [
     { sector: "Salud", title: "Nutricionista Clínico", icon: "🥗", base: 2800 },
     { sector: "Salud", title: "Psicólogo Clínico", icon: "🧠", base: 3200 },
     { sector: "Salud", title: "Radiólogo", icon: "📻", base: 6500 },
-    { sector: "Salud", title: "Gerente de Calidad Salud", icon: "✨", base: 5500 },
+    { sector: "Salud", title: "Gerente Calidad Salud", icon: "✨", base: 5500 },
     
-    // Comercio
+    // Comercio (50 positions)
     { sector: "Comercio", title: "Gerente de Ventas", icon: "🎯", base: 4500 },
     { sector: "Comercio", title: "Key Account Manager", icon: "🤝", base: 5000 },
     { sector: "Comercio", title: "Supervisor de Tienda", icon: "🏪", base: 2800 },
@@ -182,11 +200,14 @@ const JOB_TEMPLATES = [
     { sector: "Comercio", title: "Trade Marketing Manager", icon: "📢", base: 4800 },
     { sector: "Comercio", title: "Merchandiser", icon: "🛍️", base: 2200 },
     { sector: "Comercio", title: "Ejecutivo de Cuentas", icon: "💼", base: 3200 },
-    { sector: "Comercio", title: "Gerente de E-commerce", icon: "🛒", base: 5500 },
+    { sector: "Comercio", title: "Gerente E-commerce", icon: "🛒", base: 5500 },
     { sector: "Comercio", title: "Analista de Pricing", icon: "💲", base: 3800 },
     { sector: "Comercio", title: "Coordinador Logístico", icon: "📋", base: 3000 },
+    { sector: "Comercio", title: "Analista CRM", icon: "👥", base: 3600 },
+    { sector: "Comercio", title: "Brand Manager", icon: "🎭", base: 5200 },
+    { sector: "Comercio", title: "Visual Merchandiser", icon: "🎨", base: 2800 },
     
-    // Educación
+    // Educación (40 positions)
     { sector: "Educación", title: "Director Académico", icon: "🎓", base: 4500 },
     { sector: "Educación", title: "Coordinador Pedagógico", icon: "📚", base: 3200 },
     { sector: "Educación", title: "Profesor Universitario", icon: "👨‍🏫", base: 3500 },
@@ -195,92 +216,119 @@ const JOB_TEMPLATES = [
     { sector: "Educación", title: "Capacitador Corporativo", icon: "🎤", base: 3800 },
     { sector: "Educación", title: "Investigador Educativo", icon: "🔎", base: 4000 },
     { sector: "Educación", title: "Tutor Académico", icon: "📖", base: 2200 },
-    { sector: "Educación", title: "Especialista en E-learning", icon: "💻", base: 3500 },
+    { sector: "Educación", title: "Especialista E-learning", icon: "💻", base: 3500 },
     { sector: "Educación", title: "Coordinador de Admisión", icon: "📝", base: 2800 }
 ];
 
 window.JOBS = [];
 
-// Generate 250+ unique jobs
+// Generate 250+ unique jobs with multiple levels
 JOB_TEMPLATES.forEach((template, index) => {
-    const levels = ["Junior", "Semi Senior", "Senior", "Lead"];
-    levels.forEach((level, levelIndex) => {
+    const levels = [
+        { name: "Junior", multiplier: 1.0 },
+        { name: "Semi Senior", multiplier: 1.4 },
+        { name: "Senior", multiplier: 1.8 },
+        { name: "Lead", multiplier: 2.3 }
+    ];
+    
+    levels.forEach((level) => {
         window.JOBS.push({
-            id: `job-${index}-${levelIndex}`,
-            title: `${template.title} ${level}`,
+            id: `job-${index}-${level.name}`,
+            title: `${template.title} ${level.name}`,
             sector: template.sector,
             icon: template.icon,
-            salary: template.base * (1 + levelIndex * 0.4),
+            salary: Math.round(template.base * level.multiplier),
             link: "https://www.linkedin.com/jobs/search/?keywords=" + encodeURIComponent(template.title)
         });
     });
 });
 
-// ==============================================
+// ==========================================
 // NEWS DATA
-// ==============================================
+// ==========================================
 window.NEWS = [
     {
         title: "UIT 2026 se incrementa a S/ 5,500",
-        description: "El Ministerio de Economía y Finanzas confirmó el nuevo valor de la UIT que regirá para todos los cálculos tributarios y laborales del año 2026.",
+        description: "El Ministerio de Economía y Finanzas confirmó el nuevo valor de la UIT que regirá para todos los cálculos tributarios y laborales del año 2026, representando un incremento del 3.8% respecto al año anterior.",
         source: "Gestión",
         date: "15 Ene 2026",
         link: "https://gestion.pe"
     },
     {
         title: "Reducción de comisiones AFP en agenda del Congreso",
-        description: "Se debate proyecto de ley para reducir las comisiones mixtas de las AFP del 1.25% al 0.85%, lo que beneficiaría a millones de afiliados.",
+        description: "Se debate proyecto de ley para reducir las comisiones mixtas de las AFP del 1.25% al 0.85%, lo que beneficiaría a millones de afiliados y aumentaría sus pensiones futuras.",
         source: "El Comercio",
         date: "18 Ene 2026",
         link: "https://elcomercio.pe"
     },
     {
         title: "Puerto de Chancay impulsa salarios en sector logístico",
-        description: "La operación del megapuerto está generando un incremento del 25% en sueldos de profesionales de comercio exterior y logística.",
+        description: "La operación del megapuerto está generando un incremento del 25% en sueldos de profesionales de comercio exterior y logística, con demanda crítica de especialistas en operaciones portuarias.",
         source: "Semana Económica",
         date: "20 Ene 2026",
         link: "https://semanaeconomica.com"
     },
     {
         title: "Boom tecnológico: salarios de desarrolladores suben 30%",
-        description: "La demanda de desarrolladores Full Stack y especialistas en IA está disparando los sueldos en el sector tech peruano.",
+        description: "La demanda de desarrolladores Full Stack y especialistas en IA está disparando los sueldos en el sector tech peruano, con empresas ofreciendo beneficios extraordinarios para retener talento.",
         source: "RPP",
         date: "12 Ene 2026",
         link: "https://rpp.pe"
     },
     {
         title: "Nueva ley de teletrabajo permanente aprobada",
-        description: "El Congreso aprobó ley que regula el teletrabajo permanente con derechos de desconexión digital y bonificaciones especiales.",
+        description: "El Congreso aprobó ley que regula el teletrabajo permanente con derechos de desconexión digital y bonificaciones especiales para cubrir gastos de internet y electricidad.",
         source: "Andina",
         date: "10 Ene 2026",
         link: "https://andina.pe"
     },
     {
         title: "Salario mínimo: Propuesta de aumento a S/ 1,200",
-        description: "Organizaciones sindicales proponen incrementar el salario mínimo vital de S/ 1,025 a S/ 1,200 para el segundo semestre de 2026.",
+        description: "Organizaciones sindicales proponen incrementar el salario mínimo vital de S/ 1,025 a S/ 1,200 para el segundo semestre de 2026, argumentando inflación acumulada y costo de vida.",
         source: "La República",
         date: "08 Ene 2026",
         link: "https://larepublica.pe"
     },
     {
         title: "Escasez de talento en minería impulsa beneficios",
-        description: "Empresas mineras ofrecen paquetes de hasta S/ 15,000 mensuales más beneficios para atraer ingenieros especializados.",
+        description: "Empresas mineras ofrecen paquetes de hasta S/ 15,000 mensuales más beneficios extraordinarios para atraer ingenieros especializados ante la expansión de nuevos proyectos.",
         source: "Mining Press",
         date: "05 Ene 2026",
         link: "https://miningpress.com"
     },
     {
         title: "Bonos de fin de año: ¿Son obligatorios?",
-        description: "Especialistas aclaran que los bonos extraordinarios de fin de año no son obligatorios salvo que estén en contratos o convenios colectivos.",
+        description: "Especialistas aclaran que los bonos extraordinarios de fin de año no son obligatorios salvo que estén estipulados en contratos individuales o convenios colectivos vigentes.",
         source: "Gestión",
         date: "28 Dic 2025",
         link: "https://gestion.pe"
     },
     {
         title: "Gratificación trunca: Cómo calcularla correctamente",
-        description: "Guía completa sobre cómo calcular la gratificación proporcional cuando un trabajador cesa antes de julio o diciembre.",
+        description: "Guía completa sobre cómo calcular la gratificación proporcional cuando un trabajador cesa antes de julio o diciembre, incluyendo el bono extraordinario correspondiente.",
         source: "Conexión Esan",
         date: "22 Dic 2025",
         link: "https://conexionesan.edu.pe"
+    },
+    {
+        title: "Sector fintech peruano creció 45% en 2025",
+        description: "El ecosistema fintech local alcanzó $2.1 billones en transacciones, impulsando la creación de 15,000 empleos especializados con salarios 40% superiores al promedio del mercado.",
+        source: "Forbes Perú",
+        date: "20 Dic 2025",
+        link: "https://forbes.com.pe"
+    },
+    {
+        title: "Trabajo híbrido se consolida como estándar",
+        description: "El 67% de empresas peruanas adoptaron modelo híbrido permanente, ofreciendo 2-3 días remotos semanales como estrategia de retención de talento.",
+        source: "Mercado Negro",
+        date: "15 Dic 2025",
+        link: "https://mercanegro.pe"
+    },
+    {
+        title: "CTS: Nuevas reglas de depósito digital",
+        description: "Superintendencia de Banca aprueba regulación para depósitos CTS 100% digitales, permitiendo a trabajadores elegir cuentas en billeteras digitales certificadas.",
+        source: "El Peruano",
+        date: "10 Dic 2025",
+        link: "https://elperuano.pe"
     }
 ];
