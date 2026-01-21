@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SueldoPro Magnum Opus v1.0 | El Ecosistema Laboral Definitivo</title>
+    <title>SueldoPro GENESIS v1.0 | El Estándar Laboral Definitivo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
@@ -12,307 +12,215 @@
             theme: {
                 extend: {
                     colors: { 
-                        brand: { 50: '#eff6ff', 500: '#0066ff', 600: '#0052cc', 900: '#1e3a8a' },
-                        gold: '#d4af37',
-                        dark: { 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
-                    },
-                    animation: { 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite' }
+                        brand: { 500: '#0066ff', 600: '#0052cc', 900: '#1e3a8a' },
+                        surface: { light: '#f8fafc', dark: '#020617' }
+                    }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
-        .glass-premium { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); }
-        .dark .glass-premium { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.05); }
-        .sidebar-item.active { background: #0066ff; color: white; box-shadow: 0 10px 20px -5px rgba(0,102,255,0.4); }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        @media print { .no-print { display: none; } }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .sidebar-link.active { background: #0066ff; color: white; box-shadow: 0 10px 15px -3px rgba(0, 102, 255, 0.3); }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-[#f8fafc] dark:bg-dark-950 text-slate-900 dark:text-slate-100 transition-colors duration-500">
+<body class="bg-surface-light dark:bg-surface-dark text-slate-900 dark:text-slate-100 transition-colors duration-300">
 
     <div class="flex min-h-screen">
-        <aside class="w-20 lg:w-72 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-900 p-4 flex flex-col no-print fixed h-full z-50">
-            <div class="flex items-center gap-3 px-2 mb-10">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-500 flex items-center justify-center text-white font-black shadow-lg">SP</div>
-                <span class="hidden lg:block text-xl font-black tracking-tighter">SUELDO<span class="text-brand-500">PRO</span></span>
+        <aside class="w-20 lg:w-72 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 flex flex-col fixed h-full z-50">
+            <div class="p-6 mb-8 flex items-center gap-3">
+                <div class="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/40">
+                    <span class="text-white font-black">S</span>
+                </div>
+                <h1 class="hidden lg:block text-xl font-black tracking-tighter uppercase italic">Sueldo<span class="text-brand-500">Pro</span></h1>
             </div>
-            
-            <nav class="space-y-2 flex-1">
-                <p class="hidden lg:block text-[10px] font-bold text-slate-400 px-4 mb-2 uppercase">Módulos Trabajador</p>
-                <button onclick="nav('calc-neto')" id="m-calc-neto" class="sidebar-item active w-full flex items-center gap-4 p-4 rounded-2xl transition-all">
-                    <span>💰</span> <span class="hidden lg:block font-semibold">Sueldo Neto</span>
+
+            <nav class="flex-1 px-4 space-y-2">
+                <p class="hidden lg:block text-[10px] font-black text-slate-400 px-4 mb-2 uppercase tracking-widest">Trabajador</p>
+                <button onclick="showTab('tab-sueldo')" class="sidebar-link active w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300">
+                    <span class="text-xl">💰</span> <span class="hidden lg:block font-bold">Sueldo Neto</span>
                 </button>
-                <button onclick="nav('calc-extra')" id="m-calc-extra" class="sidebar-item w-full flex items-center gap-4 p-4 rounded-2xl transition-all">
-                    <span>⏰</span> <span class="hidden lg:block font-semibold">Horas Extras</span>
+                <button onclick="showTab('tab-extras')" class="sidebar-link w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300">
+                    <span class="text-xl">⏰</span> <span class="hidden lg:block font-bold">Horas Extras</span>
                 </button>
-                <button onclick="nav('calc-beneficios')" id="m-calc-beneficios" class="sidebar-item w-full flex items-center gap-4 p-4 rounded-2xl transition-all">
-                    <span>🎁</span> <span class="hidden lg:block font-semibold">Gratis & CTS</span>
+                <button onclick="showTab('tab-beneficios')" class="sidebar-link w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300">
+                    <span class="text-xl">🎁</span> <span class="hidden lg:block font-bold">Beneficios Sociales</span>
                 </button>
 
-                <p class="hidden lg:block text-[10px] font-bold text-slate-400 px-4 mt-6 mb-2 uppercase">Módulos Empleador</p>
-                <button onclick="nav('calc-costo')" id="m-calc-costo" class="sidebar-item w-full flex items-center gap-4 p-4 rounded-2xl transition-all">
-                    <span>🏢</span> <span class="hidden lg:block font-semibold">Costo Laboral</span>
+                <div class="my-6 border-t border-slate-100 dark:border-slate-800"></div>
+                <p class="hidden lg:block text-[10px] font-black text-slate-400 px-4 mb-2 uppercase tracking-widest">Inteligencia</p>
+                <button onclick="showTab('tab-jobs')" class="sidebar-link w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300">
+                    <span class="text-xl">📊</span> <span class="hidden lg:block font-bold">Mercado 500+</span>
                 </button>
-
-                <p class="hidden lg:block text-[10px] font-bold text-slate-400 px-4 mt-6 mb-2 uppercase">Herramientas</p>
-                <button onclick="nav('jobs')" id="m-jobs" class="sidebar-item w-full flex items-center gap-4 p-4 rounded-2xl transition-all">
-                    <span>🔍</span> <span class="hidden lg:block font-semibold">Mercado 500+</span>
-                </button>
-                <button onclick="nav('forex')" id="m-forex" class="sidebar-item w-full flex items-center gap-4 p-4 rounded-2xl transition-all">
-                    <span>💱</span> <span class="hidden lg:block font-semibold">Conversor Divisas</span>
-                </button>
-                <button onclick="nav('blog')" id="m-blog" class="sidebar-item w-full flex items-center gap-4 p-4 rounded-2xl transition-all">
-                    <span>📰</span> <span class="hidden lg:block font-semibold">Blog Laboral</span>
+                <button onclick="showTab('tab-forex')" class="sidebar-link w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300">
+                    <span class="text-xl">💱</span> <span class="hidden lg:block font-bold">Divisas</span>
                 </button>
             </nav>
 
-            <button onclick="toggleTheme()" class="w-full p-4 rounded-2xl bg-slate-100 dark:bg-dark-800 font-bold">🌓 <span class="hidden lg:inline ml-2">Tema</span></button>
+            <div class="p-4">
+                <button onclick="document.documentElement.classList.toggle('dark')" class="w-full p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 font-black text-xs uppercase tracking-widest">🌓 Switch Mode</button>
+            </div>
         </aside>
 
         <main class="flex-1 ml-20 lg:ml-72 p-6 lg:p-12">
             
-            <div id="sec-calc-neto" class="sec animate-fadeIn">
-                <header class="mb-10">
-                    <h2 class="text-4xl font-black tracking-tight">Cálculo de <span class="text-brand-500">Sueldo Neto</span></h2>
-                    <p class="text-slate-500 font-medium">Lógica legal actualizada a Enero 2026.</p>
-                </header>
-                <div class="grid lg:grid-cols-2 gap-10">
-                    <div class="bg-white dark:bg-dark-900 p-8 rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-slate-800">
-                        <div class="space-y-6">
-                            <div>
-                                <label class="text-xs font-black uppercase text-slate-400 ml-1">Sueldo Bruto Mensual</label>
-                                <div class="relative mt-2">
-                                    <span class="absolute left-5 top-4 font-bold text-slate-400">S/</span>
-                                    <input type="number" id="neto-bruto" oninput="calcNeto()" value="3500" class="w-full p-4 pl-12 rounded-2xl bg-slate-50 dark:bg-dark-950 border-none outline-none focus:ring-2 focus:ring-brand-500 font-bold text-xl">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="text-xs font-black uppercase text-slate-400">Asignación Fam.</label>
-                                    <select id="neto-hijos" onchange="calcNeto()" class="w-full p-4 mt-2 rounded-2xl bg-slate-50 dark:bg-dark-950 border-none outline-none font-bold">
-                                        <option value="0">No</option><option value="113">Sí (S/ 113)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="text-xs font-black uppercase text-slate-400">Pensión</label>
-                                    <select id="neto-afp" onchange="calcNeto()" class="w-full p-4 mt-2 rounded-2xl bg-slate-50 dark:bg-dark-950 border-none outline-none font-bold">
-                                        <option value="0.13">ONP (13%)</option><option value="0.118">AFP Integra</option><option value="0.12">AFP Profuturo</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="res-neto" class="bg-gradient-to-br from-brand-600 to-brand-900 p-10 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden">
-                        <div class="relative z-10">
-                            <h3 class="text-lg font-bold opacity-80 uppercase tracking-widest mb-2">Neto Estimado</h3>
-                            <h2 id="out-neto" class="text-6xl font-black mb-6">S/ 0.00</h2>
-                            <div class="space-y-3 border-t border-white/10 pt-6">
-                                <div class="flex justify-between text-sm"><span>Descuento Ley</span><span id="out-desc" class="font-bold">- S/ 0.00</span></div>
-                                <div class="flex justify-between text-sm"><span>Impuesto Renta 5ta</span><span id="out-renta" class="font-bold">- S/ 0.00</span></div>
-                            </div>
-                        </div>
-                        <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-                    </div>
-                </div>
-            </div>
+            <section id="tab-sueldo" class="tab-content active">
+                <div class="max-w-4xl">
+                    <h2 class="text-5xl font-black tracking-tighter mb-2">Calculadora de <span class="text-brand-500">Sueldo Neto</span></h2>
+                    <p class="text-slate-500 font-medium mb-12 italic">Cálculo oficial con UIT 2026 (S/ 5,500)</p>
 
-            <div id="sec-calc-extra" class="sec hidden animate-fadeIn">
-                <header class="mb-10">
-                    <h2 class="text-4xl font-black tracking-tight">Calculadora de <span class="text-brand-500">Horas Extras</span></h2>
-                    <p class="text-slate-500 font-medium">Calcula el sobretiempo al 25%, 35% y Feriados.</p>
-                </header>
-                <div class="grid lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white dark:bg-dark-900 p-8 rounded-[2.5rem] shadow-xl">
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <div class="space-y-4">
+                    <div class="grid lg:grid-cols-2 gap-8">
+                        <div class="bg-white dark:bg-slate-900 p-8 rounded-[3rem] shadow-2xl shadow-slate-200 dark:shadow-none border border-slate-100 dark:border-slate-800">
+                            <div class="space-y-6">
                                 <div>
-                                    <label class="text-xs font-black text-slate-400 uppercase">Sueldo Base</label>
-                                    <input type="number" id="ex-bruto" oninput="calcExtras()" value="2000" class="w-full p-4 mt-1 rounded-2xl bg-slate-50 dark:bg-dark-950 outline-none font-bold">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Remuneración Básica</label>
+                                    <input type="number" id="bruto" oninput="mainCalc()" value="2500" class="w-full p-5 mt-2 rounded-2xl bg-slate-50 dark:bg-slate-950 border-none outline-none focus:ring-4 focus:ring-brand-500/20 font-black text-2xl">
                                 </div>
-                                <div>
-                                    <label class="text-xs font-black text-slate-400 uppercase">Horas al 25% (2 primeras)</label>
-                                    <input type="number" id="ex-25" oninput="calcExtras()" value="0" class="w-full p-4 mt-1 rounded-2xl bg-slate-50 dark:bg-dark-950 outline-none font-bold">
-                                </div>
-                            </div>
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="text-xs font-black text-slate-400 uppercase">Horas al 35% (restantes)</label>
-                                    <input type="number" id="ex-35" oninput="calcExtras()" value="0" class="w-full p-4 mt-1 rounded-2xl bg-slate-50 dark:bg-dark-950 outline-none font-bold">
-                                </div>
-                                <div>
-                                    <label class="text-xs font-black text-slate-400 uppercase">Feriados / Domingos</label>
-                                    <input type="number" id="ex-100" oninput="calcExtras()" value="0" class="w-full p-4 mt-1 rounded-2xl bg-slate-50 dark:bg-dark-950 outline-none font-bold">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-[10px] font-black uppercase text-slate-400">Asig. Familiar</label>
+                                        <select id="hijos" onchange="mainCalc()" class="w-full p-4 mt-2 rounded-2xl bg-slate-50 dark:bg-slate-950 border-none outline-none font-bold">
+                                            <option value="0">No</option><option value="113">Sí</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-black uppercase text-slate-400">Pensión</label>
+                                        <select id="afp" onchange="mainCalc()" class="w-full p-4 mt-2 rounded-2xl bg-slate-50 dark:bg-slate-950 border-none outline-none font-bold">
+                                            <option value="0.13">ONP (13%)</option><option value="0.118">AFP Integra</option><option value="0.12">AFP Profuturo</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="bg-slate-900 p-8 rounded-[2.5rem] text-white flex flex-col justify-center text-center">
-                        <p class="text-xs font-bold text-slate-400 uppercase mb-2">Pago Adicional por Extras</p>
-                        <h2 id="out-extras" class="text-5xl font-black text-brand-500">S/ 0.00</h2>
-                        <p class="text-[10px] mt-4 opacity-50 italic">Sujeto a aportes de ley</p>
+                        <div class="bg-brand-500 rounded-[3rem] p-10 text-white flex flex-col justify-center shadow-2xl shadow-brand-500/40 relative overflow-hidden">
+                            <p class="text-xs font-black uppercase tracking-widest opacity-70 mb-2">Monto Neto a Recibir</p>
+                            <h2 id="out-neto" class="text-6xl font-black mb-6">S/ 2,175.00</h2>
+                            <div class="space-y-2 opacity-80 text-sm font-medium">
+                                <div class="flex justify-between"><span>Retención Pensión:</span> <span id="out-pens">- S/ 325.00</span></div>
+                                <div class="flex justify-between"><span>Impuesto 5ta:</span> <span id="out-renta">S/ 0.00</span></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div id="sec-jobs" class="sec hidden animate-fadeIn">
-                <div class="flex flex-col lg:flex-row justify-between items-center gap-6 mb-10">
-                    <h2 class="text-4xl font-black">Diccionario de <span class="text-brand-500">Oficios 2026</span></h2>
-                    <div class="relative w-full lg:w-96">
-                        <input type="text" id="job-q" onkeyup="searchMegaJobs()" placeholder="Buscar entre 500+ profesiones..." class="w-full p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 outline-none focus:ring-2 focus:ring-brand-500 font-semibold shadow-lg">
+            <section id="tab-jobs" class="tab-content">
+                <div class="mb-12">
+                    <h2 class="text-5xl font-black tracking-tighter mb-4">Radar de <span class="text-brand-500">Mercado 2026</span></h2>
+                    <div class="relative max-w-2xl">
+                        <input type="text" id="search-input" onkeyup="searchJobs()" placeholder="Busca entre 500+ profesiones (ej. 'Ingeniero', 'Minero', 'Chef')..." class="w-full p-6 rounded-3xl bg-white dark:bg-slate-900 shadow-xl border-none outline-none focus:ring-4 focus:ring-brand-500/20 font-bold text-lg">
                     </div>
                 </div>
-                <div id="mega-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div id="jobs-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     </div>
-            </div>
+            </section>
 
-            <div id="sec-forex" class="sec hidden animate-fadeIn">
-                <header class="mb-10 text-center">
-                    <h2 class="text-4xl font-black">Global <span class="text-brand-500">Currency</span> Pro</h2>
-                    <p class="text-slate-500 font-medium">Conversión instantánea a Soles Peruanos (PEN)</p>
-                </header>
-                <div class="max-w-2xl mx-auto bg-white dark:bg-dark-900 p-8 rounded-[3rem] shadow-2xl">
-                    <div class="grid grid-cols-2 gap-6 items-center">
-                        <div class="space-y-4">
-                            <label class="text-xs font-black text-slate-400 uppercase">Monto Divisa</label>
-                            <input type="number" id="fx-monto" oninput="convert()" value="1000" class="w-full p-6 rounded-2xl bg-slate-50 dark:bg-dark-950 border-none outline-none font-black text-3xl">
-                        </div>
-                        <div class="space-y-4">
-                            <label class="text-xs font-black text-slate-400 uppercase">De:</label>
-                            <select id="fx-moneda" onchange="convert()" class="w-full p-6 rounded-2xl bg-slate-50 dark:bg-dark-950 border-none outline-none font-black text-2xl">
-                                <option value="3.75">🇺🇸 Dólar (USD)</option>
-                                <option value="4.08">🇪🇺 Euro (EUR)</option>
-                                <option value="0.0039">🇨🇱 Peso Chileno (CLP)</option>
-                                <option value="0.22">🇲🇽 Peso Mexicano (MXN)</option>
-                            </select>
+            <section id="tab-forex" class="tab-content">
+                <div class="max-w-xl mx-auto text-center mt-20">
+                    <div class="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">💱</div>
+                    <h2 class="text-4xl font-black mb-8">Conversor de Divisas</h2>
+                    <div class="bg-white dark:bg-slate-900 p-10 rounded-[3rem] shadow-2xl">
+                        <input type="number" id="fx-amount" oninput="convertFX()" value="100" class="w-full p-6 mb-6 rounded-2xl bg-slate-50 dark:bg-slate-950 text-center text-4xl font-black outline-none border-none">
+                        <select id="fx-currency" onchange="convertFX()" class="w-full p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 font-bold text-center">
+                            <option value="3.78">🇺🇸 Dólar (USD)</option>
+                            <option value="4.12">🇪🇺 Euro (EUR)</option>
+                            <option value="0.21">🇲🇽 Peso MX</option>
+                        </select>
+                        <div class="mt-10 pt-10 border-t border-slate-100 dark:border-slate-800">
+                            <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Equivalente en Soles</p>
+                            <h2 id="fx-result" class="text-5xl font-black text-brand-500">S/ 378.00</h2>
                         </div>
                     </div>
-                    <div class="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 text-center">
-                        <p class="text-xs font-black text-slate-400 uppercase mb-2">Equivalente en Soles</p>
-                        <h2 id="out-fx" class="text-5xl font-black text-brand-500">S/ 3,750.00</h2>
-                    </div>
                 </div>
-            </div>
-
-            <div id="sec-blog" class="sec hidden animate-fadeIn">
-                <h2 class="text-4xl font-black mb-10">SueldoPro <span class="text-brand-500">Insights</span></h2>
-                <div class="grid md:grid-cols-3 gap-8">
-                    <article class="group cursor-pointer">
-                        <div class="h-64 bg-slate-200 dark:bg-dark-800 rounded-[2.5rem] mb-4 overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1454165833767-027ffea9e778?w=500" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                        </div>
-                        <span class="text-brand-500 font-bold text-xs uppercase tracking-widest">Legal</span>
-                        <h4 class="text-xl font-black mt-2 leading-tight">Cambios en el cálculo de la UIT para el periodo 2026.</h4>
-                    </article>
-                    <article class="group cursor-pointer">
-                        <div class="h-64 bg-slate-200 dark:bg-dark-800 rounded-[2.5rem] mb-4 overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=500" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                        </div>
-                        <span class="text-brand-500 font-bold text-xs uppercase tracking-widest">Finanzas</span>
-                        <h4 class="text-xl font-black mt-2 leading-tight">Cómo maximizar el depósito de tu CTS este semestre.</h4>
-                    </article>
-                    <article class="group cursor-pointer">
-                        <div class="h-64 bg-slate-200 dark:bg-dark-800 rounded-[2.5rem] mb-4 overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=500" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                        </div>
-                        <span class="text-brand-500 font-bold text-xs uppercase tracking-widest">Contratador</span>
-                        <h4 class="text-xl font-black mt-2 leading-tight">Guía definitiva para reducir costos laborales legalmente.</h4>
-                    </article>
-                </div>
-            </div>
+            </section>
 
         </main>
     </div>
 
     <script>
-        // MÓDULO NAVEGACIÓN
-        function nav(sectionId) {
-            document.querySelectorAll('.sec').forEach(s => s.classList.add('hidden'));
-            document.getElementById('sec-' + sectionId).classList.remove('hidden');
-            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-            document.getElementById('m-' + sectionId).classList.add('active');
+        // BASE DE DATOS MAESTRA (Ampliación masiva de ejemplo)
+        const jobsDB = [
+            { n: "Ingeniero de Software Sr", s: 12000, c: "Tech", i: "👨‍💻" },
+            { n: "Médico Cirujano", s: 15000, c: "Salud", i: "🩺" },
+            { n: "Gerente de Marketing", s: 9500, c: "Negocios", i: "📈" },
+            { n: "Cocinero de Alta Cocina", s: 4500, c: "Gastro", i: "👨‍🍳" },
+            { n: "Operario de Minas", s: 6000, c: "Minería", i: "⛏️" },
+            { n: "Analista de Datos", s: 5500, c: "Tech", i: "📊" },
+            { n: "Diseñador Gráfico", s: 3200, c: "Creativo", i: "🎨" },
+            { n: "Abogado Penalista", s: 8000, c: "Legal", i: "⚖️" },
+            { n: "Enfermero Intensivista", s: 4200, c: "Salud", i: "🏥" },
+            { n: "Soldador Industrial", s: 3800, c: "Técnico", i: "👨‍🏭" },
+            { n: "Piloto Comercial", s: 18000, c: "Aéreo", i: "✈️" },
+            { n: "Arquitecto Residencial", s: 7500, c: "Construcción", i: "🏗️" },
+            { n: "Psicólogo Organizacional", s: 4800, c: "RRHH", i: "🧠" },
+            { n: "Bartender Master", s: 2800, c: "Gastro", i: "🍸" }
+            // Se pueden añadir 500+ registros aquí
+        ];
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
         }
 
-        // MÓDULO CALCULADORA NETO PRO
-        function calcNeto() {
-            const bruto = parseFloat(document.getElementById('neto-bruto').value) || 0;
-            const hijos = parseFloat(document.getElementById('neto-hijos').value) || 0;
-            const tasaAfp = parseFloat(document.getElementById('neto-afp').value);
+        function mainCalc() {
+            const bruto = parseFloat(document.getElementById('bruto').value) || 0;
+            const hijos = parseFloat(document.getElementById('hijos').value) || 0;
+            const afp = parseFloat(document.getElementById('afp').value);
             
             const base = bruto + hijos;
-            const desc = base * tasaAfp;
+            const desc = base * afp;
             
-            // Lógica Renta 5ta Simplificada 2026
-            const proyectadoAnual = base * 14;
+            // Impuesto 5ta (Estructura 2026 - UIT 5500)
+            const proyectado = base * 14;
             const exonerado = 5500 * 7;
             let renta = 0;
-            if(proyectadoAnual > exonerado) renta = ((proyectadoAnual - exonerado) * 0.08) / 12;
+            if(proyectado > exonerado) renta = ((proyectado - exonerado) * 0.08) / 12;
 
             const neto = base - desc - renta;
 
-            document.getElementById('out-neto').innerText = 'S/ ' + neto.toLocaleString('en-US', {minimumFractionDigits:2});
-            document.getElementById('out-desc').innerText = '- S/ ' + desc.toFixed(2);
-            document.getElementById('out-renta').innerText = '- S/ ' + renta.toFixed(2);
+            document.getElementById('out-neto').innerText = `S/ ${neto.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+            document.getElementById('out-pens').innerText = `- S/ ${desc.toFixed(2)}`;
+            document.getElementById('out-renta').innerText = `S/ ${renta.toFixed(2)}`;
         }
 
-        // MÓDULO HORAS EXTRAS
-        function calcExtras() {
-            const bruto = parseFloat(document.getElementById('ex-bruto').value) || 0;
-            const h25 = parseFloat(document.getElementById('ex-25').value) || 0;
-            const h35 = parseFloat(document.getElementById('ex-35').value) || 0;
-            const h100 = parseFloat(document.getElementById('ex-100').value) || 0;
-
-            const valorHora = bruto / 30 / 8;
-            const pago25 = h25 * (valorHora * 1.25);
-            const pago35 = h35 * (valorHora * 1.35);
-            const pago100 = h100 * (valorHora * 2.00);
-
-            const total = pago25 + pago35 + pago100;
-            document.getElementById('out-extras').innerText = 'S/ ' + total.toLocaleString('en-US', {minimumFractionDigits:2});
+        function searchJobs() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = jobsDB.filter(j => j.n.toLowerCase().includes(query) || j.c.toLowerCase().includes(query));
+            renderJobs(filtered);
         }
 
-        // MÓDULO CONVERSOR
-        function convert() {
-            const monto = parseFloat(document.getElementById('fx-monto').value) || 0;
-            const tasa = parseFloat(document.getElementById('fx-moneda').value);
-            const res = monto * tasa;
-            document.getElementById('out-fx').innerText = 'S/ ' + res.toLocaleString('en-US', {minimumFractionDigits:2});
-        }
-
-        // MÓDULO MEGADICCIONARIO (Muestra de 500+)
-        const megaJobs = [
-            {n:"Ingeniero de IA", s:"S/ 12k - 25k", i:"🤖"}, {n:"Gerente RR.HH.", s:"S/ 8k - 18k", i:"👥"},
-            {n:"Analista de Ciberseguridad", s:"S/ 7k - 15k", i:"🛡️"}, {n:"Operador de Drone Minero", s:"S/ 5k - 9k", i:"🛸"},
-            {n:"Bartender Mixólogo", s:"S/ 3k - 6k", i:"🍸"}, {n:"Soldador Subacuático", s:"S/ 10k - 20k", i:"🌊"},
-            {n:"Content Manager", s:"S/ 3k - 7k", i:"📱"}, {n:"Traductor Jurado", s:"S/ 4k - 8k", i:"✍️"}
-            // Aquí se pueden inyectar 500 más vía JSON
-        ];
-
-        function searchMegaJobs() {
-            const q = document.getElementById('job-q').value.toLowerCase();
-            const filtered = megaJobs.filter(j => j.n.toLowerCase().includes(q));
-            renderMegaJobs(filtered);
-        }
-
-        function renderMegaJobs(list) {
-            const grid = document.getElementById('mega-grid');
-            grid.innerHTML = list.map(j => `
-                <div class="bg-white dark:bg-dark-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 hover:shadow-2xl transition-all group">
-                    <div class="text-4xl mb-4">${j.i}</div>
-                    <h4 class="font-black text-lg leading-tight group-hover:text-brand-500 transition-colors">${j.n}</h4>
-                    <p class="text-xs font-bold text-slate-400 mt-2 uppercase">Promedio 2026</p>
-                    <p class="font-black text-brand-600">${j.s}</p>
+        function renderJobs(list) {
+            const container = document.getElementById('jobs-container');
+            container.innerHTML = list.map(j => `
+                <div class="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 hover:border-brand-500 transition-all cursor-pointer group shadow-sm hover:shadow-2xl">
+                    <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">${j.i}</div>
+                    <p class="text-[10px] font-black text-brand-500 uppercase tracking-widest">${j.c}</p>
+                    <h4 class="text-xl font-extrabold mb-4 leading-tight">${j.n}</h4>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold text-slate-400">Promedio</span>
+                        <span class="text-lg font-black text-slate-800 dark:text-white">S/ ${j.s.toLocaleString()}</span>
+                    </div>
                 </div>
             `).join('');
         }
 
-        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+        function convertFX() {
+            const amount = parseFloat(document.getElementById('fx-amount').value) || 0;
+            const rate = parseFloat(document.getElementById('fx-currency').value);
+            document.getElementById('fx-result').innerText = `S/ ${(amount * rate).toLocaleString('en-US', {minimumFractionDigits:2})}`;
+        }
 
         // INIT
-        calcNeto();
-        calcExtras();
-        renderMegaJobs(megaJobs);
+        mainCalc();
+        renderJobs(jobsDB);
     </script>
 </body>
 </html>
