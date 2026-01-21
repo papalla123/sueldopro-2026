@@ -1,24 +1,33 @@
-// script.js - Motor de SueldoPro 2026
+// script.js - Lógica Maestra SueldoPro 2026
+let forexChart;
 
-// 1. NAVEGACIÓN
+// 1. NAVEGACIÓN ENTRE SECCIONES
 function nav(id) {
     document.querySelectorAll('.sec-content').forEach(s => s.classList.remove('active'));
-    document.getElementById('sec-' + id).classList.add('active');
+    const section = document.getElementById('sec-' + id);
+    if(section) section.classList.add('active');
     
     document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('m-' + id).classList.add('active');
+    const btn = document.getElementById('m-' + id);
+    if(btn) btn.classList.add('active');
 }
 
-// 2. TRADUCTOR Y CARGA
+// 2. TRADUCTOR Y CARGA DE DATOS
 function setLang(lang) {
+    if (typeof i18n === 'undefined') return;
+    
+    // Traducir elementos con el atributo data-t si existen
+    document.querySelectorAll('[data-t]').forEach(el => {
+        const key = el.getAttribute('data-t');
+        if (i18n[lang][key]) el.innerText = i18n[lang][key];
+    });
+
     // Cargar textos de las guías desde data.js
     const titleEl = document.getElementById('guide-neto-title');
     const textEl = document.getElementById('guide-neto-text');
-    
-    if (i18n && i18n[lang]) {
-        if (titleEl) titleEl.innerText = i18n[lang].g_neto_t;
-        if (textEl) textEl.innerText = i18n[lang].g_neto_txt;
-    }
+    if (titleEl) titleEl.innerText = i18n[lang].g_neto_t;
+    if (textEl) textEl.innerText = i18n[lang].g_neto_txt;
+
     renderJobs();
 }
 
@@ -37,14 +46,14 @@ function renderJobs(query = "") {
             <h4 class="font-bold text-lg text-brand-500">${j.n}</h4>
             <p class="text-[10px] text-slate-500 mb-4">${j.d}</p>
             <div class="flex justify-between items-center pt-4 border-t">
-                <span class="font-black italic">S/ ${j.max}</span>
+                <span class="font-black italic text-sm">S/ ${j.min} - ${j.max}</span>
                 <a href="${j.l}" target="_blank" class="text-[9px] bg-slate-100 dark:bg-dark-800 p-2 rounded-lg font-bold">INFO →</a>
             </div>
         </div>
     `).join('');
 }
 
-// 4. INICIO AUTOMÁTICO
+// 4. INICIALIZADOR GLOBAL
 window.onload = () => {
     setLang('es');
     document.getElementById('job-search')?.addEventListener('input', (e) => {
