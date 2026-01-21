@@ -1,39 +1,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
 
-:root { --blue: #0066ff; }
-body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.5s ease; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
 /* FIX MODO OSCURO */
-.dark-mode { background-color: #020617; color: #f1f5f9; }
+.dark-mode { background-color: #020617; color: #f8fafc; }
 .dark-mode .bg-white { background-color: #0f172a !important; border-color: #1e293b !important; }
-.dark-mode .text-slate-600 { color: #94a3b8 !important; }
-.dark-mode .text-slate-900 { color: #ffffff !important; }
+.dark-mode .text-slate-600, .dark-mode .text-slate-500 { color: #94a3b8 !important; }
 .dark-mode .input-pro { background-color: #1e293b; color: white; border-color: #334155; }
-.dark-mode aside { background-color: #0f172a; border-color: #1e293b; }
+.dark-mode .sidebar-btn:hover { background-color: #1e293b; }
 
-/* Botones de Navegación */
-.sidebar-btn { @apply w-full flex items-center gap-4 p-4 rounded-2xl text-sm font-bold transition-all text-slate-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-slate-800; }
-.sidebar-btn.active { @apply bg-blue-600 text-white shadow-xl shadow-blue-600/30; }
+/* Sidebar */
+.sidebar-btn { @apply w-full flex items-center gap-4 p-4 rounded-2xl text-sm font-bold transition-all text-slate-400 hover:bg-slate-100; }
+.sidebar-btn.active { @apply bg-blue-600 text-white shadow-2xl shadow-blue-600/30; }
 
-/* Tabs de Calculadoras */
-.tab-btn { @apply px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border-2 transition-all; }
+/* Botón de Tema */
+.theme-toggle-btn { @apply py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest transition-all; }
+
+/* Tabs Calculadora */
+.tab-btn { @apply px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all; }
 .t-neto { border-color: #3b82f6; color: #3b82f6; }
 .t-grati { border-color: #a855f7; color: #a855f7; }
 .t-cts { border-color: #ef4444; color: #ef4444; }
 .t-cuarta { border-color: #f59e0b; color: #f59e0b; }
-
 .tab-btn.active { background: currentColor; color: white; }
 
-/* UI de Calculadoras */
+/* Form Elements */
 .input-pro { @apply w-full p-5 rounded-3xl bg-slate-50 border-2 border-transparent focus:border-blue-600 outline-none font-black text-2xl transition-all; }
-.label-pro { @apply block text-[10px] font-black opacity-40 uppercase mb-2 tracking-widest dark:text-white; }
+.label-pro { @apply block text-[10px] font-black opacity-40 uppercase mb-2 tracking-widest dark:text-slate-400; }
+.btn-calc { @apply w-full mt-6 py-5 rounded-[2rem] font-black text-white uppercase tracking-widest text-xs shadow-2xl hover:scale-[1.02] active:scale-95 transition-all; }
 
-.btn-calc { @apply w-full mt-6 py-5 rounded-[2rem] font-black text-white uppercase tracking-tighter text-sm shadow-2xl hover:scale-[1.02] active:scale-95 transition-all; }
-
-/* Animaciones */
+/* Sections */
 .sec-content { display: none; opacity: 0; }
 .sec-content.active { display: block; animation: fadeInUp 0.5s forwards; }
-@keyframes fadeInUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+@keyframes fadeInUp { from { opacity:0; transform: translateY(15px); } to { opacity:1; transform: translateY(0); } }
 
 .custom-scroll::-webkit-scrollbar { width: 4px; }
 .custom-scroll::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
