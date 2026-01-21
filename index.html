@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SueldoPro 2026 | Suite Laboral Elite</title>
+    <title>SueldoPro 2026 | Elite Laboral</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
@@ -21,220 +22,278 @@
         }
     </script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.3s; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s; }
         .sidebar-btn.active { background: #0066ff; color: white; box-shadow: 0 8px 20px -5px rgba(0, 102, 255, 0.4); }
         .sec-content { display: none; }
         .sec-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        ::-webkit-scrollbar { width: 5px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #0066ff; border-radius: 10px; }
-        input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-dark-950 text-slate-800 dark:text-slate-200 min-h-screen flex">
 
     <aside class="w-20 lg:w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-900 fixed h-full z-50 flex flex-col p-4 overflow-y-auto no-scrollbar">
         <div class="flex items-center gap-3 px-2 mb-8">
-            <div class="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center text-white font-black">SP</div>
-            <span class="hidden lg:block text-lg font-black italic uppercase dark:text-white">Sueldo<span class="text-brand-500">Pro</span></span>
+            <div class="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center text-white font-black shadow-lg shadow-brand-500/30">SP</div>
+            <span class="hidden lg:block text-xl font-black italic tracking-tighter dark:text-white uppercase">Sueldo<span class="text-brand-500">Pro</span></span>
         </div>
 
-        <div class="mb-6 px-2">
-            <button onclick="toggleTheme()" class="w-full flex items-center justify-center gap-2 p-2 rounded-xl bg-slate-100 dark:bg-dark-800 text-xs font-bold transition-all">
-                <span id="theme-icon">🌙</span> <span class="hidden lg:block" id="theme-text">Modo Oscuro</span>
-            </button>
-        </div>
+        <button onclick="toggleTheme()" class="mb-6 w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-slate-100 dark:bg-dark-800 text-xs font-bold transition-all hover:scale-105">
+            <span id="theme-icon">🌙</span> <span class="hidden lg:block" id="theme-text">Modo Oscuro</span>
+        </button>
 
         <nav class="flex-1 space-y-1">
-            <p class="hidden lg:block text-[9px] font-black text-slate-500 px-4 mb-2 uppercase tracking-widest">Calculadoras</p>
-            <button onclick="nav('neto')" id="m-neto" class="sidebar-btn active w-full flex items-center gap-3 p-3 rounded-xl transition-all text-sm font-bold">💰 Sueldo Neto</button>
-            <button onclick="nav('cuarta')" id="m-cuarta" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl transition-all text-sm font-bold">📝 4ta Categoría</button>
-            <button onclick="nav('vac')" id="m-vac" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl transition-all text-sm font-bold">🌴 Vacaciones</button>
-            <button onclick="nav('grati')" id="m-grati" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl transition-all text-sm font-bold">🎁 Gratificación</button>
-            <button onclick="nav('cts')" id="m-cts" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl transition-all text-sm font-bold">🏦 CTS</button>
-            <button onclick="nav('liq')" id="m-liq" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl transition-all text-sm font-bold">⚖️ Liquidación</button>
+            <p class="hidden lg:block text-[10px] font-black text-slate-400 px-4 mb-2 uppercase tracking-widest">Calculadoras</p>
+            <button onclick="nav('neto')" id="m-neto" class="sidebar-btn active w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">💰 Sueldo Neto</button>
+            <button onclick="nav('cuarta')" id="m-cuarta" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">📝 4ta Categoría</button>
+            <button onclick="nav('costo')" id="m-costo" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">🏢 Costo Empresa</button>
+            <button onclick="nav('vac')" id="m-vac" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">🌴 Vacaciones</button>
+            <button onclick="nav('grati')" id="m-grati" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">🎁 Gratificación</button>
+            <button onclick="nav('cts')" id="m-cts" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">🏦 CTS</button>
+            <button onclick="nav('liq')" id="m-liq" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">⚖️ Liquidación</button>
             
-            <p class="hidden lg:block text-[9px] font-black text-slate-500 px-4 mt-6 mb-2 uppercase tracking-widest">Explorar</p>
-            <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl transition-all text-sm font-bold">🔍 500+ Oficios</button>
-            <button onclick="nav('blog')" id="m-blog" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl transition-all text-sm font-bold">📰 Noticias</button>
-            <button onclick="nav('forex')" id="m-forex" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl transition-all text-sm font-bold">💱 Divisas</button>
+            <p class="hidden lg:block text-[10px] font-black text-slate-400 px-4 mt-6 mb-2 uppercase tracking-widest">Mercado</p>
+            <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">🔍 Radar Sueldos</button>
+            <button onclick="nav('blog')" id="m-blog" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">📰 Noticias</button>
+            <button onclick="nav('forex')" id="m-forex" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">💱 Divisas</button>
         </nav>
     </aside>
 
     <main class="flex-1 ml-20 lg:ml-64 p-6 lg:p-10">
 
-        <section id="sec-neto" class="sec-content active">
-            <h2 class="text-3xl font-black mb-8 italic italic">Sueldo <span class="text-brand-500">Neto & Boleta</span></h2>
-            <div class="grid lg:grid-cols-2 gap-8">
-                <div class="bg-white dark:bg-dark-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl">
-                    <div class="space-y-4">
-                        <label class="text-[10px] font-black uppercase text-brand-500">Remuneración Bruta</label>
-                        <input type="number" id="n-bruto" oninput="runNeto()" value="3500" class="w-full bg-slate-50 dark:bg-dark-950 p-4 rounded-2xl text-2xl font-black outline-none border border-slate-200 dark:border-slate-800">
-                        <div class="grid grid-cols-2 gap-4">
-                            <select id="n-afp" onchange="runNeto()" class="bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold border-none"><option value="0.13">ONP</option><option value="0.118">AFP</option></select>
-                            <select id="n-hijos" onchange="runNeto()" class="bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold border-none"><option value="0">Sin Hijos</option><option value="113">Con Hijos</option></select>
-                        </div>
-                        <button onclick="genPDF()" class="w-full py-4 bg-brand-500 text-white rounded-2xl font-black mt-4">Descargar Boleta PDF</button>
-                    </div>
-                </div>
-                <div class="bg-brand-500 rounded-[2.5rem] p-10 flex flex-col justify-center text-white">
-                    <p class="text-[10px] font-black uppercase opacity-80 mb-2">Neto Estimado</p>
-                    <h2 id="out-neto" class="text-5xl font-black">S/ 0.00</h2>
-                </div>
-            </div>
-        </section>
-
-        <section id="sec-cuarta" class="sec-content">
-            <h2 class="text-3xl font-black mb-8 italic">Simulador <span class="text-brand-500">4ta Categoría</span></h2>
+        <section id="sec-costo" class="sec-content">
+            <h2 class="text-3xl font-black mb-8 italic">Costo <span class="text-brand-500">Real Empleador</span></h2>
             <div class="grid lg:grid-cols-2 gap-8">
                 <div class="bg-white dark:bg-dark-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800">
-                    <label class="text-[10px] font-black uppercase text-slate-500">Monto del Recibo</label>
-                    <input type="number" id="q-bruto" oninput="runCuarta()" value="2000" class="w-full bg-slate-50 dark:bg-dark-950 p-5 mt-2 rounded-2xl text-3xl font-black outline-none">
+                    <label class="text-[10px] font-black uppercase text-brand-500">Sueldo Bruto Mensual</label>
+                    <input type="number" id="e-bruto" oninput="runCosto()" value="3000" class="w-full bg-slate-50 dark:bg-dark-950 p-5 mt-2 rounded-2xl text-3xl font-black border-none outline-none focus:ring-2 focus:ring-brand-500">
+                    <p class="text-xs text-slate-500 mt-4 italic">Calculado para Régimen General (EsSalud 9%, Gratificación, CTS, Vacaciones).</p>
                 </div>
-                <div class="bg-dark-900 border-2 border-brand-500 p-10 rounded-[2.5rem]">
-                    <p class="text-[10px] font-black text-brand-500 uppercase">Recibes en mano</p>
-                    <h2 id="out-q-neto" class="text-4xl font-black text-white">S/ 0.00</h2>
-                    <p id="out-q-ret" class="text-sm text-red-500 mt-2 font-bold">Retención (8%): S/ 0.00</p>
+                <div class="bg-dark-900 border-2 border-brand-500 rounded-[2.5rem] p-10 flex flex-col justify-center">
+                    <p class="text-[10px] font-black text-brand-500 uppercase tracking-widest mb-2">Presupuesto Mensual Empresa</p>
+                    <h2 id="out-costo" class="text-5xl font-black text-white">S/ 0.00</h2>
+                    <p class="text-xs text-slate-400 mt-4 underline decoration-brand-500">Incluye provisiones de ley 2026</p>
                 </div>
             </div>
         </section>
 
-        <section id="sec-vac" class="sec-content">
-            <h2 class="text-3xl font-black mb-8 italic">Calculadora <span class="text-brand-500">Vacaciones</span></h2>
-            <div class="grid lg:grid-cols-2 gap-8">
-                <div class="bg-white dark:bg-dark-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 space-y-4">
-                    <label class="text-[10px] font-black text-slate-500 uppercase">Sueldo Mensual</label>
-                    <input type="number" id="v-bruto" oninput="runVac()" value="3000" class="w-full bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold">
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="number" id="v-meses" oninput="runVac()" placeholder="Meses" class="bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold">
-                        <input type="number" id="v-dias" oninput="runVac()" placeholder="Días" class="bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold">
+        <section id="sec-forex" class="sec-content">
+            <h2 class="text-3xl font-black mb-8 italic">Cambio & <span class="text-brand-500">Tendencia</span></h2>
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1 bg-white dark:bg-dark-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl">
+                    <input type="number" id="f-in" oninput="runForex()" value="100" class="w-full bg-slate-50 dark:bg-dark-950 p-5 rounded-2xl text-2xl font-black mb-4 border-none">
+                    <select id="f-sel" onchange="runForex()" class="w-full bg-slate-100 dark:bg-dark-800 p-4 rounded-xl font-bold mb-6 outline-none">
+                        <option value="3.85">🇺🇸 Dólar (USD)</option>
+                        <option value="4.18">🇪🇺 Euro (EUR)</option>
+                    </select>
+                    <div class="text-center">
+                        <p class="text-[10px] font-black uppercase text-slate-500">Resultado</p>
+                        <h2 id="f-out" class="text-4xl font-black text-brand-500 italic">S/ 385.00</h2>
                     </div>
                 </div>
-                <div class="bg-brand-600 rounded-[2.5rem] p-10 flex flex-col justify-center text-white">
-                    <h2 id="out-vac" class="text-4xl font-black">S/ 0.00</h2>
-                </div>
-            </div>
-        </section>
-
-        <section id="sec-grati" class="sec-content">
-            <h2 class="text-3xl font-black mb-8 italic">Cálculo <span class="text-brand-500">Gratificación</span></h2>
-            <div class="grid lg:grid-cols-2 gap-8">
-                <div class="bg-white dark:bg-dark-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 space-y-4">
-                    <input type="number" id="g-bruto" oninput="runGrati()" value="2500" class="w-full bg-slate-50 dark:bg-dark-950 p-5 rounded-2xl text-2xl font-black">
-                    <input type="number" id="g-meses" oninput="runGrati()" value="6" max="6" class="w-full bg-slate-50 dark:bg-dark-950 p-5 rounded-2xl text-2xl font-black">
-                </div>
-                <div class="bg-dark-900 border border-brand-500 p-10 rounded-[2.5rem] flex flex-col justify-center text-center">
-                    <h2 id="out-grati" class="text-4xl font-black text-brand-500">S/ 0.00</h2>
-                    <p class="text-[9px] uppercase font-black text-slate-500 mt-4 italic">Incluye Bono Extra Ley 30334</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="sec-cts" class="sec-content">
-            <h2 class="text-3xl font-black mb-8 italic">Depósito <span class="text-brand-500">CTS</span></h2>
-            <div class="bg-white dark:bg-dark-900 p-10 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 max-w-xl">
-                <label class="text-[10px] font-black text-slate-500 uppercase">Sueldo Base para CTS</label>
-                <input type="number" id="c-sueldo" oninput="runCTS()" value="3000" class="w-full bg-slate-50 dark:bg-dark-950 p-5 rounded-2xl text-3xl font-black mt-2">
-                <div class="mt-8 bg-brand-500/10 p-6 rounded-2xl border border-brand-500">
-                    <h2 id="out-cts" class="text-3xl font-black text-brand-500">S/ 0.00</h2>
-                </div>
-            </div>
-        </section>
-
-        <section id="sec-liq" class="sec-content">
-            <h2 class="text-3xl font-black mb-8 italic">Calculadora <span class="text-brand-500">Liquidación</span></h2>
-            <div class="bg-white dark:bg-dark-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 grid lg:grid-cols-2 gap-8">
-                <div class="space-y-4">
-                    <input type="number" id="l-bruto" oninput="runLiq()" value="3000" class="w-full bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold">
-                    <input type="number" id="l-meses" oninput="runLiq()" placeholder="Meses trabajados" class="w-full bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold">
-                    <input type="number" id="l-vac" oninput="runLiq()" placeholder="Vacaciones truncas (días)" class="w-full bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold">
-                </div>
-                <div class="bg-brand-500 rounded-[2.5rem] p-10 flex flex-col justify-center text-white">
-                    <h2 id="out-liq" class="text-4xl font-black">S/ 0.00</h2>
+                <div class="lg:col-span-2 bg-white dark:bg-dark-900 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl min-h-[300px]">
+                    <canvas id="forexChart"></canvas>
                 </div>
             </div>
         </section>
 
         <section id="sec-jobs" class="sec-content">
             <div class="flex flex-col lg:flex-row justify-between gap-6 mb-8">
-                <h2 class="text-3xl font-black italic italic">Radar de <span class="text-brand-500">Sueldos 2026</span></h2>
-                <input type="text" id="j-search" onkeyup="runJobs()" placeholder="Buscar oficio (ej: Minero, IA, Chef)..." class="bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500 w-full lg:w-80">
+                <h2 class="text-3xl font-black italic">Radar Salarial <span class="text-brand-500">2026</span></h2>
+                <input type="text" id="j-search" onkeyup="runJobs()" placeholder="Filtrar carrera..." class="bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500 w-full lg:w-96">
             </div>
-            <div id="job-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+            <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
         </section>
 
         <section id="sec-blog" class="sec-content">
-            <h2 class="text-3xl font-black mb-10 italic italic">SueldoPro <span class="text-brand-500">Insights</span></h2>
-            <div id="news-grid" class="grid md:grid-cols-3 gap-6"></div>
+            <h2 class="text-3xl font-black mb-10 italic">Centro de <span class="text-brand-500">Noticias & Fuentes</span></h2>
+            <div id="news-grid" class="grid md:grid-cols-3 gap-8"></div>
         </section>
 
-        <section id="sec-forex" class="sec-content">
-            <h2 class="text-3xl font-black mb-8 italic italic">Conversor <span class="text-brand-500">Forex</span></h2>
-            <div class="max-w-md mx-auto bg-white dark:bg-dark-900 p-10 rounded-[3rem] border border-slate-200 dark:border-slate-800">
-                <input type="number" id="f-in" oninput="runForex()" value="100" class="w-full bg-slate-50 dark:bg-dark-950 p-5 rounded-2xl text-2xl font-black mb-4">
-                <select id="f-sel" onchange="runForex()" class="w-full bg-slate-100 dark:bg-dark-800 p-4 rounded-xl font-bold border-none outline-none">
-                    <option value="3.85">🇺🇸 Dólar (USD)</option>
-                    <option value="4.18">🇪🇺 Euro (EUR)</option>
-                    <option value="0.22">🇲🇽 Peso (MXN)</option>
-                </select>
-                <h2 id="f-out" class="text-4xl font-black text-brand-500 mt-8 text-center italic">S/ 385.00</h2>
-            </div>
-        </section>
+        <section id="sec-neto" class="sec-content active"></section>
+        <section id="sec-cuarta" class="sec-content"></section>
+        <section id="sec-vac" class="sec-content"></section>
+        <section id="sec-grati" class="sec-content"></section>
+        <section id="sec-cts" class="sec-content"></section>
+        <section id="sec-liq" class="sec-content"></section>
 
-        <div id="news-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div class="bg-white dark:bg-dark-900 w-full max-w-2xl p-8 rounded-[2.5rem] shadow-2xl">
-                <h3 id="modal-title" class="text-2xl font-black mb-4"></h3>
-                <div id="modal-content" class="text-slate-600 dark:text-slate-400 leading-relaxed"></div>
-                <button onclick="closeModal()" class="mt-8 w-full py-4 bg-brand-500 text-white font-black rounded-xl">Cerrar</button>
+        <div id="news-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+            <div class="bg-white dark:bg-dark-900 w-full max-w-3xl rounded-[3rem] overflow-hidden shadow-2xl">
+                <img id="modal-img" class="w-full h-64 object-cover" src="" alt="News">
+                <div class="p-8">
+                    <h3 id="modal-title" class="text-2xl font-black mb-4"></h3>
+                    <p id="modal-content" class="text-slate-600 dark:text-slate-400 leading-relaxed mb-6"></p>
+                    <a id="modal-link" target="_blank" class="block w-full py-4 bg-brand-500 text-white text-center font-black rounded-2xl hover:bg-brand-600 transition-all">Ver Fuente Oficial</a>
+                    <button onclick="closeModal()" class="mt-4 w-full text-slate-500 font-bold py-2">Cerrar</button>
+                </div>
             </div>
         </div>
 
     </main>
 
     <script>
-        // TEMA
+        // CONFIG TEMA
         function toggleTheme() {
             const isDark = document.documentElement.classList.toggle('dark');
             document.getElementById('theme-icon').innerText = isDark ? '🌙' : '☀️';
             document.getElementById('theme-text').innerText = isDark ? 'Modo Oscuro' : 'Modo Claro';
         }
 
-        // 50+ OFICIOS
-        const jobs = [
-            {n:"Ingeniero de Software AI", s:15000, i:"🤖"}, {n:"Data Scientist", s:12000, i:"📊"},
-            {n:"Arquitecto Cloud", s:13500, i:"☁️"}, {n:"Desarrollador Fullstack", s:9500, i:"💻"},
-            {n:"Médico Especialista", s:14000, i:"🩺"}, {n:"Enfermero SCTR", s:4200, i:"💉"},
-            {n:"Odontólogo", s:5500, i:"🦷"}, {n:"Chef Ejecutivo", s:8000, i:"👨‍🍳"},
-            {n:"Bartender Mixólogo", s:3200, i:"🍸"}, {n:"Cocinero de Línea", s:2500, i:"🥘"},
-            {n:"Minero de Socavón", s:9000, i:"⛏️"}, {n:"Ingeniero de Minas", s:16000, i:"🏔️"},
-            {n:"Abogado Corporativo", s:11000, i:"⚖️"}, {n:"Contador Público", s:6500, i:"📉"},
-            {n:"Diseñador UX/UI", s:5800, i:"🎨"}, {n:"Editor Audiovisual", s:4500, i:"🎬"},
-            {n:"Piloto Comercial", s:20000, i:"✈️"}, {n:"Tripulante de Cabina", s:5000, i:"🛫"},
-            {n:"Conductor de Carga Pesada", s:4800, i:"🚚"}, {n:"Electricista Industrial", s:3900, i:"⚡"},
-            {n:"Soldador Calificado", s:4500, i:"👨‍🏭"}, {n:"Maestro de Obra", s:5000, i:"👷"},
-            {n:"Ingeniero Civil Jr.", s:4800, i:"🏗️"}, {n:"Arquitecto Diseñador", s:7500, i:"📐"},
-            {n:"Agente de Seguridad", s:2000, i:"🛡️"}, {n:"Cajero Bancario", s:2300, i:"🏦"},
-            {n:"Analista de Créditos", s:4200, i:"💸"}, {n:"Marketing Digital Specialist", s:6000, i:"📱"},
-            {n:"Community Manager", s:3000, i:"🤳"}, {n:"Vendedor de Retail", s:1800, i:"🛍️"},
-            {n:"Repartidor Delivery", s:2500, i:"🛵"}, {n:"Profesor de Secundaria", s:3500, i:"🏫"},
-            {n:"Docente Universitario", s:7000, i:"🎓"}, {n:"Psicólogo Organizacional", s:4500, i:"🧠"},
-            {n:"Veterinario", s:4000, i:"🐾"}, {n:"Fotógrafo Profesional", s:3800, i:"📸"},
-            {n:"Traductor e Intérprete", s:5000, i:"🗣️"}, {n:"Guía de Turismo", s:3500, i:"🗺️"},
-            {n:"Mecánico Automotriz", s:3600, i:"🔧"}, {n:"Peluquero / Estilista", s:3200, i:"✂️"},
-            {n:"Entrenador Personal", s:4000, i:"💪"}, {n:"Agente Inmobiliario", s:6000, i:"🏠"},
-            {n:"Operario de Limpieza", s:1500, i:"🧹"}, {n:"Recepcionista de Hotel", s:2200, i:"🛎️"},
-            {n:"Barista de Especialidad", s:2400, i:"☕"}, {n:"Especialista en Ciberseguridad", s:13000, i:"🛡️"},
-            {n:"Analista de E-commerce", s:5500, i:"🛒"}, {n:"Project Manager", s:10500, i:"📅"},
-            {n:"Ingeniero Ambiental", s:6800, i:"🌱"}, {n:"Asistente Administrativo", s:2200, i:"📂"}
-        ];
-
+        // 6 NOTICIAS PROFESIONALES
         const news = [
-            {t: "Aumento de UIT 2026", s: "Legal", c: "La UIT proyectada para 2026 sube a S/ 5,500, lo que amplía el tramo inafecto de impuestos para trabajadores de 4ta y 5ta categoría."},
-            {t: "Gratificación Pro: Ley 30334", s: "Beneficios", c: "Recuerda que la bonificación extraordinaria del 9% sobre tu gratificación es un derecho permanente que aumenta tu liquidez en Julio y Diciembre."},
-            {t: "CTS 2026: Nuevos Plazos", s: "Finanzas", c: "El depósito de la CTS se realiza en la primera quincena de Mayo y Noviembre. Calcula aquí tu monto proyectado."}
+            {
+                t: "Aumento de la UIT 2026",
+                s: "Ministerio de Economía",
+                img: "https://images.unsplash.com/photo-1589902860314-e910697dea18?auto=format&fit=crop&w=800&q=80",
+                c: "El gobierno proyecta que la UIT 2026 subirá a S/ 5,500. Esto cambia los topes para el Impuesto a la Renta de 4ta y 5ta categoría.",
+                f: "https://www.gob.pe/mef"
+            },
+            {
+                t: "Bonificación Extra 9%",
+                s: "El Peruano",
+                img: "https://images.unsplash.com/photo-1554224155-169746991c99?auto=format&fit=crop&w=800&q=80",
+                c: "Se mantiene el pago de la bonificación extraordinaria por gratificación, equivalente al aporte de EsSalud que deja de pagar la empresa.",
+                f: "https://busquedas.elperuano.pe/"
+            },
+            {
+                t: "Nuevas Reglas CTS 2026",
+                s: "SUNAT",
+                img: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80",
+                c: "Información oficial sobre la intangibilidad de la CTS y los plazos máximos para el depósito semestral en entidades bancarias.",
+                f: "https://www.sunat.gob.pe"
+            },
+            {
+                t: "Ley de Teletrabajo 2.0",
+                s: "MTPE",
+                img: "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=800&q=80",
+                c: "Nuevos ajustes en el reembolso de energía y conectividad para trabajadores remotos bajo el nuevo marco legal peruano.",
+                f: "https://www.gob.pe/mtpe"
+            },
+            {
+                t: "Tope Suspensión de 4ta",
+                s: "Gestión",
+                img: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=800&q=80",
+                c: "SUNAT actualiza los montos máximos de ingresos anuales para solicitar la exoneración del 8% de retención en recibos por honorarios.",
+                f: "https://gestion.pe"
+            },
+            {
+                t: "Pensiones AFP Integra/Habit",
+                s: "SBS",
+                img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
+                c: "Consulta las comisiones vigentes y el rendimiento proyectado para el 2026 en el sistema privado de pensiones.",
+                f: "https://www.sbs.gob.pe"
+            }
         ];
 
-        // NAVEGACIÓN
+        // CARRERAS CON MÍNIMO Y APROX
+        const jobs = [
+            {n:"Arquitecto Cloud AI", min:9500, max:18000, i:"☁️"},
+            {n:"Médico Intensivista", min:8000, max:15000, i:"🩺"},
+            {n:"Ingeniero de Software Senior", min:7500, max:14500, i:"💻"},
+            {n:"Minero de Socavón", min:4500, max:9500, i:"⛏️"},
+            {n:"Chef de Cocina Internacional", min:3500, max:8500, i:"👨‍🍳"},
+            {n:"Abogado Penalista Sr.", min:6000, max:13000, i:"⚖️"},
+            {n:"Piloto Comercial", min:12000, max:25000, i:"✈️"},
+            {n:"Diseñador UX/UI Pro", min:4200, max:9000, i:"🎨"},
+            {n:"Data Scientist", min:7000, max:16000, i:"📊"},
+            {n:"Enfermero Especialista", min:3200, max:6000, i:"💉"}
+        ];
+
+        // LÓGICAS
+        function runCosto() {
+            const b = parseFloat(document.getElementById('e-bruto').value) || 0;
+            // Cálculo: Sueldo + EsSalud(9%) + Grati(1/6) + CTS(1/12) + Vac(1/12)
+            const total = b + (b * 0.09) + (b / 6) + (b / 12) + (b / 12);
+            document.getElementById('out-costo').innerText = 'S/ ' + total.toLocaleString('en-US',{minimumFractionDigits:2});
+        }
+
+        function runForex() {
+            const v = parseFloat(document.getElementById('f-in').value) || 0;
+            const r = parseFloat(document.getElementById('f-sel').value);
+            document.getElementById('f-out').innerText = 'S/ ' + (v * r).toLocaleString('en-US',{minimumFractionDigits:2});
+            updateChart();
+        }
+
+        function renderJobs(data) {
+            document.getElementById('job-grid').innerHTML = data.map(j => `
+                <div class="bg-white dark:bg-dark-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 hover:border-brand-500 hover:shadow-2xl transition-all cursor-default">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-4xl">${j.i}</span>
+                        <span class="text-[10px] font-black bg-brand-500/10 text-brand-500 px-3 py-1 rounded-full uppercase">Mercado 2026</span>
+                    </div>
+                    <h4 class="text-lg font-black text-slate-800 dark:text-white">${j.n}</h4>
+                    <div class="mt-6 flex justify-between items-end border-t border-slate-50 dark:border-slate-800 pt-4">
+                        <div><p class="text-[9px] text-slate-500 uppercase font-bold">Mínimo</p><p class="font-bold text-slate-600 dark:text-slate-300">S/ ${j.min.toLocaleString()}</p></div>
+                        <div class="text-right"><p class="text-[9px] text-brand-500 uppercase font-bold">Aproximado</p><p class="text-xl font-black text-brand-500">S/ ${j.max.toLocaleString()}</p></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderNews() {
+            document.getElementById('news-grid').innerHTML = news.map((n, i) => `
+                <div onclick="openModal(${i})" class="bg-white dark:bg-dark-900 rounded-[2rem] overflow-hidden border border-slate-100 dark:border-slate-800 hover:scale-[1.03] transition-all cursor-pointer shadow-lg">
+                    <img src="${n.img}" class="w-full h-40 object-cover" alt="SueldoPro">
+                    <div class="p-5">
+                        <span class="text-[9px] font-black text-brand-500 uppercase tracking-tighter">${n.s}</span>
+                        <h4 class="font-bold text-md mt-1 leading-tight">${n.t}</h4>
+                        <p class="text-xs text-slate-500 mt-2 line-clamp-2">${n.c}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // GRÁFICO TENDENCIA (CHART.JS)
+        let chart;
+        function initChart() {
+            const ctx = document.getElementById('forexChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Hoy'],
+                    datasets: [{
+                        label: 'Soles x Dólar',
+                        data: [3.82, 3.84, 3.83, 3.86, 3.85, 3.85, 3.85],
+                        borderColor: '#0066ff',
+                        backgroundColor: 'rgba(0, 102, 255, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 4,
+                        pointRadius: 0
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { display: false }, x: { grid: { display: false } } }
+                }
+            });
+        }
+
+        function updateChart() {
+            const rate = parseFloat(document.getElementById('f-sel').value);
+            chart.data.datasets[0].data = chart.data.datasets[0].data.map(v => (rate - 0.05 + Math.random() * 0.1));
+            chart.update();
+        }
+
+        function openModal(i) {
+            document.getElementById('modal-img').src = news[i].img;
+            document.getElementById('modal-title').innerText = news[i].t;
+            document.getElementById('modal-content').innerText = news[i].c;
+            document.getElementById('modal-link').href = news[i].f;
+            document.getElementById('news-modal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('news-modal').classList.add('hidden'); }
+
+        function runJobs() {
+            const q = document.getElementById('j-search').value.toLowerCase();
+            renderJobs(jobs.filter(x => x.n.toLowerCase().includes(q)));
+        }
+
         function nav(id) {
             document.querySelectorAll('.sec-content').forEach(s => s.classList.remove('active'));
             document.getElementById('sec-' + id).classList.add('active');
@@ -243,104 +302,8 @@
             if(btn) btn.classList.add('active');
         }
 
-        // LÓGICAS DE CÁLCULO REPARADAS
-        function runNeto() {
-            const b = parseFloat(document.getElementById('n-bruto').value) || 0;
-            const h = parseFloat(document.getElementById('n-hijos').value);
-            const a = parseFloat(document.getElementById('n-afp').value);
-            const total = b + h;
-            const neto = total - (total * a);
-            document.getElementById('out-neto').innerText = 'S/ ' + neto.toLocaleString('en-US',{minimumFractionDigits:2});
-        }
-
-        function runCuarta() {
-            const b = parseFloat(document.getElementById('q-bruto').value) || 0;
-            const ret = b > 1500 ? b * 0.08 : 0;
-            document.getElementById('out-q-neto').innerText = 'S/ ' + (b - ret).toLocaleString('en-US',{minimumFractionDigits:2});
-            document.getElementById('out-q-ret').innerText = 'Retención (8%): S/ ' + ret.toFixed(2);
-        }
-
-        function runVac() {
-            const b = parseFloat(document.getElementById('v-bruto').value) || 0;
-            const m = parseFloat(document.getElementById('v-meses').value) || 0;
-            const d = parseFloat(document.getElementById('v-dias').value) || 0;
-            const res = (b / 12 * m) + (b / 360 * d);
-            document.getElementById('out-vac').innerText = 'S/ ' + res.toLocaleString('en-US',{minimumFractionDigits:2});
-        }
-
-        function runGrati() {
-            const b = parseFloat(document.getElementById('g-bruto').value) || 0;
-            const m = parseFloat(document.getElementById('g-meses').value) || 0;
-            const res = ((b / 6) * m) * 1.09;
-            document.getElementById('out-grati').innerText = 'S/ ' + res.toLocaleString('en-US',{minimumFractionDigits:2});
-        }
-
-        function runCTS() {
-            const b = parseFloat(document.getElementById('c-sueldo').value) || 0;
-            const res = (b + b/6) / 2;
-            document.getElementById('out-cts').innerText = 'S/ ' + res.toLocaleString('en-US',{minimumFractionDigits:2});
-        }
-
-        function runLiq() {
-            const b = parseFloat(document.getElementById('l-bruto').value) || 0;
-            const m = parseFloat(document.getElementById('l-meses').value) || 0;
-            const v = parseFloat(document.getElementById('l-vac').value) || 0;
-            const res = (((b + b/6) / 12) * m) + (((b/6) * m) * 1.09) + ((b/30) * v);
-            document.getElementById('out-liq').innerText = 'S/ ' + res.toLocaleString('en-US',{minimumFractionDigits:2});
-        }
-
-        function runForex() {
-            const v = parseFloat(document.getElementById('f-in').value) || 0;
-            const r = parseFloat(document.getElementById('f-sel').value);
-            document.getElementById('f-out').innerText = 'S/ ' + (v * r).toLocaleString('en-US',{minimumFractionDigits:2});
-        }
-
-        function renderJobs(data) {
-            document.getElementById('job-grid').innerHTML = data.map(j => `
-                <div class="bg-white dark:bg-dark-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-brand-500 transition-all cursor-pointer">
-                    <div class="text-3xl mb-2">${j.i}</div>
-                    <h4 class="text-xs font-bold text-slate-500 uppercase">${j.n}</h4>
-                    <p class="text-lg font-black text-slate-900 dark:text-white">S/ ${j.s.toLocaleString()}</p>
-                </div>
-            `).join('');
-        }
-
-        function runJobs() {
-            const q = document.getElementById('j-search').value.toLowerCase();
-            renderJobs(jobs.filter(x => x.n.toLowerCase().includes(q)));
-        }
-
-        function renderNews() {
-            document.getElementById('news-grid').innerHTML = news.map((n, i) => `
-                <div onclick="openModal(${i})" class="bg-white dark:bg-dark-900 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800 hover:scale-[1.02] transition-all cursor-pointer">
-                    <span class="text-[10px] font-black text-brand-500 uppercase">${n.s}</span>
-                    <h4 class="font-bold text-lg mt-2">${n.t}</h4>
-                    <p class="text-xs text-slate-500 mt-2 line-clamp-2">${n.c}</p>
-                </div>
-            `).join('');
-        }
-
-        function openModal(i) {
-            document.getElementById('modal-title').innerText = news[i].t;
-            document.getElementById('modal-content').innerText = news[i].c;
-            document.getElementById('news-modal').classList.remove('hidden');
-        }
-
-        function closeModal() { document.getElementById('news-modal').classList.add('hidden'); }
-
-        function genPDF() {
-            const b = document.getElementById('n-bruto').value;
-            const n = document.getElementById('out-neto').innerText;
-            const element = document.createElement('div');
-            element.innerHTML = `<div style="padding:40px; font-family:sans-serif;">
-                <h1 style="color:#0066ff">Boleta SueldoPro 2026</h1>
-                <hr><p>Bruto: S/ ${b}</p><p>Neto: ${n}</p>
-            </div>`;
-            html2pdf().from(element).save('Boleta_Pro.pdf');
-        }
-
         window.onload = () => {
-            runNeto(); runCuarta(); runVac(); runGrati(); runCTS(); runLiq(); runForex(); renderJobs(jobs); renderNews();
+            runCosto(); runForex(); renderJobs(jobs); renderNews(); initChart();
         };
     </script>
 </body>
