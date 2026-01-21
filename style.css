@@ -1,27 +1,32 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+/* style.css */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
 
-body { font-family: 'Plus Jakarta Sans', sans-serif; }
+:root { --blue: #0066ff; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.4s ease; }
 
 .sec-content { display: none; opacity: 0; }
-.sec-content.active { display: block !important; animation: fadeIn 0.6s ease forwards; }
+.sec-content.active { display: block !important; animation: slideUp 0.6s ease forwards; }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(40px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .sidebar-btn {
-    @apply w-full flex items-center gap-4 p-4 rounded-2xl text-sm font-bold transition-all text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800;
+    @apply w-full flex items-center gap-4 p-4 rounded-2xl text-sm font-bold transition-all text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800;
 }
-.sidebar-btn.active { @apply bg-blue-600 text-white shadow-xl shadow-blue-600/20; }
+.sidebar-btn.active { @apply bg-blue-600 text-white shadow-2xl shadow-blue-600/40; }
 
-.calc-card {
-    @apply p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-black uppercase tracking-widest transition-all hover:border-blue-500;
+.calc-tab {
+    @apply px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-tighter border-2 border-slate-200 dark:border-slate-800 transition-all hover:border-blue-500;
 }
-.calc-card.active { @apply border-blue-600 bg-blue-600/5 text-blue-600; }
+.calc-tab.active { @apply bg-blue-600 border-blue-600 text-white; }
+
+.forex-item {
+    @apply p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-transparent cursor-pointer transition-all flex justify-between items-center;
+}
+.forex-item.active { @apply border-blue-600 bg-blue-600/5 ring-1 ring-blue-600; }
 
 .job-card {
-    @apply bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 transition-all hover:shadow-2xl hover:-translate-y-2;
+    @apply bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 transition-all hover:shadow-3xl hover:-translate-y-3;
 }
-
-input[type="number"]::-webkit-inner-spin-button { display: none; }
