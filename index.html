@@ -3,45 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SueldoPro 2026 | Global Market Supremacy</title>
+    <title>SueldoPro 2026 | Global Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { 
+                        brand: { 500: '#0066ff', 600: '#0052cc', 900: '#001a33' },
+                        dark: { 700: '#334155', 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s; }
+        .sidebar-btn.active { background: #0066ff; color: white; box-shadow: 0 8px 20px -5px rgba(0, 102, 255, 0.4); }
+        .sec-content { display: none; }
+        .sec-content.active { display: block; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .guide-box { border-left: 5px solid #0066ff; background: rgba(0, 102, 255, 0.05); }
+        .lang-active { background: #0066ff; color: white; }
+    </style>
 </head>
-<body class="bg-slate-50 dark:bg-dark-950 flex">
+<body class="bg-slate-50 dark:bg-dark-950 text-slate-800 dark:text-slate-200 min-h-screen flex">
+
+    <aside class="w-20 lg:w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-900 fixed h-full z-50 flex flex-col p-4 overflow-y-auto">
+        <div class="flex items-center gap-3 px-2 mb-8">
+            <div class="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center text-white font-black">SP</div>
+            <span class="hidden lg:block text-xl font-black italic dark:text-white uppercase tracking-tighter">Sueldo<span class="text-brand-500">Pro</span></span>
+        </div>
+
+        <nav class="flex-1 space-y-1">
+            <button onclick="nav('neto')" id="m-neto" class="sidebar-btn active w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">💰 <span class="hidden lg:inline" data-t="m_neto">Neto</span></button>
+            <button onclick="nav('cuarta')" id="m-cuarta" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">📝 <span class="hidden lg:inline" data-t="m_cuarta">4ta Cat</span></button>
+            <button onclick="nav('costo')" id="m-costo" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">🏢 <span class="hidden lg:inline" data-t="m_costo">Empresa</span></button>
+            <button onclick="nav('vac')" id="m-vac" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">🌴 <span class="hidden lg:inline" data-t="m_vac">Vacaciones</span></button>
+            <button onclick="nav('grati')" id="m-grati" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">🎁 <span class="hidden lg:inline" data-t="m_grati">Grati</span></button>
+            <button onclick="nav('cts')" id="m-cts" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">🏦 <span class="hidden lg:inline" data-t="m_cts">CTS</span></button>
+            <button onclick="nav('liq')" id="m-liq" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">⚖️ <span class="hidden lg:inline" data-t="m_liq">Liquidación</span></button>
+            <hr class="my-4 border-slate-100 dark:border-slate-800">
+            <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">🔍 <span class="hidden lg:inline" data-t="m_radar">Radar 2026</span></button>
+            <button onclick="nav('blog')" id="m-blog" class="sidebar-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all">📰 <span class="hidden lg:inline" data-t="m_news">Noticias</span></button>
+        </nav>
+
+        <div class="mt-4 flex gap-1 p-1 bg-slate-100 dark:bg-dark-800 rounded-xl">
+            <button onclick="setLang('es')" id="btn-es" class="flex-1 py-1 text-[10px] font-bold rounded-lg lang-active">ES</button>
+            <button onclick="setLang('en')" id="btn-en" class="flex-1 py-1 text-[10px] font-bold rounded-lg">EN</button>
+        </div>
+        <button onclick="toggleTheme()" class="mt-2 w-full p-3 rounded-xl bg-slate-100 dark:bg-dark-800 text-[10px] font-black uppercase">🌓 Theme</button>
+    </aside>
+
     <main class="flex-1 ml-20 lg:ml-64 p-6 lg:p-10">
+        
         <section id="sec-neto" class="sec-content active">
-            <div class="guide-box p-6 mt-6 rounded-2xl">
-                <h4 id="guide-neto-title" class="font-black text-brand-500 uppercase"></h4>
-                <p id="guide-neto-text" class="text-sm italic opacity-80"></p>
+            <h2 class="text-4xl font-black mb-8 italic"><span data-t="net_h2_1">Sueldo</span> <span class="text-brand-500" data-t="net_h2_2">Neto</span></h2>
+            <div class="grid lg:grid-cols-2 gap-8 mb-10">
+                <div class="bg-white dark:bg-dark-900 p-8 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-xl">
+                    <label data-t="label_bruto" class="text-xs font-bold uppercase text-brand-500">Sueldo Bruto</label>
+                    <input type="number" id="n-bruto" oninput="runNeto()" value="3500" class="w-full bg-slate-50 dark:bg-dark-950 p-4 mt-1 rounded-2xl text-2xl font-black outline-none border-none">
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <select id="n-afp" onchange="runNeto()" class="bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold border-none outline-none">
+                            <option value="0.13">ONP (13%)</option>
+                            <option value="0.118">AFP (11.8%)</option>
+                        </select>
+                        <select id="n-hijos" onchange="runNeto()" class="bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold border-none outline-none">
+                            <option value="0" data-t="opt_no_kids">Sin Hijos</option>
+                            <option value="113" data-t="opt_kids">Con Hijos</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="bg-brand-500 rounded-[2rem] p-10 flex flex-col justify-center text-white shadow-2xl">
+                    <p data-t="net_result_label" class="text-xs font-black uppercase opacity-80">Monto a Recibir</p>
+                    <h2 id="out-neto" class="text-6xl font-black italic">S/ 0.00</h2>
+                    <button onclick="genPDF('Sueldo Neto')" class="mt-6 bg-white text-brand-500 px-6 py-2 rounded-full text-xs font-black uppercase hover:bg-slate-100 transition-all">PDF Report</button>
+                </div>
+            </div>
+            <div class="guide-box p-6 rounded-2xl">
+                <h4 id="guide-neto-title" class="font-black text-brand-500 mb-2 uppercase text-sm"></h4>
+                <p id="guide-neto-text" class="text-slate-600 dark:text-slate-400 italic"></p>
+            </div>
+        </section>
+
+        <section id="sec-cuarta" class="sec-content">
+            <h2 class="text-4xl font-black mb-8 italic"><span data-t="q_h2_1">Recibo por</span> <span class="text-brand-500" data-t="q_h2_2">Honorarios</span></h2>
+            <div class="grid lg:grid-cols-2 gap-8 mb-10">
+                <div class="bg-white dark:bg-dark-900 p-8 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-xl">
+                    <label data-t="label_service" class="text-xs font-bold uppercase text-slate-500">Monto del Servicio</label>
+                    <input type="number" id="q-bruto" oninput="runCuarta()" value="2000" class="w-full bg-slate-50 dark:bg-dark-950 p-4 mt-1 rounded-2xl text-4xl font-black outline-none border-none">
+                </div>
+                <div class="bg-dark-900 border-2 border-brand-500 rounded-[2rem] p-10 flex flex-col justify-center text-center">
+                    <h2 id="out-q-neto" class="text-5xl font-black text-white italic">S/ 0.00</h2>
+                    <p id="out-q-ret" class="text-red-500 font-black mt-2 text-lg italic"></p>
+                </div>
+            </div>
+            <div class="guide-box p-6 rounded-2xl">
+                <h4 id="guide-cuarta-title" class="font-black text-brand-500 mb-2 uppercase text-sm"></h4>
+                <p id="guide-cuarta-text" class="text-slate-600 dark:text-slate-400 italic"></p>
+            </div>
+        </section>
+
+        <section id="sec-costo" class="sec-content">
+            <h2 class="text-4xl font-black mb-8 italic"><span data-t="c_h2_1">Costo Total</span> <span class="text-brand-500" data-t="c_h2_2">Empleador</span></h2>
+            <div class="grid lg:grid-cols-2 gap-8 mb-10">
+                <div class="bg-white dark:bg-dark-900 p-8 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-xl">
+                    <label data-t="label_bruto" class="text-xs font-bold uppercase text-brand-500">Bruto Mensual</label>
+                    <input type="number" id="e-bruto" oninput="runCosto()" value="3000" class="w-full bg-slate-50 dark:bg-dark-950 p-4 mt-1 rounded-2xl text-4xl font-black outline-none border-none">
+                </div>
+                <div class="bg-brand-900 border-4 border-brand-500 rounded-[2rem] p-10 flex flex-col justify-center">
+                    <h2 id="out-costo" class="text-5xl font-black text-white italic">S/ 0.00</h2>
+                    <p data-t="c_result_label" class="text-xs text-brand-500 mt-4 font-black">COSTO MENSUAL ESTIMADO</p>
+                </div>
+            </div>
+            <div class="guide-box p-6 rounded-2xl">
+                <h4 id="guide-costo-title" class="font-black text-brand-500 mb-2 uppercase text-sm"></h4>
+                <p id="guide-costo-text" class="text-slate-600 dark:text-slate-400 italic"></p>
+            </div>
+        </section>
+
+        <section id="sec-vac" class="sec-content">
+            <h2 class="text-4xl font-black mb-8 italic"><span data-t="v_h2_1">Vacaciones</span> <span class="text-brand-500" data-t="v_h2_2">Truncas</span></h2>
+            <div class="grid lg:grid-cols-2 gap-8 mb-10">
+                <div class="bg-white dark:bg-dark-900 p-8 rounded-[2rem] border border-slate-200 dark:border-slate-800 space-y-4 shadow-xl">
+                    <input type="number" id="v-bruto" oninput="runVac()" placeholder="Sueldo Bruto" class="w-full bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold outline-none">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="number" id="v-meses" oninput="runVac()" placeholder="Meses" class="bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold outline-none">
+                        <input type="number" id="v-dias" oninput="runVac()" placeholder="Días" class="bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold outline-none">
+                    </div>
+                </div>
+                <div class="bg-emerald-600 rounded-[2rem] p-10 text-white flex flex-col justify-center text-center shadow-xl">
+                    <h2 id="out-vac" class="text-5xl font-black italic">S/ 0.00</h2>
+                </div>
+            </div>
+            <div class="guide-box p-6 rounded-2xl">
+                <h4 id="guide-vac-title" class="font-black text-brand-500 mb-2 uppercase text-sm"></h4>
+                <p id="guide-vac-text" class="text-slate-600 dark:text-slate-400 italic"></p>
             </div>
         </section>
 
         <section id="sec-jobs" class="sec-content">
-            <div class="flex flex-col md:flex-row justify-between mb-8 gap-4">
-                <h2 class="text-4xl font-black italic">Radar <span class="text-brand-500">2026</span></h2>
-                <input type="text" id="job-search" placeholder="Busca entre 1,000 profesiones..." 
-                       class="p-4 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 outline-none w-full md:w-80">
-            </div>
+            <h2 class="text-4xl font-black mb-8 italic"><span data-t="j_h2_1">Radar</span> <span class="text-brand-500" data-t="j_h2_2">2026</span></h2>
             <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
         </section>
 
-        <section id="sec-forex" class="sec-content">
-            <h2 class="text-4xl font-black mb-8 italic">Mercado <span class="text-brand-500">Forex Live</span></h2>
-            <div class="grid lg:grid-cols-3 gap-8">
-                <div class="bg-white dark:bg-dark-900 p-6 rounded-3xl shadow-xl">
-                    <select id="currency-select" class="w-full p-4 rounded-xl bg-slate-100 dark:bg-dark-800 font-bold mb-4"></select>
-                    <div id="currency-result" class="text-3xl font-black text-brand-500 text-center py-6 border-t border-b my-4">S/ 0.00</div>
-                </div>
-                <div class="lg:col-span-2 bg-white dark:bg-dark-900 p-6 rounded-3xl shadow-xl min-h-[400px]">
-                    <canvas id="forexChart"></canvas>
-                </div>
+        <section id="sec-blog" class="sec-content">
+            <h2 class="text-4xl font-black mb-8 italic"><span data-t="n_h2_1">Data</span> <span class="text-brand-500" data-t="n_h2_2">Stream</span></h2>
+            <div id="news-grid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+        </section>
+
+        <section id="sec-grati" class="sec-content">
+            <h2 class="text-4xl font-black mb-8 italic">Gratificación</h2>
+            <div class="bg-white dark:bg-dark-900 p-8 rounded-[2rem] shadow-xl">
+                <input type="number" id="g-bruto" oninput="runGrati()" placeholder="Sueldo" class="w-full bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold outline-none mb-4">
+                <h2 id="out-grati" class="text-4xl font-black text-brand-500 italic text-center">S/ 0.00</h2>
             </div>
         </section>
+        
+        <section id="sec-cts" class="sec-content">
+            <h2 class="text-4xl font-black mb-8 italic">CTS</h2>
+            <div class="bg-white dark:bg-dark-900 p-8 rounded-[2rem] shadow-xl text-center">
+                <input type="number" id="c-sueldo" oninput="runCTS()" placeholder="Sueldo Bruto" class="w-full bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold outline-none mb-4">
+                <h2 id="out-cts" class="text-4xl font-black text-brand-500 italic">S/ 0.00</h2>
+            </div>
+        </section>
+
+        <section id="sec-liq" class="sec-content">
+            <h2 class="text-4xl font-black mb-8 italic">Liquidación</h2>
+            <div class="bg-dark-900 p-8 rounded-[2rem] border border-brand-500 text-center">
+                <input type="number" id="l-bruto" oninput="runLiq()" placeholder="Sueldo Bruto" class="w-full bg-slate-50 dark:bg-dark-950 p-4 rounded-xl font-bold outline-none mb-4">
+                <h2 id="out-liq" class="text-4xl font-black text-brand-500 italic">S/ 0.00</h2>
+            </div>
+        </section>
+
     </main>
 
-    <script src="data.js"></script>
-    <script src="script.js"></script>
+    <script>
+        // DICCIONARIO GLOBAL
+        const i18n = {
+            es: {
+                m_neto: "Neto", m_cuarta: "4ta Cat", m_costo: "Empresa", m_vac: "Vacaciones", m_grati: "Grati", m_cts: "CTS", m_liq: "Liq", m_radar: "Radar", m_news: "Noticias",
+                net_h2_1: "Sueldo", net_h2_2: "Neto", label_bruto: "Remuneración Bruta", opt_no_kids: "Sin Hijos", opt_kids: "Con Hijos", net_result_label: "A Recibir",
+                q_h2_1: "Recibo por", q_h2_2: "Honorarios", label_service: "Monto del Servicio", ret_label: "Retención (8%)",
+                c_h2_1: "Costo", c_h2_2: "Empleador", v_h2_1: "Vacaciones", v_h2_2: "Truncas", j_h2_1: "Radar", j_h2_2: "2026", n_h2_1: "Data", n_h2_2: "Stream",
+                g_neto_t: "📖 Guía: Sueldo Neto", g_neto_txt: "Calcula tu sueldo tras descuentos de AFP (11.8%) o ONP (13%). Incluye asignación familiar si corresponde.",
+                g_cuarta_t: "📖 Guía: 4ta Categoría", g_cuarta_txt: "Para trabajadores independientes. Si el recibo supera S/ 1,500 se retiene el 8%.",
+                g_costo_t: "📖 Guía: Costo Empresa", g_costo_txt: "El costo real del trabajador incluye Gratificaciones, CTS y EsSalud (aprox +45%).",
+                g_vac_t: "📖 Guía: Vacaciones", g_vac_txt: "Pago proporcional por el tiempo trabajado sin goce de descanso."
+            },
+            en: {
+                m_neto: "Net Salary", m_cuarta: "Freelance", m_costo: "Company Cost", m_vac: "Vacation", m_grati: "Bonus", m_cts: "Severance", m_liq: "Settlement", m_radar: "Radar", m_news: "News",
+                net_h2_1: "Net", net_h2_2: "Salary", label_bruto: "Gross Salary", opt_no_kids: "No Kids", opt_kids: "With Kids", net_result_label: "Take-home Pay",
+                q_h2_1: "Freelance", q_h2_2: "Receipt", label_service: "Service Amount", ret_label: "Withholding (8%)",
+                c_h2_1: "Employer", c_h2_2: "Cost", v_h2_1: "Unused", v_h2_2: "Vacation", j_h2_1: "Radar", j_h2_2: "2026", n_h2_1: "Data", n_h2_2: "Stream",
+                g_neto_t: "📖 Guide: Net Salary", g_neto_txt: "Calculates pay after pension fund deductions (AFP/ONP). Includes family allowance if applicable.",
+                g_cuarta_t: "📖 Guide: Freelance Pay", g_cuarta_txt: "For independent workers. Receipts over S/ 1,500 have an 8% tax withholding.",
+                g_costo_t: "📖 Guide: Employer Cost", g_costo_txt: "Real cost including bonuses, insurance and severance (approx +45% of gross).",
+                g_vac_t: "📖 Guide: Vacation Pay", g_vac_txt: "Proportional payment for time worked without taking rest days."
+            }
+        };
+
+        const jobs = [
+            {n:"Cloud Architect", min:10000, max:24000, i:"🤖"}, {n:"Médico", min:9000, max:18000, i:"🩺"},
+            {n:"Software Eng", min:6000, max:14000, i:"💻"}, {n:"Data Science", min:8000, max:17500, i:"📊"},
+            {n:"Chef Senior", min:4500, max:11000, i:"👨‍🍳"}, {n:"Abogado Corp", min:6500, max:16000, i:"⚖️"},
+            {n:"UX Lead", min:5000, max:12000, i:"🎨"}, {n:"Pilot", min:13000, max:30000, i:"✈️"},
+            {n:"Cybersecurity", min:9000, max:20000, i:"🛡️"}, {n:"Agro Ing", min:3800, max:9000, i:"🚜"},
+            {n:"Geólogo", min:7000, max:18000, i:"🌍"}, {n:"Psicólogo", min:3000, max:7500, i:"🧠"},
+            {n:"Vet", min:3200, max:7500, i:"🐾"}, {n:"Marketing", min:4000, max:12000, i:"📈"},
+            {n:"Contador", min:4000, max:9500, i:"📊"}, {n:"Mining Eng", min:8000, max:22000, i:"⛏️"},
+            {n:"Project Mgr", min:6000, max:15000, i:"📅"}, {n:"E-commerce", min:5000, max:13000, i:"🛒"},
+            {n:"Journalist", min:2800, max:6000, i:"🎙️"}, {n:"Architect", min:4500, max:11000, i:"🏛️"},
+            {n:"Economist", min:5000, max:13000, i:"💹"}, {n:"Personal Trainer", min:2500, max:7000, i:"💪"},
+            {n:"Textile Ing", min:3500, max:8500, i:"🧵"}, {n:"Customs Exp", min:4000, max:9000, i:"📦"},
+            {n:"Producer", min:3500, max:10000, i:"🎬"}, {n:"ESG Mgr", min:4500, max:11000, i:"♻️"},
+            {n:"Sales Lead", min:4000, max:15000, i:"💰"}, {n:"Civil Eng", min:5000, max:14000, i:"🏗️"},
+            {n:"HR Director", min:7000, max:18000, i:"👥"}, {n:"Social Media", min:3000, max:8000, i:"📱"}
+        ];
+
+        const news = [
+            {t:"UIT 2026: S/ 5,500", s:"MEF", c:"Nuevos tramos de impuestos para trabajadores."},
+            {t:"Sueldo Mínimo Debate", s:"MTPE", c:"Buscan elevar la RMV a S/ 1,150 este año."},
+            {t:"Teletrabajo 2026", s:"Gestión", c:"Nuevas leyes de desconexión digital."},
+            {t:"AFP Retiros", s:"SBS", c:"Regulaciones para el fondo de pensiones."},
+            {t:"Gratificación Julio", s:"Sunafil", c:"Cronograma de pagos y multas."},
+            {t:"CTS Libre 2026", s:"Congreso", c:"Debate sobre disponibilidad de fondos."},
+            {t:"Empleo Tech Perú", s:"Innóvate", c:"Demanda de programadores crece 30%."},
+            {t:"Impuesto 4ta Cat", s:"Sunat", c:"Tope de suspensión de retenciones actualizado."},
+            {t:"Feriados 2026", s:"El Peruano", c:"Lista de fines de semana largos."},
+            {t:"Bonos del Estado", s:"Midis", c:"Subsidios para familias vulnerables."},
+            {t:"IA en el Trabajo", s:"Forbes", c:"Carreras con mayor riesgo de automatización."},
+            {t:"Exportaciones 2026", s:"Comex", c:"Crecimiento del sector agroindustrial."}
+        ];
+
+        let currentLang = 'es';
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('[data-t]').forEach(el => {
+                const key = el.getAttribute('data-t');
+                el.innerText = i18n[lang][key];
+            });
+            // Actualizar Guías
+            document.getElementById('guide-neto-title').innerText = i18n[lang].g_neto_t;
+            document.getElementById('guide-neto-text').innerText = i18n[lang].g_neto_txt;
+            document.getElementById('guide-cuarta-title').innerText = i18n[lang].g_cuarta_t;
+            document.getElementById('guide-cuarta-text').innerText = i18n[lang].g_cuarta_txt;
+            document.getElementById('guide-costo-title').innerText = i18n[lang].g_costo_t;
+            document.getElementById('guide-costo-text').innerText = i18n[lang].g_costo_txt;
+            document.getElementById('guide-vac-title').innerText = i18n[lang].g_vac_t;
+            document.getElementById('guide-vac-text').innerText = i18n[lang].g_vac_txt;
+
+            document.getElementById('btn-es').classList.toggle('lang-active', lang === 'es');
+            document.getElementById('btn-en').classList.toggle('lang-active', lang === 'en');
+            runCuarta();
+        }
+
+        // CALCULOS
+        function runNeto() {
+            const b = parseFloat(document.getElementById('n-bruto').value) || 0;
+            const h = parseFloat(document.getElementById('n-hijos').value);
+            const a = parseFloat(document.getElementById('n-afp').value);
+            const neto = (b + h) - ((b + h) * a);
+            document.getElementById('out-neto').innerText = 'S/ ' + neto.toLocaleString('en-US',{minimumFractionDigits:2});
+        }
+        function runCuarta() {
+            const b = parseFloat(document.getElementById('q-bruto').value) || 0;
+            const ret = b > 1500 ? b * 0.08 : 0;
+            document.getElementById('out-q-neto').innerText = 'S/ ' + (b - ret).toLocaleString('en-US',{minimumFractionDigits:2});
+            document.getElementById('out-q-ret').innerText = i18n[currentLang].ret_label + ': S/ ' + ret.toFixed(2);
+        }
+        function runCosto() {
+            const b = parseFloat(document.getElementById('e-bruto').value) || 0;
+            document.getElementById('out-costo').innerText = 'S/ ' + (b * 1.455).toLocaleString('en-US',{minimumFractionDigits:2});
+        }
+        function runVac() {
+            const b = parseFloat(document.getElementById('v-bruto').value) || 0;
+            const m = parseFloat(document.getElementById('v-meses').value) || 0;
+            const d = parseFloat(document.getElementById('v-dias').value) || 0;
+            const res = (b/12*m) + (b/360*d);
+            document.getElementById('out-vac').innerText = 'S/ ' + res.toLocaleString('en-US',{minimumFractionDigits:2});
+        }
+        function runGrati() {
+            const b = parseFloat(document.getElementById('g-bruto').value) || 0;
+            document.getElementById('out-grati').innerText = 'S/ ' + (b * 1.09).toLocaleString('en-US',{minimumFractionDigits:2});
+        }
+        function runCTS() {
+            const b = parseFloat(document.getElementById('c-sueldo').value) || 0;
+            document.getElementById('out-cts').innerText = 'S/ ' + ((b + b/6)/2).toLocaleString('en-US',{minimumFractionDigits:2});
+        }
+        function runLiq() {
+            const b = parseFloat(document.getElementById('l-bruto').value) || 0;
+            document.getElementById('out-liq').innerText = 'S/ ' + (b * 1.5).toLocaleString('en-US',{minimumFractionDigits:2});
+        }
+
+        // RENDERS
+        function renderJobs() {
+            document.getElementById('job-grid').innerHTML = jobs.map(j => `
+                <div class="bg-white dark:bg-dark-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-lg">
+                    <div class="text-3xl mb-2">${j.i}</div>
+                    <h4 class="font-black text-lg">${j.n}</h4>
+                    <p class="text-brand-500 font-bold mt-2">S/ ${j.min} - S/ ${j.max}</p>
+                </div>
+            `).join('');
+        }
+        function renderNews() {
+            document.getElementById('news-grid').innerHTML = news.map(n => `
+                <div class="bg-white dark:bg-dark-900 p-5 rounded-xl shadow-md border-t-4 border-brand-500">
+                    <span class="text-[10px] font-black text-brand-500 uppercase">${n.s}</span>
+                    <h4 class="font-bold text-sm mt-1">${n.t}</h4>
+                    <p class="text-[10px] text-slate-500 mt-2">${n.c}</p>
+                </div>
+            `).join('');
+        }
+
+        function nav(id) {
+            document.querySelectorAll('.sec-content').forEach(s => s.classList.remove('active'));
+            document.getElementById('sec-' + id).classList.add('active');
+            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('m-' + id).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+        function genPDF(title) { alert('Generating ' + title + ' PDF...'); }
+
+        window.onload = () => { setLang('es'); renderJobs(); renderNews(); runNeto(); runCosto(); };
+    </script>
 </body>
 </html>
