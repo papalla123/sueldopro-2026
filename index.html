@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SueldoPro 2026 | Financial Ecosystem</title>
+    <title>SueldoPro 2026 | The Financial Standard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
@@ -13,74 +13,67 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: { 50: '#f0f9ff', 500: '#0066ff', 600: '#0052cc', 950: '#001a41' },
-                        surface: { 50: '#f8fafc', 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
+                        brand: { 500: '#0066ff', 600: '#0052cc', 950: '#020617' },
+                        surface: { 50: '#f8fafc', 900: '#0f172a' }
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-surface-50 text-surface-900 dark:bg-surface-950 dark:text-surface-50 transition-all duration-500">
+<body class="bg-surface-50 text-surface-900 dark:bg-brand-950 dark:text-white transition-all duration-500">
     
-    <aside class="fixed left-0 top-0 h-full w-20 lg:w-80 bg-white/80 dark:bg-surface-900/80 backdrop-blur-2xl border-r border-slate-200 dark:border-surface-800 z-50 flex flex-col p-6">
+    <aside class="fixed left-0 top-0 h-full w-20 lg:w-80 bg-white/80 dark:bg-surface-900/80 backdrop-blur-2xl border-r border-slate-200 dark:border-slate-800 z-50 flex flex-col p-6">
         <div class="mb-12 px-4">
             <h1 class="hidden lg:block text-3xl font-black text-brand-500 tracking-tighter italic">SueldoPro<span class="text-slate-400">2026</span></h1>
             <div class="lg:hidden text-2xl font-black text-brand-500">SP</div>
         </div>
         
         <nav class="flex-1 space-y-2 overflow-y-auto no-scrollbar">
-            <p class="hidden lg:block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 px-4">Terminal</p>
-            <button onclick="nav('calcs')" id="m-calcs" class="sidebar-btn active">📊 <span class="hidden lg:inline ml-4">8 Calculadoras Pro</span></button>
-            <button onclick="nav('forex')" id="m-forex" class="sidebar-btn">💱 <span class="hidden lg:inline ml-4">100 Divisas Globales</span></button>
+            <p class="hidden lg:block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 px-4">Terminal de Control</p>
+            <button onclick="nav('calcs')" id="m-calcs" class="sidebar-btn active">📊 <span class="hidden lg:inline ml-4">8 Calculadoras Master</span></button>
+            <button onclick="nav('forex')" id="m-forex" class="sidebar-btn">💱 <span class="hidden lg:inline ml-4">100 Divisas Live</span></button>
             <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn">🔎 <span class="hidden lg:inline ml-4">Radar 250 Empleos</span></button>
-            <button onclick="nav('news')" id="m-news" class="sidebar-btn">📰 <span class="hidden lg:inline ml-4">Intelligence Feed</span></button>
+            <button onclick="nav('news')" id="m-news" class="sidebar-btn">📰 <span class="hidden lg:inline ml-4">50 Noticias Globales</span></button>
         </nav>
 
-        <div class="mt-auto pt-6 border-t border-slate-200 dark:border-surface-800">
-            <button onclick="toggleTheme()" class="w-full flex items-center justify-center lg:justify-start gap-4 p-4 rounded-2xl bg-slate-100 dark:bg-surface-800 hover:scale-105 transition-all">
-                <span id="theme-icon">🌙</span> <span class="hidden lg:inline font-black text-[10px] tracking-widest uppercase">Modo Visual</span>
-            </button>
-        </div>
+        <button onclick="toggleTheme()" class="mt-auto p-4 rounded-2xl bg-slate-100 dark:bg-surface-800 flex justify-center items-center">
+            <span id="theme-icon">🌙</span>
+        </button>
     </aside>
 
     <main class="ml-20 lg:ml-80 p-6 lg:p-16 min-h-screen">
         
         <section id="sec-calcs" class="sec-content active">
             <div class="max-w-7xl mx-auto">
-                <div class="mb-12">
-                    <h2 class="text-6xl font-black tracking-tighter mb-4">Financial <span class="text-brand-500">OS</span></h2>
-                    <p class="text-slate-500 dark:text-slate-400 font-medium">Motor de cálculo legal actualizado UIT 2026 (S/ 5,500).</p>
-                </div>
+                <h2 class="text-6xl font-black tracking-tighter mb-12">Financial <span class="text-brand-500 italic">OS</span></h2>
 
                 <div class="grid lg:grid-cols-12 gap-10">
                     <div class="lg:col-span-3 space-y-2">
                         <button onclick="setCalc('neto')" id="tab-neto" class="calc-tab active">Sueldo Neto Mensual</button>
                         <button onclick="setCalc('grati')" id="tab-grati" class="calc-tab">Gratificaciones</button>
                         <button onclick="setCalc('cts')" id="tab-cts" class="calc-tab">CTS Semestral</button>
-                        <button onclick="setCalc('liq')" id="tab-liq" class="calc-tab">Liquidación Total</button>
-                        <button onclick="setCalc('cuarta')" id="tab-cuarta" class="calc-tab">Renta 4ta (Honorarios)</button>
-                        <button onclick="setCalc('quinta')" id="tab-quinta" class="calc-tab">Renta 5ta (Anual)</button>
-                        <button onclick="setCalc('costo')" id="tab-costo" class="calc-tab">Costo Empleador</button>
-                        <button onclick="setCalc('util')" id="tab-util" class="calc-tab">Utilidades (Est.)</button>
+                        <button onclick="setCalc('liq')" id="tab-liq" class="calc-tab">Liquidación 2026</button>
+                        <button onclick="setCalc('quinta')" id="tab-quinta" class="calc-tab">Impuesto 5ta Cat.</button>
+                        <button onclick="setCalc('cuarta')" id="tab-cuarta" class="calc-tab">Recibos por Honorarios</button>
+                        <button onclick="setCalc('costo')" id="tab-costo" class="calc-tab">Costo para la Empresa</button>
+                        <button onclick="setCalc('util')" id="tab-util" class="calc-tab">Reparto de Utilidades</button>
                     </div>
 
-                    <div class="lg:col-span-5 bg-white dark:bg-surface-900 p-10 rounded-[3.5rem] shadow-2xl border border-slate-100 dark:border-surface-800">
-                        <div id="calc-ui"></div>
-                    </div>
-
-                    <div class="lg:col-span-4 space-y-6">
-                        <div id="res-card" class="bg-brand-500 p-10 rounded-[3.5rem] text-white shadow-2xl shadow-brand-500/40 relative overflow-hidden">
-                            <div class="relative z-10">
-                                <p class="text-[10px] font-black uppercase tracking-[0.3em] opacity-70 mb-2">Resultado Final</p>
-                                <div id="calc-res" class="text-6xl font-black tracking-tighter tabular-nums">S/ 0.00</div>
-                                <div id="calc-breakdown" class="mt-8 pt-8 border-t border-white/20 space-y-3"></div>
+                    <div class="lg:col-span-6 bg-white dark:bg-surface-900 p-12 rounded-[3.5rem] shadow-2xl border border-slate-100 dark:border-slate-800">
+                        <div id="calc-ui">
                             </div>
-                            <div class="absolute -right-10 -bottom-10 text-[15rem] font-black opacity-10 pointer-events-none">$</div>
+                    </div>
+
+                    <div class="lg:col-span-3 space-y-6">
+                        <div id="res-card" class="bg-brand-500 p-10 rounded-[3.5rem] text-white shadow-2xl transition-all">
+                            <p class="text-[10px] font-black uppercase tracking-[0.3em] opacity-70 mb-2">Monto Estimado</p>
+                            <div id="calc-res" class="text-5xl font-black tabular-nums">S/ 0.00</div>
+                            <div id="calc-breakdown" class="mt-8 pt-8 border-t border-white/20 text-[11px] space-y-3 font-bold uppercase"></div>
                         </div>
-                        <div class="bg-slate-100 dark:bg-surface-800 p-8 rounded-[2.5rem] border-l-8 border-brand-500">
-                            <h4 class="text-xs font-black text-brand-500 uppercase mb-4 tracking-widest">Guía Profesional 2026</h4>
-                            <div id="guide-text" class="text-sm leading-relaxed text-slate-600 dark:text-slate-300 space-y-4"></div>
+                        <div class="bg-slate-100 dark:bg-surface-800 p-8 rounded-[2.5rem]">
+                            <h4 class="text-xs font-black text-brand-500 mb-4">GUÍA PRO</h4>
+                            <div id="guide-text" class="text-xs leading-relaxed opacity-70 italic"></div>
                         </div>
                     </div>
                 </div>
@@ -88,39 +81,33 @@
         </section>
 
         <section id="sec-forex" class="sec-content">
-            <h2 class="text-4xl font-black mb-12 tracking-tighter">Global <span class="text-brand-500">Currency Terminal</span></h2>
-            <div class="grid lg:grid-cols-12 gap-10">
-                <div class="lg:col-span-4 bg-white dark:bg-surface-900 p-8 rounded-[3rem] border border-slate-200 dark:border-surface-800">
-                    <label class="label-pro">Monto en Soles (PEN)</label>
-                    <input type="number" id="f-amt" oninput="updateForex()" class="input-pro mb-8" value="1000">
-                    <div id="forex-list" class="space-y-3 h-[600px] overflow-y-auto pr-2 custom-scroll"></div>
+            <h2 class="text-4xl font-black mb-12">Global <span class="text-brand-500">Forex Index</span> (100)</h2>
+            <div class="grid lg:grid-cols-12 gap-8">
+                <div class="lg:col-span-4 bg-white dark:bg-surface-900 p-6 rounded-[3rem] border border-slate-200 dark:border-surface-800 h-[700px] overflow-hidden flex flex-col">
+                    <input type="number" id="f-amt" oninput="updateForex()" class="w-full p-6 text-3xl font-black bg-slate-50 dark:bg-surface-800 rounded-3xl mb-6 outline-none focus:ring-4 ring-brand-500/20" value="1000">
+                    <div id="forex-list" class="flex-1 overflow-y-auto custom-scroll pr-2 space-y-2"></div>
                 </div>
-                <div class="lg:col-span-8 bg-white dark:bg-surface-900 p-10 rounded-[4rem] border border-slate-200 dark:border-surface-800 flex flex-col">
+                <div class="lg:col-span-8 bg-white dark:bg-surface-900 p-10 rounded-[4rem] border border-slate-200 dark:border-surface-800">
                     <div class="flex justify-between items-center mb-10">
-                        <h3 id="chart-label" class="text-4xl font-black text-brand-500 tracking-tighter">ANÁLISIS DE MERCADO</h3>
-                        <div class="px-4 py-2 bg-green-500 text-white text-[10px] font-black rounded-full">LIVE DATA 2026</div>
+                        <h3 id="chart-label" class="text-5xl font-black text-brand-500 italic">USD/PEN</h3>
+                        <div class="px-6 py-2 bg-green-500 text-white font-black rounded-full text-[10px]">REAL-TIME ANALYTICS</div>
                     </div>
-                    <div class="flex-1 min-h-[450px]">
-                        <canvas id="f-chart"></canvas>
-                    </div>
+                    <canvas id="f-chart"></canvas>
                 </div>
             </div>
         </section>
 
         <section id="sec-jobs" class="sec-content">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-                <div>
-                    <h2 class="text-5xl font-black tracking-tighter mb-2">Radar <span class="text-brand-500 italic">250 Opportunities</span></h2>
-                    <p class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Base de datos de empleos de alta demanda 2026</p>
-                </div>
-                <input type="text" id="job-search" oninput="renderJobs()" placeholder="Filtrar por puesto, tecnología o sector..." class="w-full md:w-96 p-5 rounded-2xl bg-white dark:bg-surface-900 border border-slate-200 dark:border-surface-800 outline-none focus:ring-4 ring-brand-500/20 transition-all">
+            <div class="flex justify-between items-end mb-12">
+                <h2 class="text-4xl font-black tracking-tighter">Market <span class="text-brand-500">Radar (250)</span></h2>
+                <input type="text" id="job-search" oninput="renderJobs()" placeholder="Buscar por puesto o sector..." class="p-5 rounded-2xl bg-white dark:bg-surface-900 border border-slate-200 dark:border-surface-800 w-96 outline-none focus:ring-4 ring-brand-500/10">
             </div>
-            <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+            <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
         </section>
 
         <section id="sec-news" class="sec-content">
-            <h2 class="text-4xl font-black mb-12 tracking-tighter">Market <span class="text-red-600">Intelligence Feed</span></h2>
-            <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"></div>
+            <h2 class="text-4xl font-black mb-12">Intelligence <span class="text-red-600">Report (50)</span></h2>
+            <div id="news-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
         </section>
 
     </main>
