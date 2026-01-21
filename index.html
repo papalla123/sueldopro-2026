@@ -8,20 +8,21 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col lg:flex-row transition-colors duration-500">
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col lg:flex-row transition-all duration-500" id="app-body">
     
-    <aside class="w-full lg:w-72 border-b lg:border-r border-slate-200 bg-white/80 backdrop-blur-xl p-6 sticky top-0 z-50 flex lg:flex-col shadow-sm">
+    <aside class="w-full lg:w-72 border-b lg:border-r border-slate-200 bg-white/90 backdrop-blur-xl p-6 sticky top-0 z-50 flex lg:flex-col shadow-sm">
         <div class="flex-1">
             <h1 class="text-2xl font-black mb-8 text-blue-600 tracking-tighter uppercase">SueldoPro<span class="text-slate-400">2026</span></h1>
             <nav class="flex lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0">
                 <button onclick="nav('calcs')" id="m-calcs" class="sidebar-btn active">📊 <span>Calculadoras</span></button>
-                <button onclick="nav('forex')" id="m-forex" class="sidebar-btn">💱 <span>Conversor Pro</span></button>
-                <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn">🔎 <span>Radar Oficios</span></button>
+                <button onclick="nav('forex')" id="m-forex" class="sidebar-btn">💱 <span>Global Forex</span></button>
+                <button onclick="nav('jobs')" id="m-jobs" class="sidebar-btn">🔎 <span>Radar Empleos</span></button>
+                <button onclick="nav('news')" id="m-news" class="sidebar-btn">📰 <span>News Hub</span></button>
             </nav>
         </div>
         <div class="flex items-center justify-between mt-auto pt-6 border-t border-slate-200">
-            <button onclick="toggleTheme()" class="theme-toggle-btn" id="theme-btn">🌙 Modo Noche</button>
-            <span class="text-[10px] font-black opacity-30 uppercase">v3.5 Stable</span>
+            <button onclick="toggleTheme()" class="theme-btn" id="t-btn">🌙 Dark Mode</button>
+            <span class="text-[10px] font-black opacity-20 uppercase tracking-widest">v4.0 PRO</span>
         </div>
     </aside>
 
@@ -29,54 +30,61 @@
         <section id="sec-calcs" class="sec-content active">
             <h2 class="text-5xl font-black mb-10 tracking-tight">Financial <span class="text-blue-600">Hub</span></h2>
             <div class="flex flex-wrap gap-3 mb-10">
-                <button onclick="setCalc('neto')" class="calc-tab active" id="btn-neto">Sueldo Neto</button>
-                <button onclick="setCalc('costo')" class="calc-tab" id="btn-costo">Costo Empresa</button>
-                <button onclick="setCalc('cuarta')" class="calc-tab" id="btn-cuarta">4ta Categoría</button>
-                <button onclick="setCalc('vacaciones')" class="calc-tab" id="btn-vacaciones">Vacaciones</button>
-                <button onclick="setCalc('grati')" class="calc-tab" id="btn-grati">Gratificación</button>
+                <button onclick="setCalc('neto')" class="calc-tab active" id="btn-neto">Neto</button>
+                <button onclick="setCalc('costo')" class="calc-tab" id="btn-costo">Empresa</button>
+                <button onclick="setCalc('cuarta')" class="calc-tab" id="btn-cuarta">4ta Cat</button>
+                <button onclick="setCalc('grati')" class="calc-tab" id="btn-grati">Grati</button>
+                <button onclick="setCalc('cts')" class="calc-tab" id="btn-cts">CTS</button>
             </div>
 
             <div class="grid lg:grid-cols-5 gap-10">
-                <div class="lg:col-span-3 bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-2xl transition-all" id="calc-container">
-                    <div id="calc-ui"></div>
+                <div class="lg:col-span-3 p-1 rounded-[3rem]" id="calc-border">
+                    <div class="bg-white p-10 rounded-[2.9rem] shadow-2xl h-full" id="calc-inner">
+                        <div id="calc-ui"></div>
+                    </div>
                 </div>
-                <div class="lg:col-span-2">
-                    <div class="p-8 bg-blue-600/5 rounded-[2.5rem] border-2 border-dashed border-blue-500/20" id="guide-box">
-                        <h4 class="font-bold text-blue-600 mb-4 flex items-center gap-2">📑 Guía Profesional</h4>
-                        <div id="guide-text" class="text-sm leading-relaxed opacity-80 space-y-4"></div>
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-200 shadow-sm" id="guide-box">
+                        <h4 class="font-bold text-blue-600 mb-4 uppercase text-xs tracking-widest">Guía de Análisis</h4>
+                        <div id="guide-text" class="text-sm leading-relaxed opacity-70"></div>
+                    </div>
+                    <div class="p-8 bg-slate-900 text-white rounded-[2.5rem] shadow-xl" id="summary-card">
+                        <p class="text-[10px] font-bold opacity-50 uppercase mb-4">Proyección 2026</p>
+                        <div id="calc-res">Esperando datos...</div>
                     </div>
                 </div>
             </div>
         </section>
 
         <section id="sec-forex" class="sec-content">
-            <h2 class="text-4xl font-black mb-8 italic">Global <span class="text-blue-600">Forex Hub</span></h2>
-            <div class="grid lg:grid-cols-2 gap-10">
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-200" id="forex-card">
-                    <div class="space-y-6">
-                        <div>
-                            <label class="label-text">Monto en Soles (PEN)</label>
-                            <input type="number" id="forex-amount" oninput="convertCurrency()" placeholder="0.00" class="main-input">
-                        </div>
-                        <div>
-                            <label class="label-text">Convertir a:</label>
-                            <select id="forex-select" onchange="updateForexUI()" class="main-input text-lg"></select>
-                        </div>
-                        <div class="p-8 bg-blue-600 rounded-[2rem] text-white shadow-lg shadow-blue-500/40">
-                            <p class="text-xs font-bold opacity-70 uppercase tracking-widest">Cambio Estimado</p>
-                            <h3 id="forex-result" class="text-5xl font-black mt-2">0.00</h3>
-                        </div>
-                    </div>
+            <h2 class="text-4xl font-black mb-8">Global <span class="text-blue-600">Currency</span></h2>
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-200 lg:col-span-1">
+                    <label class="label-pro">Monto (Soles)</label>
+                    <input type="number" id="f-amt" oninput="updateForex()" class="input-pro mb-6 text-3xl" placeholder="0.00">
+                    <label class="label-pro">Divisa Destino</label>
+                    <div id="forex-list" class="space-y-2 h-[400px] overflow-y-auto pr-2 custom-scroll"></div>
                 </div>
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-200" id="chart-card">
-                    <canvas id="forexChart"></canvas>
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-200 h-full">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 id="chart-title" class="text-xl font-black text-blue-600 uppercase">Estadísticas</h3>
+                            <span class="text-xs font-bold opacity-40">Histórico 7 días</span>
+                        </div>
+                        <canvas id="f-chart"></canvas>
+                    </div>
                 </div>
             </div>
         </section>
 
         <section id="sec-jobs" class="sec-content">
-            <h2 class="text-4xl font-black mb-8">Radar <span class="text-blue-600">Mintra 2026</span></h2>
-            <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            <h2 class="text-4xl font-black mb-8">Radar <span class="text-blue-600">50 Empleos</span></h2>
+            <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+        </section>
+
+        <section id="sec-news" class="sec-content">
+            <h2 class="text-4xl font-black mb-8 text-red-600 italic">Global <span class="text-slate-900" id="news-title-color">Economy News</span></h2>
+            <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
         </section>
     </main>
 
