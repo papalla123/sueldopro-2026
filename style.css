@@ -1,4 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+/* ==========================================
+   SUELDOPRO 2026 - ESTILOS GLOBALES ELITE
+   ========================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@600;700;800;900&display=swap');
 
 * {
     margin: 0;
@@ -18,28 +22,86 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* Animations */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', 'Inter', sans-serif;
+}
+
+/* ==========================================
+   ANIMACIONES
+   ========================================== */
+
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideLeft {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 @keyframes pulseGlow {
-    0%, 100% { opacity: 1; box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); }
-    50% { opacity: 0.8; box-shadow: 0 0 40px rgba(168, 85, 247, 0.6); }
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+        opacity: 0.9;
+        box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+    }
 }
 
-@keyframes bounceSubtle {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
 }
 
-/* Mobile Sidebar */
+.animate-fadeIn {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* ==========================================
+   SIDEBAR MÓVIL
+   ========================================== */
+
 #sidebar.mobile-open {
     transform: translateX(0) !important;
 }
@@ -48,7 +110,7 @@ body {
     #sidebar {
         width: 280px;
     }
-    
+
     body.sidebar-open::after {
         content: '';
         position: fixed;
@@ -59,7 +121,10 @@ body {
     }
 }
 
-/* Navigation Buttons */
+/* ==========================================
+   NAVEGACIÓN
+   ========================================== */
+
 .nav-btn {
     width: 100%;
     display: flex;
@@ -72,6 +137,7 @@ body {
     color: rgb(100 116 139);
     position: relative;
     overflow: hidden;
+    cursor: pointer;
 }
 
 .dark .nav-btn {
@@ -102,27 +168,22 @@ body {
     color: rgb(59 130 246);
 }
 
-.nav-btn.active {
-    background: linear-gradient(135deg, rgb(59 130 246) 0%, rgb(37 99 235) 100%);
-    color: white;
-    box-shadow: 0 8px 24px -8px rgba(59, 130, 246, 0.5);
-}
-
 @media (min-width: 1024px) {
     .nav-btn:hover {
         transform: translateX(4px);
     }
 }
 
-.nav-icon {
-    font-size: 1.25rem;
-    min-width: 1.75rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.nav-btn.active {
+    background: linear-gradient(135deg, rgb(59 130 246) 0%, rgb(37 99 235) 100%);
+    color: white;
+    box-shadow: 0 8px 24px -8px rgba(59, 130, 246, 0.5);
 }
 
-/* Calculator Tab Buttons */
+/* ==========================================
+   PESTAÑAS DE CALCULADORA
+   ========================================== */
+
 .calc-tab-btn {
     width: 100%;
     display: flex;
@@ -135,6 +196,7 @@ body {
     color: rgb(71 85 105);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
+    font-weight: 600;
 }
 
 .dark .calc-tab-btn {
@@ -168,7 +230,10 @@ body {
     }
 }
 
-/* Form Styles */
+/* ==========================================
+   FORMULARIOS
+   ========================================== */
+
 .form-group {
     margin-bottom: 1.25rem;
 }
@@ -226,7 +291,6 @@ body {
     color: rgb(71 85 105);
 }
 
-/* Prevent zoom on iOS */
 @media (max-width: 768px) {
     .form-input,
     .form-select {
@@ -264,7 +328,7 @@ body {
 }
 
 .dark .form-select {
-    background: rgb(15 23 42);
+    background-color: rgb(15 23 42);
     color: rgb(226 232 240);
 }
 
@@ -273,7 +337,10 @@ body {
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
-/* Primary Button */
+/* ==========================================
+   BOTONES
+   ========================================== */
+
 .btn-primary {
     width: 100%;
     padding: 1rem;
@@ -305,7 +372,10 @@ body {
     transform: translateY(0);
 }
 
-/* Section Content */
+/* ==========================================
+   CONTENIDO DE SECCIÓN
+   ========================================== */
+
 .section-content {
     display: none;
     animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -315,7 +385,10 @@ body {
     display: block;
 }
 
-/* Custom Scrollbar */
+/* ==========================================
+   SCROLL PERSONALIZADO
+   ========================================== */
+
 .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
 }
@@ -338,7 +411,10 @@ body {
     background: rgb(37 99 235);
 }
 
-/* Currency Card */
+/* ==========================================
+   TARJETA DE DIVISA
+   ========================================== */
+
 .currency-card {
     display: flex;
     justify-content: space-between;
@@ -379,7 +455,10 @@ body {
     }
 }
 
-/* Job Card */
+/* ==========================================
+   TARJETA DE EMPLEO
+   ========================================== */
+
 .job-card {
     background: white;
     padding: 1.25rem;
@@ -418,7 +497,10 @@ body {
     }
 }
 
-/* News Card */
+/* ==========================================
+   TARJETA DE NOTICIA
+   ========================================== */
+
 .news-card {
     background: white;
     padding: 1.25rem;
@@ -450,7 +532,10 @@ body {
     }
 }
 
-/* Sector Filter */
+/* ==========================================
+   FILTRO DE SECTOR
+   ========================================== */
+
 .sector-filter {
     padding: 0.625rem 1rem;
     background: rgb(248 250 252);
@@ -496,7 +581,10 @@ body {
     box-shadow: 0 4px 16px -4px rgba(59, 130, 246, 0.5);
 }
 
-/* Stat Card */
+/* ==========================================
+   TARJETA DE ESTADÍSTICAS
+   ========================================== */
+
 .stat-card {
     background: rgb(248 250 252);
     padding: 1rem;
@@ -515,23 +603,35 @@ body {
     background: rgb(15 23 42);
 }
 
-/* Semaphore Status */
+/* ==========================================
+   ESTADOS DEL SEMÁFORO
+   ========================================== */
+
 .semaphore-low {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
     border: 2px solid rgb(239 68 68);
     color: rgb(220 38 38);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    text-align: center;
 }
 
 .semaphore-average {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.05) 100%);
     border: 2px solid rgb(245 158 11);
     color: rgb(217 119 6);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    text-align: center;
 }
 
 .semaphore-top {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
     border: 2px solid rgb(16 185 129);
     color: rgb(5 150 105);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    text-align: center;
 }
 
 .dark .semaphore-low {
@@ -546,7 +646,10 @@ body {
     color: rgb(52 211 153);
 }
 
-/* Touch Optimization */
+/* ==========================================
+   OPTIMIZACIONES TÁCTILES
+   ========================================== */
+
 @media (hover: none) and (pointer: coarse) {
     button, .nav-btn, .calc-tab-btn, .currency-card, .job-card {
         cursor: pointer;
@@ -554,17 +657,27 @@ body {
     }
 }
 
-/* Loading State */
+/* ==========================================
+   ESTADO DE CARGA
+   ========================================== */
+
 .loading {
     animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
 }
 
-/* Safe Area for Notched Devices */
+/* ==========================================
+   ÁREA SEGURA PARA DISPOSITIVOS CON MUESCA
+   ========================================== */
+
 @supports (padding-top: env(safe-area-inset-top)) {
     body {
         padding-top: var(--safe-area-top);
@@ -572,7 +685,10 @@ body {
     }
 }
 
-/* Print Optimization */
+/* ==========================================
+   OPTIMIZACIÓN DE IMPRESIÓN
+   ========================================== */
+
 @media print {
     #sidebar,
     #mobile-menu-toggle,
@@ -580,8 +696,12 @@ body {
     button {
         display: none !important;
     }
-    
+
     main {
         margin-left: 0 !important;
+    }
+
+    .section-content {
+        page-break-inside: avoid;
     }
 }

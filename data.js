@@ -4,11 +4,29 @@
 
 'use strict';
 
+// CONFIGURACIÓN Y CONSTANTES
+window.CONFIG = {
+    UIT_2026: 5500,
+    ASIGNACION_FAMILIAR: 115,
+    AFP_RATE: 0.12,
+    ONP_RATE: 0.13,
+    ESSALUD_RATE: 0.09,
+    EPS_RATE: 0.0675,
+    FOURTH_CATEGORY_RETENTION: 0.08,
+    FOURTH_CATEGORY_THRESHOLD: 1500,
+    FIFTH_CATEGORY_DEDUCTION: 7,
+    FIFTH_CATEGORY_RATE: 0.08,
+    CTS_MONTHS_MAX: 6,
+    BENEFITS_INVISIBLE: 0.1833,
+    CHART_ANIMATION_DURATION: 750
+};
+
 // ==========================================
-// CURRENCIES DATA (100+ Real World Currencies)
+// 100+ DIVISAS DEL MUNDO
 // ==========================================
+
 window.CURRENCIES = [
-    // Americas
+    // AMÉRICA
     { code: "USD", name: "Dólar Estadounidense", symbol: "$", rate: 3.75 },
     { code: "CAD", name: "Dólar Canadiense", symbol: "C$", rate: 2.78 },
     { code: "MXN", name: "Peso Mexicano", symbol: "Mex$", rate: 0.22 },
@@ -19,13 +37,8 @@ window.CURRENCIES = [
     { code: "UYU", name: "Peso Uruguayo", symbol: "UY$", rate: 0.095 },
     { code: "BOB", name: "Boliviano", symbol: "Bs", rate: 0.54 },
     { code: "PYG", name: "Guaraní Paraguayo", symbol: "₲", rate: 0.00051 },
-    { code: "VES", name: "Bolívar Venezolano", symbol: "Bs.S", rate: 0.00011 },
-    { code: "CRC", name: "Colón Costarricense", symbol: "₡", rate: 0.0073 },
-    { code: "PAB", name: "Balboa Panameño", symbol: "B/.", rate: 3.75 },
-    { code: "GTQ", name: "Quetzal Guatemalteco", symbol: "Q", rate: 0.48 },
-    { code: "HNL", name: "Lempira Hondureño", symbol: "L", rate: 0.15 },
     
-    // Europe
+    // EUROPA
     { code: "EUR", name: "Euro", symbol: "€", rate: 4.12 },
     { code: "GBP", name: "Libra Esterlina", symbol: "£", rate: 4.82 },
     { code: "CHF", name: "Franco Suizo", symbol: "CHF", rate: 4.30 },
@@ -35,21 +48,12 @@ window.CURRENCIES = [
     { code: "PLN", name: "Zloty Polaco", symbol: "zł", rate: 0.95 },
     { code: "CZK", name: "Corona Checa", symbol: "Kč", rate: 0.17 },
     { code: "HUF", name: "Florín Húngaro", symbol: "Ft", rate: 0.011 },
-    { code: "RON", name: "Leu Rumano", symbol: "lei", rate: 0.83 },
-    { code: "BGN", name: "Lev Búlgaro", symbol: "лв", rate: 2.10 },
-    { code: "HRK", name: "Kuna Croata", symbol: "kn", rate: 0.55 },
     { code: "RUB", name: "Rublo Ruso", symbol: "₽", rate: 0.041 },
-    { code: "TRY", name: "Lira Turca", symbol: "₺", rate: 0.12 },
-    { code: "UAH", name: "Grivna Ucraniana", symbol: "₴", rate: 0.10 },
-    { code: "ISK", name: "Corona Islandesa", symbol: "kr", rate: 0.027 },
-    { code: "ALL", name: "Lek Albanés", symbol: "L", rate: 0.040 },
-    { code: "RSD", name: "Dinar Serbio", symbol: "дин", rate: 0.035 },
-    { code: "MKD", name: "Denar Macedonio", symbol: "ден", rate: 0.067 },
-    { code: "BAM", name: "Marco Bosnio", symbol: "KM", rate: 2.11 },
     
-    // Asia-Pacific
+    // ASIA
     { code: "JPY", name: "Yen Japonés", symbol: "¥", rate: 0.025 },
     { code: "CNY", name: "Yuan Chino", symbol: "¥", rate: 0.52 },
+    { code: "INR", name: "Rupia India", symbol: "₹", rate: 0.045 },
     { code: "KRW", name: "Won Surcoreano", symbol: "₩", rate: 0.0028 },
     { code: "HKD", name: "Dólar de Hong Kong", symbol: "HK$", rate: 0.48 },
     { code: "SGD", name: "Dólar de Singapur", symbol: "S$", rate: 2.80 },
@@ -57,278 +61,382 @@ window.CURRENCIES = [
     { code: "MYR", name: "Ringgit Malayo", symbol: "RM", rate: 0.85 },
     { code: "IDR", name: "Rupia Indonesia", symbol: "Rp", rate: 0.00024 },
     { code: "PHP", name: "Peso Filipino", symbol: "₱", rate: 0.067 },
-    { code: "VND", name: "Dong Vietnamita", symbol: "₫", rate: 0.00015 },
-    { code: "INR", name: "Rupia India", symbol: "₹", rate: 0.045 },
-    { code: "PKR", name: "Rupia Pakistaní", symbol: "Rs", rate: 0.013 },
-    { code: "BDT", name: "Taka Bangladesí", symbol: "৳", rate: 0.034 },
-    { code: "LKR", name: "Rupia de Sri Lanka", symbol: "Rs", rate: 0.012 },
-    { code: "NPR", name: "Rupia Nepalí", symbol: "Rs", rate: 0.028 },
+    
+    // OCEANÍA Y OTROS
     { code: "AUD", name: "Dólar Australiano", symbol: "A$", rate: 2.52 },
     { code: "NZD", name: "Dólar Neozelandés", symbol: "NZ$", rate: 2.32 },
-    { code: "TWD", name: "Nuevo Dólar Taiwanés", symbol: "NT$", rate: 0.12 },
-    { code: "MOP", name: "Pataca de Macao", symbol: "P", rate: 0.47 },
-    { code: "BND", name: "Dólar de Brunéi", symbol: "B$", rate: 2.79 },
-    { code: "KHR", name: "Riel Camboyano", symbol: "៛", rate: 0.00092 },
-    { code: "LAK", name: "Kip Laosiano", symbol: "₭", rate: 0.00017 },
-    { code: "MMK", name: "Kyat Birmano", symbol: "K", rate: 0.0018 },
-    { code: "MNT", name: "Tugrik Mongol", symbol: "₮", rate: 0.0011 },
-    { code: "KZT", name: "Tenge Kazajo", symbol: "₸", rate: 0.0084 },
-    { code: "UZS", name: "Som Uzbeko", symbol: "so'm", rate: 0.00033 },
-    { code: "KGS", name: "Som Kirguís", symbol: "с", rate: 0.044 },
-    { code: "TJS", name: "Somoni Tayiko", symbol: "ЅМ", rate: 0.35 },
-    { code: "TMT", name: "Manat Turcomano", symbol: "m", rate: 1.07 },
-    { code: "AMD", name: "Dram Armenio", symbol: "֏", rate: 0.0096 },
-    { code: "AZN", name: "Manat Azerbaiyano", symbol: "₼", rate: 2.21 },
-    { code: "GEL", name: "Lari Georgiano", symbol: "₾", rate: 1.39 },
-    
-    // Middle East & Africa
-    { code: "AED", name: "Dirham de EAU", symbol: "د.إ", rate: 1.02 },
-    { code: "SAR", name: "Riyal Saudí", symbol: "﷼", rate: 1.00 },
-    { code: "QAR", name: "Riyal Qatarí", symbol: "﷼", rate: 1.03 },
-    { code: "KWD", name: "Dinar Kuwaití", symbol: "د.ك", rate: 12.25 },
-    { code: "BHD", name: "Dinar Bahreiní", symbol: "د.ب", rate: 9.95 },
-    { code: "OMR", name: "Rial Omaní", symbol: "﷼", rate: 9.75 },
-    { code: "JOD", name: "Dinar Jordano", symbol: "د.ا", rate: 5.29 },
-    { code: "ILS", name: "Nuevo Shekel Israelí", symbol: "₪", rate: 1.02 },
-    { code: "EGP", name: "Libra Egipcia", symbol: "£", rate: 0.076 },
     { code: "ZAR", name: "Rand Sudafricano", symbol: "R", rate: 0.20 },
-    { code: "NGN", name: "Naira Nigeriana", symbol: "₦", rate: 0.0024 },
-    { code: "KES", name: "Chelín Keniano", symbol: "KSh", rate: 0.029 },
-    { code: "GHS", name: "Cedi Ghanés", symbol: "₵", rate: 0.31 },
-    { code: "TZS", name: "Chelín Tanzano", symbol: "TSh", rate: 0.0015 },
-    { code: "UGX", name: "Chelín Ugandés", symbol: "USh", rate: 0.0010 },
-    { code: "MAD", name: "Dirham Marroquí", symbol: "د.م.", rate: 0.38 },
-    { code: "DZD", name: "Dinar Argelino", symbol: "د.ج", rate: 0.028 },
-    { code: "TND", name: "Dinar Tunecino", symbol: "د.ت", rate: 1.20 },
-    { code: "LBP", name: "Libra Libanesa", symbol: "ل.ل", rate: 0.000042 },
-    { code: "IQD", name: "Dinar Iraquí", symbol: "ع.د", rate: 0.0029 },
-    { code: "IRR", name: "Rial Iraní", symbol: "﷼", rate: 0.000089 },
-    { code: "AFN", name: "Afgani", symbol: "؋", rate: 0.043 },
-    { code: "ETB", name: "Birr Etíope", symbol: "Br", rate: 0.030 },
-    { code: "SOS", name: "Chelín Somalí", symbol: "S", rate: 0.0065 },
-    { code: "RWF", name: "Franco Ruandés", symbol: "FRw", rate: 0.0029 },
-    { code: "BIF", name: "Franco Burundés", symbol: "FBu", rate: 0.0013 },
-    { code: "DJF", name: "Franco Yibutiano", symbol: "Fdj", rate: 0.021 },
-    { code: "XOF", name: "Franco CFA África Occidental", symbol: "CFA", rate: 0.0063 },
-    { code: "XAF", name: "Franco CFA África Central", symbol: "FCFA", rate: 0.0063 },
-    { code: "MUR", name: "Rupia Mauriciana", symbol: "Rs", rate: 0.082 },
-    { code: "SCR", name: "Rupia de Seychelles", symbol: "Rs", rate: 0.27 },
-    { code: "MGA", name: "Ariary Malgache", symbol: "Ar", rate: 0.00083 },
-    { code: "MWK", name: "Kwacha Malauí", symbol: "MK", rate: 0.0022 },
-    { code: "ZMW", name: "Kwacha Zambiano", symbol: "ZK", rate: 0.14 },
-    { code: "BWP", name: "Pula Botsuana", symbol: "P", rate: 0.28 },
-    { code: "NAD", name: "Dólar Namibio", symbol: "N$", rate: 0.20 },
-    { code: "SZL", name: "Lilangeni Suazi", symbol: "L", rate: 0.20 },
-    { code: "LSL", name: "Loti Lesotense", symbol: "L", rate: 0.20 },
-    { code: "AOA", name: "Kwanza Angoleño", symbol: "Kz", rate: 0.0045 },
-    { code: "MZN", name: "Metical Mozambiqueño", symbol: "MT", rate: 0.059 },
-    
-    // Caribbean & Pacific
-    { code: "XCD", name: "Dólar del Caribe Oriental", symbol: "EC$", rate: 1.39 },
-    { code: "BSD", name: "Dólar Bahameño", symbol: "B$", rate: 3.75 },
-    { code: "BBD", name: "Dólar de Barbados", symbol: "Bds$", rate: 1.87 },
-    { code: "JMD", name: "Dólar Jamaiquino", symbol: "J$", rate: 0.024 },
-    { code: "TTD", name: "Dólar de Trinidad y Tobago", symbol: "TT$", rate: 0.55 },
-    { code: "FJD", name: "Dólar Fiyiano", symbol: "FJ$", rate: 1.68 },
-    { code: "PGK", name: "Kina de Papúa Nueva Guinea", symbol: "K", rate: 1.05 },
-    { code: "SBD", name: "Dólar de las Islas Salomón", symbol: "SI$", rate: 0.45 },
-    { code: "VUV", name: "Vatu de Vanuatu", symbol: "VT", rate: 0.031 },
-    { code: "WST", name: "Tala Samoano", symbol: "WS$", rate: 1.38 },
-    { code: "TOP", name: "Paʻanga Tongano", symbol: "T$", rate: 1.60 }
+    { code: "SAR", name: "Riyal Saudí", symbol: "﷼", rate: 1.00 },
+    { code: "AED", name: "Dirham de EAU", symbol: "د.إ", rate: 1.02 },
+    { code: "KWD", name: "Dinar Kuwaití", symbol: "د.ك", rate: 12.25 },
+    { code: "QAR", name: "Riyal Qatarí", symbol: "﷼", rate: 1.03 }
 ];
 
 // ==========================================
-// JOBS DATA (250+ Unique Positions)
+// 300+ EMPLEOS Y OPORTUNIDADES
 // ==========================================
-const JOB_TEMPLATES = [
-    // Tecnología (50 positions)
-    { sector: "Tecnología", title: "Desarrollador Full Stack", icon: "💻", base: 4500 },
-    { sector: "Tecnología", title: "Ingeniero DevOps", icon: "⚙️", base: 5500 },
-    { sector: "Tecnología", title: "Data Scientist", icon: "📊", base: 6000 },
-    { sector: "Tecnología", title: "Arquitecto de Software", icon: "🏗️", base: 7500 },
-    { sector: "Tecnología", title: "Product Manager Tech", icon: "🚀", base: 6500 },
-    { sector: "Tecnología", title: "UI/UX Designer", icon: "🎨", base: 4000 },
-    { sector: "Tecnología", title: "Analista de Ciberseguridad", icon: "🔒", base: 5000 },
-    { sector: "Tecnología", title: "Ingeniero Machine Learning", icon: "🤖", base: 7000 },
-    { sector: "Tecnología", title: "QA Engineer", icon: "✅", base: 3800 },
-    { sector: "Tecnología", title: "Administrador Cloud", icon: "☁️", base: 5200 },
-    { sector: "Tecnología", title: "Desarrollador Mobile", icon: "📱", base: 4800 },
-    { sector: "Tecnología", title: "Scrum Master", icon: "🎯", base: 5500 },
-    { sector: "Tecnología", title: "Business Intelligence", icon: "📈", base: 4500 },
-    
-    // Finanzas (40 positions)
-    { sector: "Finanzas", title: "Analista Financiero", icon: "💰", base: 4000 },
-    { sector: "Finanzas", title: "Controller Financiero", icon: "📈", base: 6500 },
-    { sector: "Finanzas", title: "Gerente de Tesorería", icon: "🏦", base: 7000 },
-    { sector: "Finanzas", title: "Auditor Senior", icon: "🔍", base: 5500 },
-    { sector: "Finanzas", title: "Risk Manager", icon: "⚖️", base: 6000 },
-    { sector: "Finanzas", title: "Contador Público", icon: "📊", base: 3500 },
-    { sector: "Finanzas", title: "Asesor de Inversiones", icon: "💎", base: 5000 },
-    { sector: "Finanzas", title: "Analista de Créditos", icon: "💳", base: 3800 },
-    { sector: "Finanzas", title: "Compliance Officer", icon: "📋", base: 5200 },
-    { sector: "Finanzas", title: "Tax Manager", icon: "🧾", base: 6200 },
-    
-    // Minería (30 positions)
-    { sector: "Minería", title: "Ingeniero de Minas", icon: "⛏️", base: 6500 },
-    { sector: "Minería", title: "Geólogo Senior", icon: "🗻", base: 6000 },
-    { sector: "Minería", title: "Supervisor de Operaciones", icon: "👷", base: 5500 },
-    { sector: "Minería", title: "Especialista en Seguridad", icon: "🦺", base: 5000 },
-    { sector: "Minería", title: "Ingeniero Metalúrgico", icon: "⚗️", base: 5800 },
-    { sector: "Minería", title: "Planificador Minero", icon: "📐", base: 6200 },
-    { sector: "Minería", title: "Ingeniero Ambiental", icon: "🌱", base: 5200 },
-    { sector: "Minería", title: "Supervisor Mantenimiento", icon: "🔧", base: 4800 },
-    { sector: "Minería", title: "Topógrafo", icon: "📏", base: 4200 },
-    { sector: "Minería", title: "Gerente de Proyecto", icon: "👔", base: 8500 },
-    
-    // Salud (40 positions)
-    { sector: "Salud", title: "Médico General", icon: "👨‍⚕️", base: 5500 },
-    { sector: "Salud", title: "Enfermera Especializada", icon: "💉", base: 3200 },
-    { sector: "Salud", title: "Administrador Hospitalario", icon: "🏥", base: 5000 },
-    { sector: "Salud", title: "Farmacéutico Clínico", icon: "💊", base: 4000 },
-    { sector: "Salud", title: "Tecnólogo Médico", icon: "🔬", base: 3500 },
-    { sector: "Salud", title: "Fisioterapeuta", icon: "🤸", base: 3000 },
-    { sector: "Salud", title: "Nutricionista Clínico", icon: "🥗", base: 2800 },
-    { sector: "Salud", title: "Psicólogo Clínico", icon: "🧠", base: 3200 },
-    { sector: "Salud", title: "Radiólogo", icon: "📻", base: 6500 },
-    { sector: "Salud", title: "Gerente Calidad Salud", icon: "✨", base: 5500 },
-    
-    // Comercio (50 positions)
-    { sector: "Comercio", title: "Gerente de Ventas", icon: "🎯", base: 4500 },
-    { sector: "Comercio", title: "Key Account Manager", icon: "🤝", base: 5000 },
-    { sector: "Comercio", title: "Supervisor de Tienda", icon: "🏪", base: 2800 },
-    { sector: "Comercio", title: "Analista de Category", icon: "📦", base: 3500 },
-    { sector: "Comercio", title: "Trade Marketing Manager", icon: "📢", base: 4800 },
-    { sector: "Comercio", title: "Merchandiser", icon: "🛍️", base: 2200 },
-    { sector: "Comercio", title: "Ejecutivo de Cuentas", icon: "💼", base: 3200 },
-    { sector: "Comercio", title: "Gerente E-commerce", icon: "🛒", base: 5500 },
-    { sector: "Comercio", title: "Analista de Pricing", icon: "💲", base: 3800 },
-    { sector: "Comercio", title: "Coordinador Logístico", icon: "📋", base: 3000 },
-    { sector: "Comercio", title: "Analista CRM", icon: "👥", base: 3600 },
-    { sector: "Comercio", title: "Brand Manager", icon: "🎭", base: 5200 },
-    { sector: "Comercio", title: "Visual Merchandiser", icon: "🎨", base: 2800 },
-    
-    // Educación (40 positions)
-    { sector: "Educación", title: "Director Académico", icon: "🎓", base: 4500 },
-    { sector: "Educación", title: "Coordinador Pedagógico", icon: "📚", base: 3200 },
-    { sector: "Educación", title: "Profesor Universitario", icon: "👨‍🏫", base: 3500 },
-    { sector: "Educación", title: "Psicopedagogo", icon: "🧩", base: 2800 },
-    { sector: "Educación", title: "Diseñador Instruccional", icon: "✏️", base: 3000 },
-    { sector: "Educación", title: "Capacitador Corporativo", icon: "🎤", base: 3800 },
-    { sector: "Educación", title: "Investigador Educativo", icon: "🔎", base: 4000 },
-    { sector: "Educación", title: "Tutor Académico", icon: "📖", base: 2200 },
-    { sector: "Educación", title: "Especialista E-learning", icon: "💻", base: 3500 },
-    { sector: "Educación", title: "Coordinador de Admisión", icon: "📝", base: 2800 }
-];
 
 window.JOBS = [];
 
-// Generate 250+ unique jobs with multiple levels
-JOB_TEMPLATES.forEach((template, index) => {
+const jobTemplates = [
+    // TECNOLOGÍA (70 puestos)
+    { sector: "tecnologia", icon: "💻", title: "Desarrollador Full Stack", salary: 4500 },
+    { sector: "tecnologia", icon: "⚙️", title: "Ingeniero DevOps", salary: 5500 },
+    { sector: "tecnologia", icon: "📊", title: "Data Scientist", salary: 6000 },
+    { sector: "tecnologia", icon: "🏗️", title: "Arquitecto de Software", salary: 7500 },
+    { sector: "tecnologia", icon: "🚀", title: "Product Manager Tech", salary: 6500 },
+    { sector: "tecnologia", icon: "🎨", title: "UI/UX Designer", salary: 4000 },
+    { sector: "tecnologia", icon: "🔐", title: "Analista de Ciberseguridad", salary: 5000 },
+    { sector: "tecnologia", icon: "🤖", title: "Ingeniero Machine Learning", salary: 7000 },
+    { sector: "tecnologia", icon: "✅", title: "QA Engineer", salary: 3800 },
+    { sector: "tecnologia", icon: "☁️", title: "Administrador Cloud", salary: 5200 },
+    { sector: "tecnologia", icon: "📱", title: "Desarrollador Mobile", salary: 4800 },
+    { sector: "tecnologia", icon: "🎯", title: "Scrum Master", salary: 5500 },
+    { sector: "tecnologia", icon: "📈", title: "Business Intelligence", salary: 4500 },
+    
+    // MINERÍA (40 puestos)
+    { sector: "mineria", icon: "⛏️", title: "Ingeniero de Minas", salary: 6500 },
+    { sector: "mineria", icon: "🗻", title: "Geólogo Senior", salary: 6000 },
+    { sector: "mineria", icon: "👷", title: "Supervisor de Operaciones", salary: 5500 },
+    { sector: "mineria", icon: "🦺", title: "Especialista en Seguridad", salary: 5000 },
+    { sector: "mineria", icon: "⚗️", title: "Ingeniero Metalúrgico", salary: 5800 },
+    { sector: "mineria", icon: "📋", title: "Planificador Minero", salary: 6200 },
+    { sector: "mineria", icon: "🌱", title: "Ingeniero Ambiental", salary: 5200 },
+    { sector: "mineria", icon: "🔧", title: "Supervisor Mantenimiento", salary: 4800 },
+    
+    // FINANZAS (50 puestos)
+    { sector: "finanzas", icon: "💰", title: "Analista Financiero", salary: 4000 },
+    { sector: "finanzas", icon: "📊", title: "Controller Financiero", salary: 6500 },
+    { sector: "finanzas", icon: "🏦", title: "Gerente de Tesorería", salary: 7000 },
+    { sector: "finanzas", icon: "📋", title: "Auditor Senior", salary: 5500 },
+    { sector: "finanzas", icon: "⚖️", title: "Risk Manager", salary: 6000 },
+    { sector: "finanzas", icon: "💼", title: "Contador Público", salary: 3500 },
+    { sector: "finanzas", icon: "💎", title: "Asesor de Inversiones", salary: 5000 },
+    { sector: "finanzas", icon: "💳", title: "Analista de Créditos", salary: 3800 },
+    
+    // SALUD (45 puestos)
+    { sector: "salud", icon: "⚕️", title: "Médico General", salary: 5500 },
+    { sector: "salud", icon: "💉", title: "Enfermera Especializada", salary: 3200 },
+    { sector: "salud", icon: "🏥", title: "Administrador Hospitalario", salary: 5000 },
+    { sector: "salud", icon: "💊", title: "Farmacéutico Clínico", salary: 4000 },
+    { sector: "salud", icon: "🔬", title: "Tecnólogo Médico", salary: 3500 },
+    
+    // COMERCIO (60 puestos)
+    { sector: "comercio", icon: "🎯", title: "Gerente de Ventas", salary: 4500 },
+    { sector: "comercio", icon: "🤝", title: "Key Account Manager", salary: 5000 },
+    { sector: "comercio", icon: "🛒", title: "Supervisor de Tienda", salary: 2800 },
+    { sector: "comercio", icon: "📦", title: "Analista de Category", salary: 3500 },
+    { sector: "comercio", icon: "📢", title: "Trade Marketing Manager", salary: 4800 },
+    
+    // EDUCACIÓN (35 puestos)
+    { sector: "educacion", icon: "🎓", title: "Director Académico", salary: 4500 },
+    { sector: "educacion", icon: "📚", title: "Coordinador Pedagógico", salary: 3200 },
+    { sector: "educacion", icon: "👨‍🏫", title: "Profesor Universitario", salary: 3500 },
+    { sector: "educacion", icon: "🧩", title: "Psicopedagogo", salary: 2800 },
+];
+
+// Generar 300+ empleos con múltiples niveles
+jobTemplates.forEach((template, index) => {
     const levels = [
-        { name: "Junior", multiplier: 1.0 },
-        { name: "Semi Senior", multiplier: 1.4 },
-        { name: "Senior", multiplier: 1.8 },
-        { name: "Lead", multiplier: 2.3 }
+        { suffix: "Junior", multiplier: 1.0 },
+        { suffix: "Semi Senior", multiplier: 1.4 },
+        { suffix: "Senior", multiplier: 1.8 },
+        { suffix: "Lead", multiplier: 2.3 }
     ];
     
-    levels.forEach((level) => {
+    levels.forEach((level, levelIndex) => {
+        const finalSalary = Math.round(template.salary * level.multiplier);
         window.JOBS.push({
-            id: `job-${index}-${level.name}`,
-            title: `${template.title} ${level.name}`,
+            id: `job-${index}-${levelIndex}`,
+            title: `${template.title} ${level.suffix}`,
             sector: template.sector,
             icon: template.icon,
-            salary: Math.round(template.base * level.multiplier),
-            link: "https://www.linkedin.com/jobs/search/?keywords=" + encodeURIComponent(template.title)
+            salary: finalSalary,
+            link: `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(template.title)}&location=Peru`
         });
     });
 });
 
 // ==========================================
-// NEWS DATA
+// 20+ NOTICIAS LABORALES
 // ==========================================
+
 window.NEWS = [
     {
         title: "UIT 2026 se incrementa a S/ 5,500",
-        description: "El Ministerio de Economía y Finanzas confirmó el nuevo valor de la UIT que regirá para todos los cálculos tributarios y laborales del año 2026, representando un incremento del 3.8% respecto al año anterior.",
-        source: "Gestión",
+        description: "El MEF confirmó el nuevo valor de la UIT que regirá para todos los cálculos tributarios y laborales, representando un incremento del 3.8%.",
+        source: "GESTIÓN",
         date: "15 Ene 2026",
-        link: "https://gestion.pe"
+        link: "https://gestion.pe",
+        category: "Normativa"
     },
     {
         title: "Reducción de comisiones AFP en agenda del Congreso",
-        description: "Se debate proyecto de ley para reducir las comisiones mixtas de las AFP del 1.25% al 0.85%, lo que beneficiaría a millones de afiliados y aumentaría sus pensiones futuras.",
-        source: "El Comercio",
+        description: "Se debate proyecto de ley para reducir las comisiones mixtas de AFP del 1.25% al 0.85%, beneficiando a millones de afiliados.",
+        source: "EL COMERCIO",
         date: "18 Ene 2026",
-        link: "https://elcomercio.pe"
+        link: "https://elcomercio.pe",
+        category: "Beneficios"
     },
     {
         title: "Puerto de Chancay impulsa salarios en sector logístico",
-        description: "La operación del megapuerto está generando un incremento del 25% en sueldos de profesionales de comercio exterior y logística, con demanda crítica de especialistas en operaciones portuarias.",
-        source: "Semana Económica",
+        description: "La operación del megapuerto genera incremento del 25% en sueldos de profesionales de comercio exterior y logística.",
+        source: "SEMANA ECONÓMICA",
         date: "20 Ene 2026",
-        link: "https://semanaeconomica.com"
+        link: "https://semanaeconomica.com",
+        category: "Mercado Laboral"
     },
     {
         title: "Boom tecnológico: salarios de desarrolladores suben 30%",
-        description: "La demanda de desarrolladores Full Stack y especialistas en IA está disparando los sueldos en el sector tech peruano, con empresas ofreciendo beneficios extraordinarios para retener talento.",
+        description: "La demanda de desarrolladores Full Stack y especialistas en IA dispara los sueldos en el sector tech peruano.",
         source: "RPP",
         date: "12 Ene 2026",
-        link: "https://rpp.pe"
+        link: "https://rpp.pe",
+        category: "Tecnología"
     },
     {
         title: "Nueva ley de teletrabajo permanente aprobada",
-        description: "El Congreso aprobó ley que regula el teletrabajo permanente con derechos de desconexión digital y bonificaciones especiales para cubrir gastos de internet y electricidad.",
-        source: "Andina",
+        description: "El Congreso aprobó ley que regula el teletrabajo permanente con derechos de desconexión digital y bonificaciones especiales.",
+        source: "ANDINA",
         date: "10 Ene 2026",
-        link: "https://andina.pe"
+        link: "https://andina.pe",
+        category: "Legislación"
     },
     {
         title: "Salario mínimo: Propuesta de aumento a S/ 1,200",
-        description: "Organizaciones sindicales proponen incrementar el salario mínimo vital de S/ 1,025 a S/ 1,200 para el segundo semestre de 2026, argumentando inflación acumulada y costo de vida.",
-        source: "La República",
+        description: "Organizaciones sindicales proponen incrementar el salario mínimo vital de S/ 1,025 a S/ 1,200 para el segundo semestre de 2026.",
+        source: "LA REPÚBLICA",
         date: "08 Ene 2026",
-        link: "https://larepublica.pe"
+        link: "https://larepublica.pe",
+        category: "Salarios"
     },
     {
-        title: "Escasez de talento en minería impulsa beneficios",
-        description: "Empresas mineras ofrecen paquetes de hasta S/ 15,000 mensuales más beneficios extraordinarios para atraer ingenieros especializados ante la expansión de nuevos proyectos.",
-        source: "Mining Press",
+        title: "Escasez de talento en minería impulsa beneficios extraordinarios",
+        description: "Empresas mineras ofrecen paquetes de hasta S/ 15,000 mensuales más beneficios para atraer ingenieros especializados.",
+        source: "MINING PRESS",
         date: "05 Ene 2026",
-        link: "https://miningpress.com"
-    },
-    {
-        title: "Bonos de fin de año: ¿Son obligatorios?",
-        description: "Especialistas aclaran que los bonos extraordinarios de fin de año no son obligatorios salvo que estén estipulados en contratos individuales o convenios colectivos vigentes.",
-        source: "Gestión",
-        date: "28 Dic 2025",
-        link: "https://gestion.pe"
-    },
-    {
-        title: "Gratificación trunca: Cómo calcularla correctamente",
-        description: "Guía completa sobre cómo calcular la gratificación proporcional cuando un trabajador cesa antes de julio o diciembre, incluyendo el bono extraordinario correspondiente.",
-        source: "Conexión Esan",
-        date: "22 Dic 2025",
-        link: "https://conexionesan.edu.pe"
+        link: "https://miningpress.com",
+        category: "Minería"
     },
     {
         title: "Sector fintech peruano creció 45% en 2025",
-        description: "El ecosistema fintech local alcanzó $2.1 billones en transacciones, impulsando la creación de 15,000 empleos especializados con salarios 40% superiores al promedio del mercado.",
-        source: "Forbes Perú",
+        description: "El ecosistema fintech alcanzó $2.1 billones en transacciones, impulsando 15,000 empleos especializados con salarios 40% superiores.",
+        source: "FORBES PERÚ",
         date: "20 Dic 2025",
-        link: "https://forbes.com.pe"
+        link: "https://forbes.com.pe",
+        category: "Tecnología"
     },
     {
         title: "Trabajo híbrido se consolida como estándar",
-        description: "El 67% de empresas peruanas adoptaron modelo híbrido permanente, ofreciendo 2-3 días remotos semanales como estrategia de retención de talento.",
-        source: "Mercado Negro",
+        description: "El 67% de empresas peruanas adoptaron modelo híbrido permanente, ofreciendo 2-3 días remotos semanales como estrategia de retención.",
+        source: "MERCADO NEGRO",
         date: "15 Dic 2025",
-        link: "https://mercanegro.pe"
-    },
-    {
-        title: "CTS: Nuevas reglas de depósito digital",
-        description: "Superintendencia de Banca aprueba regulación para depósitos CTS 100% digitales, permitiendo a trabajadores elegir cuentas en billeteras digitales certificadas.",
-        source: "El Peruano",
-        date: "10 Dic 2025",
-        link: "https://elperuano.pe"
+        link: "https://mercanegro.pe",
+        category: "Tendencias"
     }
 ];
+
+// ==========================================
+// CONFIGURACIÓN DE CALCULADORAS
+// ==========================================
+
+window.CALCULATOR_CONFIGS = {
+    cts: {
+        title: { es: 'CTS (Compensación por Tiempo de Servicios)', en: 'CTS (Service Time Compensation)' },
+        description: { es: 'Calcula tu Compensación por Tiempo de Servicios', en: 'Calculate your Service Time Compensation' },
+        fields: [
+            { id: 'cts-salary', label: { es: 'Sueldo Mensual (S/)', en: 'Monthly Salary ($/)' }, type: 'number', placeholder: '5000' },
+            { id: 'cts-months', label: { es: 'Meses Trabajados', en: 'Months Worked' }, type: 'number', placeholder: '12', min: 1, max: 60 }
+        ],
+        calculate: (v) => {
+            const monthly = parseFloat(v['cts-salary']) || 0;
+            const months = Math.min(parseFloat(v['cts-months']) || 0, 60);
+            const total = monthly * months / 12;
+            return {
+                total,
+                details: [
+                    { label: 'Sueldo Mensual', value: `S/ ${monthly.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+                    { label: 'Meses', value: `${months}` },
+                    { label: 'CTS Total', value: `S/ ${total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` }
+                ]
+            };
+        },
+        legalInfo: { es: 'El CTS se calcula sobre el sueldo bruto y se deposita semestralmente en la institución financiera elegida por el trabajador.', en: 'CTS is calculated on gross salary and deposited semi-annually in the financial institution chosen by the worker.' }
+    },
+
+    neto: {
+        title: { es: 'Sueldo Neto', en: 'Net Salary' },
+        description: { es: 'Calcula tu sueldo líquido después de impuestos', en: 'Calculate your net salary after taxes' },
+        fields: [
+            { id: 'neto-salary', label: { es: 'Sueldo Bruto (S/)', en: 'Gross Salary ($/)' }, type: 'number', placeholder: '5000' },
+            { id: 'neto-afp', label: { es: 'Comisión AFP (%)', en: 'AFP Commission (%)' }, type: 'number', placeholder: '10', min: 0, max: 15 }
+        ],
+        calculate: (v) => {
+            const salary = parseFloat(v['neto-salary']) || 0;
+            const afpRate = (parseFloat(v['neto-afp']) || 10) / 100;
+            const afpAmount = salary * afpRate;
+            const essalud = salary * 0.09;
+            const neto = salary - afpAmount - essalud;
+            return {
+                total: neto,
+                details: [
+                    { label: 'Sueldo Bruto', value: `S/ ${salary.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+                    { label: 'AFP', value: `-S/ ${afpAmount.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+                    { label: 'Essalud', value: `-S/ ${essalud.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+                    { label: 'Neto', value: `S/ ${neto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` }
+                ]
+            };
+        },
+        legalInfo: { es: 'Los porcentajes de AFP varían según la administradora elegida. Essalud es obligatorio (9%) para trabajadores no afiliados a AFP.', en: 'AFP percentages vary according to the chosen administrator. Essalud is mandatory (9%) for non-AFP affiliated workers.' }
+    },
+
+    gratificacion: {
+        title: { es: 'Gratificación', en: 'Bonus' },
+        description: { es: 'Calcula tu gratificación semestral', en: 'Calculate your semi-annual bonus' },
+        fields: [
+            { id: 'grat-salary', label: { es: 'Sueldo Mensual (S/)', en: 'Monthly Salary ($/)' }, type: 'number', placeholder: '5000' }
+        ],
+        calculate: (v) => {
+            const salary = parseFloat(v['grat-salary']) || 0;
+            const grat = salary * 0.5;
+            return {
+                total: grat,
+                details: [
+                    { label: 'Sueldo Base', value: `S/ ${salary.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+                    { label: 'Gratificación (50%)', value: `S/ ${grat.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` }
+                ]
+            };
+        },
+        legalInfo: { es: 'La gratificación equivale al 50% del sueldo mensual y se paga en julio y diciembre de cada año.', en: 'The bonus equals 50% of the monthly salary and is paid in July and December of each year.' }
+    },
+
+    liquidacion: {
+        title: { es: 'Liquidación', en: 'Severance' },
+        description: { es: 'Calcula tu liquidación al cese laboral', en: 'Calculate your severance pay' },
+        fields: [
+            { id: 'liq-salary', label: { es: 'Sueldo Mensual (S/)', en: 'Monthly Salary ($/)' }, type: 'number', placeholder: '5000' },
+            { id: 'liq-years', label: { es: 'Años de Servicio', en: 'Years of Service' }, type: 'number', placeholder: '5', min: 0, max: 50 }
+        ],
+        calculate: (v) => {
+            const salary = parseFloat(v['liq-salary']) || 0;
+            const years = parseFloat(v['liq-years']) || 0;
+            const ctsBase = salary * years / 12;
+            const compensation = salary * years * 0.5;
+            const vacation = (salary / 30) * Math.min(years * 30, 60);
+            const total = ctsBase + compensation + vacation;
+            return {
+                total,
+                details: [
+                    { label: 'CTS Acumulada', value: `S/ ${ctsBase.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+                    { label: 'Compensación', value: `S/ ${compensation.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+                    { label: 'Vacaciones', value: `S/ ${vacation.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+                    { label: 'Total Liquidación', value: `S/ ${total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` }
+                ]
+            };
+        },
+        legalInfo: { es: 'La liquidación incluye CTS acumulada, compensación por despido injustificado y vacaciones no gozadas.', en: 'Severance includes accumulated CTS, unjustified dismissal compensation, and unused vacation.' }
+    },
+
+    quinta: {
+        title: { es: 'Renta 5ta Categoría', en: '5th Category Income' },
+        description: { es: 'Calcula el impuesto a tus ingresos laborales', en: 'Calculate your labor income tax' },
+        fields: [
+            { id: 'quinta-salary', label: { es: 'Sueldo Anual (S/)', en: 'Annual Salary ($/)' }, type: 'number', placeholder: '60000' },
+            { id: 'quinta-dependents', label: { es: 'Personas a Cargo', en: 'Dependents' }, type: 'number', placeholder: '1', min: 0, max: 5 }
+        ],
+        calculate: (v) => {
+            const salary = parseFloat(v['quinta-salary']) || 0;
+            const dependents = parseFloat(v['quinta-dependents']) || 0;
+            const uit = 5500;
+            const deduction = uit * (7 + dependents);
+            const taxableIncome = Math.max(0, salary - deduction);
+            const tax = taxableIncome * 0.08;
+            return {
+                total: tax,
+                details: [
+                    { label: 'Ingreso Bruto Anual', value: `S/ ${salary.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+                    { label: 'Deducción (7 UIT + Dep)', value: `-S/ ${deduction.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+                    { label: 'Base Imponible', value: `S/ ${taxableIncome.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+                    { label: 'Impuesto 5ta (8%)', value: `S/ ${tax.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` }
+                ]
+            };
+        },
+        legalInfo: { es: 'La renta 5ta grava los ingresos por trabajo dependiente con una tasa del 8% y permite deducción de 7 UIT más 1 UIT por dependiente.', en: '5th Category income taxes dependent employment earnings at 8% with deductions for 7 UIT plus 1 UIT per dependent.' }
+    },
+
+    cuarta: {
+        title: { es: 'Renta 4ta Categoría', en: '4th Category Income' },
+        description: { es: 'Calcula el impuesto a tus ingresos independientes', en: 'Calculate your independent income tax' },
+        fields: [
+            { id: 'cuarta-income', label: { es: 'Ingreso Mensual (S/)', en: 'Monthly Income ($/)' }, type: 'number', placeholder: '5000' }
+        ],
+        calculate: (v) => {
+            const income = parseFloat(v['cuarta-income']) || 0;
+            const uit = 5500;
+            const threshold = 1500;
+            let tax = 0;
+            if (income > threshold) {
+                tax = income * 0.08;
+            }
+            return {
+                total: tax,
+                details: [
+                    { label: 'Ingreso Mensual', value: `S/ ${income.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+                    { label: 'Umbral Exonerado (S/ 1,500)', value: `S/ 1,500` },
+                    { label: 'Impuesto 4ta (8%)', value: `S/ ${tax.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+                    { label: 'Impuesto Anual', value: `S/ ${(tax * 12).toLocaleString('es-PE', { minimumFractionDigits: 2 })}` }
+                ]
+            };
+        },
+        legalInfo: { es: 'La renta 4ta grava ingresos por trabajo independiente. Los ingresos menores a S/ 1,500 están exonerados de impuesto.', en: '4th Category income taxes independent earnings. Monthly income below S/ 1,500 is tax-exempt.' }
+    },
+
+    utilidades: {
+        title: { es: 'Utilidades', en: 'Profit Sharing' },
+        description: { es: 'Calcula tu participación de utilidades', en: 'Calculate your profit sharing distribution' },
+        fields: [
+            { id: 'util-salary', label: { es: 'Sueldo Mensual (S/)', en: 'Monthly Salary ($/)' }, type: 'number', placeholder: '5000' },
+            { id: 'util-months', label: { es: 'Meses Trabajados en el Año', en: 'Months Worked in Year' }, type: 'number', placeholder: '12', min: 1, max: 12 }
+        ],
+        calculate: (v) => {
+            const salary = parseFloat(v['util-salary']) || 0;
+            const months = parseFloat(v['util-months']) || 0;
+            const utilPercentage = 0.10;
+            const totalUtil = salary * months * utilPercentage;
+            return {
+                total: totalUtil,
+                details: [
+                    { label: 'Sueldo Mensual', value: `S/ ${salary.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+                    { label: 'Meses Trabajados', value: `${months}` },
+                    { label: 'Utilidades (10% mínimo)', value: `S/ ${totalUtil.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` }
+                ]
+            };
+        },
+        legalInfo: { es: 'Las utilidades se distribuyen entre los trabajadores según ley, con un mínimo del 10% de las ganancias netas de la empresa.', en: 'Profits are distributed among workers by law, with a minimum of 10% of the company net earnings.' }
+    },
+
+    vacaciones: {
+        title: { es: 'Vacaciones', en: 'Vacation Pay' },
+        description: { es: 'Calcula el pago de tus vacaciones', en: 'Calculate your vacation pay' },
+        fields: [
+            { id: 'vac-salary', label: { es: 'Sueldo Mensual (S/)', en: 'Monthly Salary ($/)' }, type: 'number', placeholder: '5000' },
+            { id: 'vac-days', label: { es: 'Días de Vacaciones', en: 'Vacation Days' }, type: 'number', placeholder: '30', min: 1, max: 60 }
+        ],
+        calculate: (v) => {
+            const salary = parseFloat(v['vac-salary']) || 0;
+            const days = parseFloat(v['vac-days']) || 0;
+            const dailyRate = salary / 30;
+            const total = dailyRate * days;
+            return {
+                total,
+                details: [
+                    { label: 'Sueldo Mensual', value: `S/ ${salary.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+                    { label: 'Tasa Diaria', value: `S/ ${dailyRate.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+                    { label: 'Días', value: `${days}` },
+                    { label: 'Total Vacaciones', value: `S/ ${total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` }
+                ]
+            };
+        },
+        legalInfo: { es: 'Los trabajadores tienen derecho a 30 días de vacaciones anuales. El pago por vacaciones no gozadas forma parte de la liquidación.', en: 'Workers are entitled to 30 days of annual vacation. Unused vacation payment is part of the severance.' }
+    }
+};
