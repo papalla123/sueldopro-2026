@@ -1,359 +1,307 @@
 'use strict';
 
-window.CONFIG = {
-    UIT_2026: 5500,
-    ASIGNACION_FAMILIAR: 115,
-    AFP_RATE: 0.12,
-    ONP_RATE: 0.13,
-    ESSALUD_RATE: 0.09,
-    FOURTH_CATEGORY_RETENTION: 0.08,
-    FOURTH_CATEGORY_THRESHOLD: 1500,
-    FIFTH_CATEGORY_RATE: 0.08,
-    CTS_MONTHS_MAX: 6,
-    BENEFITS_INVISIBLE: 0.1833,
-    CHART_ANIMATION_DURATION: 750
+// PENTÁGONO FINANCIERO - Enlaces Dinámicos
+window.PENTAGON_LINKS = {
+    sueldopro: {
+        name: 'SueldoPro Ultra',
+        icon: '💰',
+        url: window.location.href,
+        description: 'Calculadora Laboral Global',
+        color: 'from-indigo-500 to-indigo-700'
+    },
+    liquidez: {
+        name: 'Liquidez Force',
+        icon: '💧',
+        url: 'https://liquidez-force.vercel.app',
+        description: 'Gestión de Flujo de Caja',
+        color: 'from-blue-500 to-cyan-500'
+    },
+    lead: {
+        name: 'Lead Target',
+        icon: '🎯',
+        url: 'https://lead-target-rpvx.vercel.app',
+        description: 'CRM de Prospectos',
+        color: 'from-purple-500 to-pink-500'
+    },
+    wealth: {
+        name: 'Wealth Armor AI',
+        icon: '🛡️',
+        url: 'https://wealth-armor-ai.vercel.app',
+        description: 'Protección Patrimonial',
+        color: 'from-emerald-500 to-green-600'
+    },
+    margin: {
+        name: 'Margin Master Pro',
+        icon: '📈',
+        url: 'https://margin-master-pro-pboy.vercel.app',
+        description: 'Optimización de Márgenes',
+        color: 'from-orange-500 to-red-500'
+    }
 };
 
-window.CURRENCIES = [
-    { code: "USD", name: "Dolar Estadounidense", symbol: "$", rate: 3.75 },
-    { code: "EUR", name: "Euro", symbol: "EUR", rate: 4.12 },
-    { code: "GBP", name: "Libra Esterlina", symbol: "GBP", rate: 4.82 },
-    { code: "JPY", name: "Yen Japones", symbol: "JPY", rate: 0.025 },
-    { code: "CNY", name: "Yuan Chino", symbol: "CNY", rate: 0.52 },
-    { code: "CAD", name: "Dolar Canadiense", symbol: "CAD", rate: 2.78 },
-    { code: "AUD", name: "Dolar Australiano", symbol: "AUD", rate: 2.52 },
-    { code: "CHF", name: "Franco Suizo", symbol: "CHF", rate: 4.30 },
-    { code: "MXN", name: "Peso Mexicano", symbol: "MXN", rate: 0.22 },
-    { code: "BRL", name: "Real Brasileno", symbol: "BRL", rate: 0.76 },
-    { code: "INR", name: "Rupia India", symbol: "INR", rate: 0.045 },
-    { code: "KRW", name: "Won Surcoreano", symbol: "KRW", rate: 0.0028 },
-    { code: "SGD", name: "Dolar Singapur", symbol: "SGD", rate: 2.80 },
-    { code: "HKD", name: "Dolar Hong Kong", symbol: "HKD", rate: 0.48 },
-    { code: "NZD", name: "Dolar Neozelandes", symbol: "NZD", rate: 2.32 },
-    { code: "SEK", name: "Corona Sueca", symbol: "SEK", rate: 0.35 },
-    { code: "NOK", name: "Corona Noruega", symbol: "NOK", rate: 0.36 },
-    { code: "DKK", name: "Corona Danesa", symbol: "DKK", rate: 0.55 },
-    { code: "PLN", name: "Zloty Polaco", symbol: "PLN", rate: 0.95 },
-    { code: "CZK", name: "Corona Checa", symbol: "CZK", rate: 0.17 },
-    { code: "HUF", name: "Florin Hungaro", symbol: "HUF", rate: 0.011 },
-    { code: "RON", name: "Leu Rumano", symbol: "RON", rate: 0.83 },
-    { code: "RUB", name: "Rublo Ruso", symbol: "RUB", rate: 0.041 },
-    { code: "TRY", name: "Lira Turca", symbol: "TRY", rate: 0.12 },
-    { code: "ZAR", name: "Rand Sudafricano", symbol: "ZAR", rate: 0.20 },
-    { code: "SAR", name: "Riyal Saudi", symbol: "SAR", rate: 1.00 },
-    { code: "AED", name: "Dirham EAU", symbol: "AED", rate: 1.02 },
-    { code: "KWD", name: "Dinar Kuwaiti", symbol: "KWD", rate: 12.25 },
-    { code: "QAR", name: "Riyal Qatari", symbol: "QAR", rate: 1.03 },
-    { code: "CLP", name: "Peso Chileno", symbol: "CLP", rate: 0.0041 }
-];
+// BASE DE DATOS GLOBAL - 21 PAÍSES
+window.COUNTRIES_DATA = {
+    ES: { code: 'ES', name: 'España', flag: '🇪🇸', currency: 'EUR', currencySymbol: '€', employerTax: 0.30, socialSecurity: 0.065, pension: 0.047, unemployment: 0.016, healthInsurance: 0.041, vacation: 30, severance: 1.0, bonusMonths: 2, minWage: 1323, thirteenth: true, fourteenth: false },
+    MX: { code: 'MX', name: 'México', flag: '🇲🇽', currency: 'MXN', currencySymbol: '$', employerTax: 0.25, socialSecurity: 0.024, pension: 0.02, unemployment: 0.0, healthInsurance: 0.105, vacation: 12, severance: 0.33, bonusMonths: 1, minWage: 248.93, thirteenth: true, fourteenth: false },
+    CO: { code: 'CO', name: 'Colombia', flag: '🇨🇴', currency: 'COP', currencySymbol: '$', employerTax: 0.27, socialSecurity: 0.04, pension: 0.12, unemployment: 0.0, healthInsurance: 0.085, vacation: 15, severance: 1.0, bonusMonths: 1, minWage: 1300000, thirteenth: true, fourteenth: true },
+    PE: { code: 'PE', name: 'Perú', flag: '🇵🇪', currency: 'PEN', currencySymbol: 'S/', employerTax: 0.09, socialSecurity: 0.0, pension: 0.13, unemployment: 0.0, healthInsurance: 0.09, vacation: 30, severance: 0.5, bonusMonths: 2, minWage: 1025, thirteenth: true, fourteenth: false },
+    CL: { code: 'CL', name: 'Chile', flag: '🇨🇱', currency: 'CLP', currencySymbol: '$', employerTax: 0.028, socialSecurity: 0.0, pension: 0.10, unemployment: 0.03, healthInsurance: 0.07, vacation: 15, severance: 0.33, bonusMonths: 0, minWage: 460000, thirteenth: false, fourteenth: false },
+    AR: { code: 'AR', name: 'Argentina', flag: '🇦🇷', currency: 'ARS', currencySymbol: '$', employerTax: 0.23, socialSecurity: 0.17, pension: 0.11, unemployment: 0.0, healthInsurance: 0.06, vacation: 14, severance: 1.0, bonusMonths: 1, minWage: 234315, thirteenth: true, fourteenth: false },
+    EC: { code: 'EC', name: 'Ecuador', flag: '🇪🇨', currency: 'USD', currencySymbol: '$', employerTax: 0.1265, socialSecurity: 0.0945, pension: 0.0, unemployment: 0.0, healthInsurance: 0.0, vacation: 15, severance: 1.0, bonusMonths: 2, minWage: 460, thirteenth: true, fourteenth: true },
+    BO: { code: 'BO', name: 'Bolivia', flag: '🇧🇴', currency: 'BOB', currencySymbol: 'Bs', employerTax: 0.165, socialSecurity: 0.1271, pension: 0.0, unemployment: 0.0, healthInsurance: 0.10, vacation: 15, severance: 1.0, bonusMonths: 2, minWage: 2362, thirteenth: true, fourteenth: true },
+    PY: { code: 'PY', name: 'Paraguay', flag: '🇵🇾', currency: 'PYG', currencySymbol: '₲', employerTax: 0.165, socialSecurity: 0.09, pension: 0.0, unemployment: 0.0, healthInsurance: 0.09, vacation: 12, severance: 0.5, bonusMonths: 1, minWage: 2680373, thirteenth: true, fourteenth: false },
+    UY: { code: 'UY', name: 'Uruguay', flag: '🇺🇾', currency: 'UYU', currencySymbol: '$', employerTax: 0.0775, socialSecurity: 0.15, pension: 0.15, unemployment: 0.0, healthInsurance: 0.05, vacation: 20, severance: 0.5, bonusMonths: 1, minWage: 21106, thirteenth: true, fourteenth: false },
+    VE: { code: 'VE', name: 'Venezuela', flag: '🇻🇪', currency: 'VES', currencySymbol: 'Bs', employerTax: 0.12, socialSecurity: 0.04, pension: 0.10, unemployment: 0.0, healthInsurance: 0.04, vacation: 15, severance: 1.0, bonusMonths: 2, minWage: 130, thirteenth: true, fourteenth: false },
+    CR: { code: 'CR', name: 'Costa Rica', flag: '🇨🇷', currency: 'CRC', currencySymbol: '₡', employerTax: 0.2667, socialSecurity: 0.0917, pension: 0.0, unemployment: 0.0, healthInsurance: 0.0917, vacation: 14, severance: 0.5, bonusMonths: 1, minWage: 351320, thirteenth: true, fourteenth: false },
+    PA: { code: 'PA', name: 'Panamá', flag: '🇵🇦', currency: 'USD', currencySymbol: '$', employerTax: 0.125, socialSecurity: 0.0975, pension: 0.0, unemployment: 0.0, healthInsurance: 0.0975, vacation: 30, severance: 1.0, bonusMonths: 1, minWage: 800, thirteenth: true, fourteenth: false },
+    GT: { code: 'GT', name: 'Guatemala', flag: '🇬🇹', currency: 'GTQ', currencySymbol: 'Q', employerTax: 0.1267, socialSecurity: 0.0483, pension: 0.0, unemployment: 0.0, healthInsurance: 0.1067, vacation: 15, severance: 1.0, bonusMonths: 1, minWage: 3139.20, thirteenth: true, fourteenth: true },
+    HN: { code: 'HN', name: 'Honduras', flag: '🇭🇳', currency: 'HNL', currencySymbol: 'L', employerTax: 0.07, socialSecurity: 0.035, pension: 0.0, unemployment: 0.0, healthInsurance: 0.05, vacation: 20, severance: 1.0, bonusMonths: 1, minWage: 9839.40, thirteenth: true, fourteenth: true },
+    SV: { code: 'SV', name: 'El Salvador', flag: '🇸🇻', currency: 'USD', currencySymbol: '$', employerTax: 0.078, socialSecurity: 0.075, pension: 0.075, unemployment: 0.0, healthInsurance: 0.075, vacation: 15, severance: 1.0, bonusMonths: 1, minWage: 365, thirteenth: true, fourteenth: false },
+    NI: { code: 'NI', name: 'Nicaragua', flag: '🇳🇮', currency: 'NIO', currencySymbol: 'C$', employerTax: 0.22, socialSecurity: 0.07, pension: 0.0, unemployment: 0.0, healthInsurance: 0.09, vacation: 15, severance: 1.0, bonusMonths: 1, minWage: 6518.40, thirteenth: true, fourteenth: false },
+    DO: { code: 'DO', name: 'República Dominicana', flag: '🇩🇴', currency: 'DOP', currencySymbol: 'RD$', employerTax: 0.0710, socialSecurity: 0.0287, pension: 0.071, unemployment: 0.0, healthInsurance: 0.0710, vacation: 14, severance: 0.5, bonusMonths: 1, minWage: 23000, thirteenth: true, fourteenth: false },
+    CU: { code: 'CU', name: 'Cuba', flag: '🇨🇺', currency: 'CUP', currencySymbol: '$', employerTax: 0.145, socialSecurity: 0.05, pension: 0.125, unemployment: 0.0, healthInsurance: 0.0, vacation: 30, severance: 1.0, bonusMonths: 0, minWage: 2100, thirteenth: true, fourteenth: false },
+    US: { code: 'US', name: 'Estados Unidos', flag: '🇺🇸', currency: 'USD', currencySymbol: '$', employerTax: 0.0765, socialSecurity: 0.062, pension: 0.0, unemployment: 0.006, healthInsurance: 0.0145, vacation: 10, severance: 0.0, bonusMonths: 0, minWage: 7.25, thirteenth: false, fourteenth: false },
+    BR: { code: 'BR', name: 'Brasil', flag: '🇧🇷', currency: 'BRL', currencySymbol: 'R$', employerTax: 0.2705, socialSecurity: 0.08, pension: 0.08, unemployment: 0.08, healthInsurance: 0.0, vacation: 30, severance: 0.4, bonusMonths: 1, minWage: 1412, thirteenth: true, fourteenth: false }
+};
 
-window.JOBS = [];
-const jobTemplates = [
-    { sector: "tecnologia", icon: "💻", title: "Desarrollador Full Stack", salary: 4500 },
-    { sector: "tecnologia", icon: "⚙️", title: "Ingeniero DevOps", salary: 5500 },
-    { sector: "tecnologia", icon: "📊", title: "Data Scientist", salary: 6000 },
-    { sector: "tecnologia", icon: "🏗️", title: "Arquitecto Software", salary: 7500 },
-    { sector: "tecnologia", icon: "🚀", title: "Product Manager", salary: 6500 },
-    { sector: "mineria", icon: "⛏️", title: "Ingeniero Minas", salary: 6500 },
-    { sector: "mineria", icon: "🗻", title: "Geologo Senior", salary: 6000 },
-    { sector: "mineria", icon: "👷", title: "Supervisor Operaciones", salary: 5500 },
-    { sector: "finanzas", icon: "💰", title: "Analista Financiero", salary: 4000 },
-    { sector: "finanzas", icon: "📊", title: "Controller Financiero", salary: 6500 },
-    { sector: "finanzas", icon: "🏦", title: "Gerente Tesoreria", salary: 7000 },
-    { sector: "salud", icon: "⚕️", title: "Medico General", salary: 5500 },
-    { sector: "salud", icon: "💉", title: "Enfermera Especializada", salary: 3200 },
-    { sector: "salud", icon: "🏥", title: "Admin Hospitalario", salary: 5000 },
-    { sector: "comercio", icon: "🎯", title: "Gerente Ventas", salary: 4500 },
-    { sector: "comercio", icon: "🤝", title: "Key Account Manager", salary: 5000 },
-    { sector: "comercio", icon: "🛒", title: "Supervisor Tienda", salary: 2800 },
-    { sector: "educacion", icon: "🎓", title: "Director Academico", salary: 4500 },
-    { sector: "educacion", icon: "📚", title: "Coordinador Pedagogico", salary: 3200 },
-    { sector: "educacion", icon: "👨‍🏫", title: "Profesor Universitario", salary: 3500 }
-];
-
-jobTemplates.forEach((template, index) => {
-    const levels = [
-        { suffix: "Junior", multiplier: 1.0 },
-        { suffix: "Semi Senior", multiplier: 1.4 },
-        { suffix: "Senior", multiplier: 1.8 },
-        { suffix: "Lead", multiplier: 2.3 }
-    ];
-    
-    levels.forEach((level, levelIndex) => {
-        const finalSalary = Math.round(template.salary * level.multiplier);
-        window.JOBS.push({
-            id: `job-${index}-${levelIndex}`,
-            title: `${template.title} ${level.suffix}`,
-            sector: template.sector,
-            icon: template.icon,
-            salary: finalSalary,
-            link: `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(template.title)}`
-        });
-    });
-});
-
-window.NEWS = [
-    {
-        title: "UIT 2026 se incrementa a S/ 5,500",
-        description: "El MEF confirmo el nuevo valor de la UIT para todos los calculos tributarios y laborales.",
-        source: "GESTION",
-        date: "15 Ene 2026",
-        link: "https://gestion.pe"
-    },
-    {
-        title: "Reduccion de comisiones AFP en agenda",
-        description: "Se debate proyecto de ley para reducir las comisiones mixtas de AFP.",
-        source: "EL COMERCIO",
-        date: "18 Ene 2026",
-        link: "https://elcomercio.pe"
-    },
-    {
-        title: "Puerto Chancay impulsa salarios",
-        description: "La operacion del megapuerto genera incremento del 25% en sueldos.",
-        source: "SEMANA ECONOMICA",
-        date: "20 Ene 2026",
-        link: "https://semanaeconomica.com"
-    },
-    {
-        title: "Boom tecnologico: salarios suben 30%",
-        description: "La demanda de desarrolladores dispara los sueldos en el sector tech.",
-        source: "RPP",
-        date: "12 Ene 2026",
-        link: "https://rpp.pe"
-    },
-    {
-        title: "Nueva ley de teletrabajo aprobada",
-        description: "El Congreso aprobo ley que regula el teletrabajo permanente.",
-        source: "ANDINA",
-        date: "10 Ene 2026",
-        link: "https://andina.pe"
-    },
-    {
-        title: "Salario minimo: propuesta de aumento",
-        description: "Se propone incrementar el salario minimo vital a S/ 1,200.",
-        source: "LA REPUBLICA",
-        date: "08 Ene 2026",
-        link: "https://larepublica.pe"
-    },
-    {
-        title: "Escasez talento en mineria",
-        description: "Empresas mineras ofrecen paquetes de hasta S/ 15,000.",
-        source: "MINING PRESS",
-        date: "05 Ene 2026",
-        link: "https://miningpress.com"
-    },
-    {
-        title: "Sector fintech peruano creció 45%",
-        description: "El ecosistema fintech alcanzo transacciones por $2.1 billones.",
-        source: "FORBES PERU",
-        date: "20 Dic 2025",
-        link: "https://forbes.com.pe"
-    },
-    {
-        title: "Trabajo hibrido se consolida",
-        description: "El 67% de empresas adoptaron modelo hibrido permanente.",
-        source: "MERCADO NEGRO",
-        date: "15 Dic 2025",
-        link: "https://mercanegro.pe"
-    }
-];
-
+// CONFIGURACIONES DE CALCULADORAS
 window.CALCULATOR_CONFIGS = {
-    cts: {
-        title: { es: 'CTS', en: 'CTS' },
-        description: { es: 'Calcula tu Compensacion por Tiempo', en: 'Calculate your Service Time Compensation' },
-        fields: [
-            { id: 'cts-salary', label: { es: 'Sueldo Mensual', en: 'Monthly Salary' }, type: 'number', placeholder: '5000' },
-            { id: 'cts-months', label: { es: 'Meses Trabajados', en: 'Months Worked' }, type: 'number', placeholder: '12', min: 1, max: 60 }
-        ],
-        calculate: (v) => {
-            const monthly = parseFloat(v['cts-salary']) || 0;
-            const months = Math.min(parseFloat(v['cts-months']) || 0, 60);
-            const total = monthly * months / 12;
-            return {
-                total,
-                details: [
-                    { label: 'Sueldo Mensual', value: `S/ ${monthly.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
-                    { label: 'Meses', value: `${months}` },
-                    { label: 'CTS Total', value: `S/ ${total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` }
-                ]
-            };
-        },
-        legalInfo: { es: 'El CTS se calcula sobre el sueldo bruto y se deposita semestralmente.', en: 'CTS is calculated on gross salary.' }
-    },
-
     neto: {
-        title: { es: 'Sueldo Neto', en: 'Net Salary' },
-        description: { es: 'Calcula tu sueldo liquido', en: 'Calculate your net salary' },
+        id: 'neto',
+        icon: '💵',
+        title: 'Sueldo Neto',
+        description: 'Calcula tu sueldo líquido después de impuestos y deducciones',
         fields: [
-            { id: 'neto-salary', label: { es: 'Sueldo Bruto', en: 'Gross Salary' }, type: 'number', placeholder: '5000' },
-            { id: 'neto-afp', label: { es: 'AFP %', en: 'AFP %' }, type: 'number', placeholder: '10', min: 0, max: 15 }
+            { id: 'neto-salary', label: 'Sueldo Bruto Mensual', type: 'number', placeholder: '5000', min: 0 }
         ],
-        calculate: (v) => {
-            const salary = parseFloat(v['neto-salary']) || 0;
-            const afpRate = (parseFloat(v['neto-afp']) || 10) / 100;
-            const afpAmount = salary * afpRate;
-            const essalud = salary * 0.09;
-            const neto = salary - afpAmount - essalud;
+        calculate: (values, country) => {
+            const salary = parseFloat(values['neto-salary']) || 0;
+            const pension = salary * country.pension;
+            const health = salary * country.healthInsurance;
+            const social = salary * country.socialSecurity;
+            const neto = salary - pension - health - social;
+            
             return {
                 total: neto,
                 details: [
-                    { label: 'Sueldo Bruto', value: `S/ ${salary.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
-                    { label: 'AFP', value: `-S/ ${afpAmount.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
-                    { label: 'Essalud', value: `-S/ ${essalud.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
-                    { label: 'Neto', value: `S/ ${neto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` }
+                    { label: 'Sueldo Bruto', value: `${country.currencySymbol} ${salary.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: 'Pensión', value: `-${country.currencySymbol} ${pension.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: 'Salud', value: `-${country.currencySymbol} ${health.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: 'Seguridad Social', value: `-${country.currencySymbol} ${social.toLocaleString('es', { minimumFractionDigits: 2 })}` }
                 ]
             };
         },
-        legalInfo: { es: 'Los porcentajes de AFP varian segun la administradora.', en: 'AFP percentages vary by administrator.' }
+        legalInfo: 'Los descuentos incluyen pensión, salud y seguridad social según normativa del país seleccionado.'
     },
-
-    gratificacion: {
-        title: { es: 'Gratificacion', en: 'Bonus' },
-        description: { es: 'Calcula tu gratificacion semestral', en: 'Calculate your bonus' },
+    
+    cts: {
+        id: 'cts',
+        icon: '🏦',
+        title: 'CTS / Indemnización',
+        description: 'Calcula compensación por tiempo de servicio o indemnización',
         fields: [
-            { id: 'grat-salary', label: { es: 'Sueldo Mensual', en: 'Monthly Salary' }, type: 'number', placeholder: '5000' }
+            { id: 'cts-salary', label: 'Sueldo Mensual', type: 'number', placeholder: '5000', min: 0 },
+            { id: 'cts-months', label: 'Meses Trabajados', type: 'number', placeholder: '12', min: 1, max: 240 }
         ],
-        calculate: (v) => {
-            const salary = parseFloat(v['grat-salary']) || 0;
-            const grat = salary * 0.5;
-            return {
-                total: grat,
-                details: [
-                    { label: 'Sueldo Base', value: `S/ ${salary.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
-                    { label: 'Gratificacion (50%)', value: `S/ ${grat.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` }
-                ]
-            };
-        },
-        legalInfo: { es: 'La gratificacion equivale al 50% del sueldo mensual.', en: 'Bonus equals 50% of monthly salary.' }
-    },
-
-    liquidacion: {
-        title: { es: 'Liquidacion', en: 'Severance' },
-        description: { es: 'Calcula tu liquidacion al cese laboral', en: 'Calculate severance' },
-        fields: [
-            { id: 'liq-salary', label: { es: 'Sueldo Mensual', en: 'Monthly Salary' }, type: 'number', placeholder: '5000' },
-            { id: 'liq-years', label: { es: 'Anos de Servicio', en: 'Years of Service' }, type: 'number', placeholder: '5', min: 0, max: 50 }
-        ],
-        calculate: (v) => {
-            const salary = parseFloat(v['liq-salary']) || 0;
-            const years = parseFloat(v['liq-years']) || 0;
-            const ctsBase = salary * years / 12;
-            const compensation = salary * years * 0.5;
-            const vacation = (salary / 30) * Math.min(years * 30, 60);
-            const total = ctsBase + compensation + vacation;
+        calculate: (values, country) => {
+            const salary = parseFloat(values['cts-salary']) || 0;
+            const months = parseFloat(values['cts-months']) || 0;
+            const years = months / 12;
+            
+            const cts = (salary * months) / 12;
+            const severance = salary * years * country.severance;
+            const total = cts + severance;
+            
             return {
                 total,
                 details: [
-                    { label: 'CTS Acumulada', value: `S/ ${ctsBase.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
-                    { label: 'Compensacion', value: `S/ ${compensation.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
-                    { label: 'Vacaciones', value: `S/ ${vacation.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
-                    { label: 'Total', value: `S/ ${total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` }
+                    { label: 'Sueldo Mensual', value: `${country.currencySymbol} ${salary.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: 'Meses Trabajados', value: `${months}` },
+                    { label: 'CTS/Indemnización', value: `${country.currencySymbol} ${cts.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: 'Compensación Adicional', value: `${country.currencySymbol} ${severance.toLocaleString('es', { minimumFractionDigits: 2 })}` }
                 ]
             };
         },
-        legalInfo: { es: 'La liquidacion incluye CTS acumulada, compensacion y vacaciones.', en: 'Severance includes CTS, compensation and vacation.' }
+        legalInfo: 'El cálculo incluye CTS y compensación adicional según el factor de severancia del país.'
     },
-
-    quinta: {
-        title: { es: 'Renta 5ta', en: '5th Category' },
-        description: { es: 'Calcula el impuesto a tus ingresos laborales', en: 'Calculate labor income tax' },
+    
+    liquidacion: {
+        id: 'liquidacion',
+        icon: '📋',
+        title: 'Liquidación Final',
+        description: 'Calcula todos los beneficios al terminar contrato',
         fields: [
-            { id: 'quinta-salary', label: { es: 'Sueldo Anual', en: 'Annual Salary' }, type: 'number', placeholder: '60000' },
-            { id: 'quinta-dependents', label: { es: 'Personas a Cargo', en: 'Dependents' }, type: 'number', placeholder: '1', min: 0, max: 5 }
+            { id: 'liq-salary', label: 'Sueldo Mensual', type: 'number', placeholder: '5000', min: 0 },
+            { id: 'liq-years', label: 'Años de Servicio', type: 'number', placeholder: '5', min: 0, max: 50 }
         ],
-        calculate: (v) => {
-            const salary = parseFloat(v['quinta-salary']) || 0;
-            const dependents = parseFloat(v['quinta-dependents']) || 0;
-            const uit = 5500;
-            const deduction = uit * (7 + dependents);
-            const taxableIncome = Math.max(0, salary - deduction);
-            const tax = taxableIncome * 0.08;
+        calculate: (values, country) => {
+            const salary = parseFloat(values['liq-salary']) || 0;
+            const years = parseFloat(values['liq-years']) || 0;
+            
+            const cts = salary * years;
+            const severance = salary * years * country.severance;
+            const vacationDays = Math.min(years * country.vacation, country.vacation * 2);
+            const vacation = (salary / 30) * vacationDays;
+            const bonus = country.thirteenth ? salary : 0;
+            
+            const total = cts + severance + vacation + bonus;
+            
             return {
-                total: tax,
+                total,
                 details: [
-                    { label: 'Ingreso Bruto Anual', value: `S/ ${salary.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
-                    { label: 'Deduccion', value: `-S/ ${deduction.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
-                    { label: 'Base Imponible', value: `S/ ${taxableIncome.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
-                    { label: 'Impuesto 5ta (8%)', value: `S/ ${tax.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` }
+                    { label: 'CTS Acumulada', value: `${country.currencySymbol} ${cts.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: 'Indemnización', value: `${country.currencySymbol} ${severance.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: 'Vacaciones', value: `${country.currencySymbol} ${vacation.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: 'Aguinaldo', value: `${country.currencySymbol} ${bonus.toLocaleString('es', { minimumFractionDigits: 2 })}` }
                 ]
             };
         },
-        legalInfo: { es: 'Renta 5ta grava ingresos por trabajo dependiente con 8%.', en: '5th Category taxes dependent work at 8%.' }
+        legalInfo: 'Incluye CTS, indemnización, vacaciones pendientes y aguinaldo según corresponda.'
     },
-
-    cuarta: {
-        title: { es: 'Renta 4ta', en: '4th Category' },
-        description: { es: 'Calcula el impuesto a tus ingresos independientes', en: 'Calculate independent income tax' },
+    
+    gratificacion: {
+        id: 'gratificacion',
+        icon: '🎁',
+        title: 'Gratificaciones/Aguinaldo',
+        description: 'Calcula bonificaciones anuales (13º, 14º sueldo)',
         fields: [
-            { id: 'cuarta-income', label: { es: 'Ingreso Mensual', en: 'Monthly Income' }, type: 'number', placeholder: '5000' }
+            { id: 'grat-salary', label: 'Sueldo Mensual', type: 'number', placeholder: '5000', min: 0 },
+            { id: 'grat-months', label: 'Meses Trabajados', type: 'number', placeholder: '12', min: 1, max: 12 }
         ],
-        calculate: (v) => {
-            const income = parseFloat(v['cuarta-income']) || 0;
-            const threshold = 1500;
-            let tax = 0;
-            if (income > threshold) {
-                tax = income * 0.08;
-            }
+        calculate: (values, country) => {
+            const salary = parseFloat(values['grat-salary']) || 0;
+            const months = parseFloat(values['grat-months']) || 0;
+            
+            const thirteenth = country.thirteenth ? (salary * months) / 12 : 0;
+            const fourteenth = country.fourteenth ? (country.minWage * months) / 12 : 0;
+            const total = thirteenth + fourteenth;
+            
             return {
-                total: tax,
+                total,
                 details: [
-                    { label: 'Ingreso Mensual', value: `S/ ${income.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
-                    { label: 'Umbral Exonerado', value: `S/ 1,500` },
-                    { label: 'Impuesto 4ta (8%)', value: `S/ ${tax.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
-                    { label: 'Impuesto Anual', value: `S/ ${(tax * 12).toLocaleString('es-PE', { minimumFractionDigits: 2 })}` }
+                    { label: 'Sueldo Mensual', value: `${country.currencySymbol} ${salary.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: 'Meses Trabajados', value: `${months}` },
+                    { label: '13º Sueldo', value: `${country.currencySymbol} ${thirteenth.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: '14º Sueldo', value: `${country.currencySymbol} ${fourteenth.toLocaleString('es', { minimumFractionDigits: 2 })}` }
                 ]
             };
         },
-        legalInfo: { es: 'Renta 4ta grava trabajo independiente. Ingresos menores a S/ 1,500 estan exonerados.', en: '4th Category taxes independent work. Monthly income below S/ 1,500 is tax-exempt.' }
+        legalInfo: 'El 13º sueldo (aguinaldo) se calcula sobre el sueldo. El 14º sueldo sobre el salario mínimo.'
     },
-
-    utilidades: {
-        title: { es: 'Utilidades', en: 'Profit Sharing' },
-        description: { es: 'Calcula tu participacion de utilidades', en: 'Calculate profit sharing' },
-        fields: [
-            { id: 'util-salary', label: { es: 'Sueldo Mensual', en: 'Monthly Salary' }, type: 'number', placeholder: '5000' },
-            { id: 'util-months', label: { es: 'Meses en el Ano', en: 'Months in Year' }, type: 'number', placeholder: '12', min: 1, max: 12 }
-        ],
-        calculate: (v) => {
-            const salary = parseFloat(v['util-salary']) || 0;
-            const months = parseFloat(v['util-months']) || 0;
-            const utilPercentage = 0.10;
-            const totalUtil = salary * months * utilPercentage;
-            return {
-                total: totalUtil,
-                details: [
-                    { label: 'Sueldo Mensual', value: `S/ ${salary.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
-                    { label: 'Meses', value: `${months}` },
-                    { label: 'Utilidades (10%)', value: `S/ ${totalUtil.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` }
-                ]
-            };
-        },
-        legalInfo: { es: 'Las utilidades se distribuyen segun ley con minimo 10%.', en: 'Profits distributed by law with minimum 10%.' }
-    },
-
+    
     vacaciones: {
-        title: { es: 'Vacaciones', en: 'Vacation' },
-        description: { es: 'Calcula el pago de tus vacaciones', en: 'Calculate vacation pay' },
+        id: 'vacaciones',
+        icon: '🏖️',
+        title: 'Vacaciones',
+        description: 'Calcula el pago de vacaciones',
         fields: [
-            { id: 'vac-salary', label: { es: 'Sueldo Mensual', en: 'Monthly Salary' }, type: 'number', placeholder: '5000' },
-            { id: 'vac-days', label: { es: 'Dias de Vacaciones', en: 'Vacation Days' }, type: 'number', placeholder: '30', min: 1, max: 60 }
+            { id: 'vac-salary', label: 'Sueldo Mensual', type: 'number', placeholder: '5000', min: 0 },
+            { id: 'vac-days', label: 'Días de Vacaciones', type: 'number', placeholder: '15', min: 1, max: 60 }
         ],
-        calculate: (v) => {
-            const salary = parseFloat(v['vac-salary']) || 0;
-            const days = parseFloat(v['vac-days']) || 0;
+        calculate: (values, country) => {
+            const salary = parseFloat(values['vac-salary']) || 0;
+            const days = parseFloat(values['vac-days']) || 0;
+            
             const dailyRate = salary / 30;
             const total = dailyRate * days;
+            
             return {
                 total,
                 details: [
-                    { label: 'Sueldo Mensual', value: `S/ ${salary.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
-                    { label: 'Tasa Diaria', value: `S/ ${dailyRate.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
-                    { label: 'Dias', value: `${days}` },
-                    { label: 'Total', value: `S/ ${total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` }
+                    { label: 'Sueldo Mensual', value: `${country.currencySymbol} ${salary.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: 'Tasa Diaria', value: `${country.currencySymbol} ${dailyRate.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: 'Días', value: `${days}` }
                 ]
             };
         },
-        legalInfo: { es: 'Trabajadores tienen derecho a 30 dias anuales. Pago por vacaciones no gozadas forma parte de liquidacion.', en: 'Workers entitled to 30 days annually. Unused vacation pay is part of severance.' }
+        legalInfo: 'Las vacaciones se calculan sobre la base del sueldo mensual dividido entre 30 días.'
+    },
+    
+    utilidades: {
+        id: 'utilidades',
+        icon: '💰',
+        title: 'Utilidades/Participación',
+        description: 'Calcula participación en utilidades de la empresa',
+        fields: [
+            { id: 'util-salary', label: 'Sueldo Mensual', type: 'number', placeholder: '5000', min: 0 },
+            { id: 'util-months', label: 'Meses en el Año', type: 'number', placeholder: '12', min: 1, max: 12 },
+            { id: 'util-percent', label: '% Utilidades', type: 'number', placeholder: '10', min: 0, max: 100 }
+        ],
+        calculate: (values, country) => {
+            const salary = parseFloat(values['util-salary']) || 0;
+            const months = parseFloat(values['util-months']) || 0;
+            const percent = parseFloat(values['util-percent']) || 10;
+            
+            const annual = salary * months;
+            const total = annual * (percent / 100);
+            
+            return {
+                total,
+                details: [
+                    { label: 'Sueldo Mensual', value: `${country.currencySymbol} ${salary.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: 'Meses Trabajados', value: `${months}` },
+                    { label: 'Porcentaje', value: `${percent}%` }
+                ]
+            };
+        },
+        legalInfo: 'Las utilidades se calculan sobre el total de ingresos anuales. El porcentaje varía según país y sector.'
+    },
+    
+    horas_extra: {
+        id: 'horas_extra',
+        icon: '⏰',
+        title: 'Horas Extra',
+        description: 'Calcula pago por horas adicionales trabajadas',
+        fields: [
+            { id: 'he-salary', label: 'Sueldo Mensual', type: 'number', placeholder: '5000', min: 0 },
+            { id: 'he-hours', label: 'Horas Extra', type: 'number', placeholder: '10', min: 0, max: 200 },
+            { id: 'he-multiplier', label: 'Multiplicador', type: 'number', placeholder: '1.5', min: 1, max: 3, step: 0.5 }
+        ],
+        calculate: (values, country) => {
+            const salary = parseFloat(values['he-salary']) || 0;
+            const hours = parseFloat(values['he-hours']) || 0;
+            const multiplier = parseFloat(values['he-multiplier']) || 1.5;
+            
+            const hourlyRate = salary / 240;
+            const total = hourlyRate * hours * multiplier;
+            
+            return {
+                total,
+                details: [
+                    { label: 'Sueldo Mensual', value: `${country.currencySymbol} ${salary.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: 'Tarifa por Hora', value: `${country.currencySymbol} ${hourlyRate.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: 'Horas Extra', value: `${hours}` },
+                    { label: 'Multiplicador', value: `${multiplier}x` }
+                ]
+            };
+        },
+        legalInfo: 'Las horas extra se calculan sobre la tarifa horaria. Multiplicador común: 1.5x (diurnas), 2x (nocturnas), 2.5x (festivos).'
+    },
+    
+    freelance: {
+        id: 'freelance',
+        icon: '👨‍💼',
+        title: 'Freelance vs Planilla',
+        description: 'Compara ingresos freelance equivalentes a sueldo en planilla',
+        fields: [
+            { id: 'free-salary', label: 'Sueldo en Planilla', type: 'number', placeholder: '5000', min: 0 }
+        ],
+        calculate: (values, country) => {
+            const salary = parseFloat(values['free-salary']) || 0;
+            
+            const benefits = salary * 0.30;
+            const taxes = salary * 0.10;
+            const total = salary + benefits + taxes;
+            
+            return {
+                total,
+                details: [
+                    { label: 'Sueldo Base', value: `${country.currencySymbol} ${salary.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: 'Beneficios (30%)', value: `+${country.currencySymbol} ${benefits.toLocaleString('es', { minimumFractionDigits: 2 })}` },
+                    { label: 'Impuestos (10%)', value: `+${country.currencySymbol} ${taxes.toLocaleString('es', { minimumFractionDigits: 2 })}` }
+                ]
+            };
+        },
+        legalInfo: 'Como freelance debes compensar beneficios (aguinaldo, vacaciones, CTS) e impuestos que el empleador cubriría.'
     }
 };

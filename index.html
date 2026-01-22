@@ -1,134 +1,276 @@
 <!DOCTYPE html>
-<html lang="es" class="light">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="theme-color" content="#3b82f6">
-    <meta name="description" content="SueldoPro 2026 - Fintech Elite para Inteligencia Salarial, Calculos Laborales">
-    <title>SueldoPro 2026 | Fintech Intelligence Platform Peru</title>
-    
+    <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="SueldoPro Ultra - Calculadora Laboral Global 21 Países | Pentágono Financiero">
+    <title>SueldoPro Ultra | Pentágono Financiero 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="style.css">
-    
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 950: '#020617' },
-                        success: { 500: '#10b981' },
-                        warning: { 500: '#f59e0b' },
-                        danger: { 500: '#ef4444' }
-                    }
-                }
-            }
-        }
-    </script>
 </head>
-<body class="bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100">
+<body class="bg-slate-900 text-slate-100">
     
-    <button id="mobile-menu-toggle" class="fixed top-4 left-4 z-50 lg:hidden p-3 bg-white dark:bg-slate-900 rounded-xl shadow-lg">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-    </button>
-
-    <aside id="sidebar" class="fixed left-0 top-0 h-full w-80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-r border-slate-200/50 dark:border-slate-800/50 z-40 transition-all duration-300 shadow-xl -translate-x-full lg:translate-x-0">
-        <div class="flex flex-col h-full">
-            <div class="p-8 border-b border-slate-200/50 dark:border-slate-800/50">
-                <h1 class="text-3xl font-black"><span class="text-brand-600 dark:text-brand-500">SUELDO</span><span class="text-slate-400">PRO</span></h1>
-                <div class="flex items-center gap-2 mt-2"><span class="text-[9px] font-bold text-slate-400">PERU 2026</span><span class="px-2 py-0.5 bg-brand-500 text-white text-[8px] font-black rounded-full">ELITE</span></div>
+    <!-- Navbar Pentágono -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 shadow-2xl">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl flex items-center justify-center">
+                    <span class="text-white font-black text-xl">₱</span>
+                </div>
+                <div>
+                    <h1 class="text-lg font-black text-white">SUELDO<span class="text-indigo-500">PRO</span></h1>
+                    <p class="text-[9px] font-bold text-slate-400 tracking-widest">PENTÁGONO FINANCIERO</p>
+                </div>
             </div>
-            
-            <nav class="flex-1 p-6 space-y-2">
-                <button data-nav="calculators" class="nav-btn active w-full flex items-center gap-3 p-3 rounded-xl font-bold text-sm">📊<div class="hidden lg:flex flex-col items-start flex-1"><span>Calculadoras</span><span class="text-[10px] opacity-60">8 Herramientas</span></div></button>
-                <button data-nav="intelligence" class="nav-btn w-full flex items-center gap-3 p-3 rounded-xl font-bold text-sm">🧠<div class="hidden lg:flex flex-col items-start flex-1"><span>Inteligencia IA</span><span class="text-[10px] opacity-60">3 Modulos</span></div></button>
-                <button data-nav="comparator" class="nav-btn w-full flex items-center gap-3 p-3 rounded-xl font-bold text-sm">📈<div class="hidden lg:flex flex-col items-start flex-1"><span>Comparador</span><span class="text-[10px] opacity-60">Analisis Real</span></div></button>
-                <button data-nav="forex" class="nav-btn w-full flex items-center gap-3 p-3 rounded-xl font-bold text-sm">💱<div class="hidden lg:flex flex-col items-start flex-1"><span>Tipo Cambio</span><span class="text-[10px] opacity-60">100+ Divisas</span></div></button>
-                <button data-nav="jobs" class="nav-btn w-full flex items-center gap-3 p-3 rounded-xl font-bold text-sm">💼<div class="hidden lg:flex flex-col items-start flex-1"><span>Radar Empleos</span><span class="text-[10px] opacity-60">300+ Empleos</span></div></button>
-                <button data-nav="news" class="nav-btn w-full flex items-center gap-3 p-3 rounded-xl font-bold text-sm">📰<div class="hidden lg:flex flex-col items-start flex-1"><span>Noticias</span><span class="text-[10px] opacity-60">Actualidad</span></div></button>
-            </nav>
-
-            <div class="p-6 border-t border-slate-200/50 dark:border-slate-800/50 space-y-3">
-                <button id="lang-toggle" class="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:scale-105 transition font-bold text-sm">🌐 <span id="lang-text">ES</span></button>
-                <button id="theme-toggle" class="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:scale-105 transition font-bold text-sm"><span id="theme-icon">🌙</span></button>
-            </div>
+            <div class="hidden lg:flex items-center gap-2" id="pentagon-desktop"></div>
+            <button id="mobile-menu-btn" class="lg:hidden p-2 rounded-xl bg-slate-800 text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
         </div>
-    </aside>
+    </nav>
 
-    <main class="lg:ml-80 min-h-screen">
-        
-        <div class="sticky top-0 z-30 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 px-4 py-4">
-            <div class="flex items-start gap-3"><span class="text-amber-600 text-lg">⚖️</span><div><p id="disclaimer-text" class="text-amber-900 dark:text-amber-200 font-semibold text-sm">Los calculos son referenciales basados en la normativa peruana 2026.</p><p class="text-amber-800 dark:text-amber-300 text-xs mt-1">Consulte con un especialista para casos especificos.</p></div></div>
+    <!-- Mobile Nav -->
+    <div id="mobile-nav" class="fixed inset-y-0 left-0 w-80 bg-slate-900/98 backdrop-blur-xl z-50 shadow-2xl border-r border-slate-800/50 -translate-x-full transition-transform duration-300">
+        <div class="p-6 border-b border-slate-800/50 flex items-center justify-between">
+            <h2 class="text-xl font-black text-white">PENTÁGONO</h2>
+            <button id="close-mobile-nav" class="p-2 rounded-xl bg-slate-800 text-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
         </div>
+        <div class="p-6 space-y-3" id="pentagon-mobile"></div>
+    </div>
 
-        <section id="sec-calculators" class="section-content active">
-            <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
-                <h2 class="text-4xl lg:text-6xl font-black dark:text-white mb-8">Motor <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-cyan-500">Financiero</span></h2>
-
-                <div class="grid lg:grid-cols-12 gap-6">
-                    <div class="lg:col-span-3 space-y-2" id="calc-buttons-container"></div>
-                    <div class="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-800 p-8"><div id="calculator-form"></div></div>
-                    <div class="lg:col-span-4 space-y-6">
-                        <div class="bg-gradient-to-br from-brand-500 to-blue-700 rounded-3xl p-8 text-white shadow-lg"><h4 class="text-xs font-bold opacity-90 mb-2">RESULTADO</h4><div id="main-result" class="text-5xl font-black mb-6">S/ 0.00</div><div id="result-details" class="space-y-3 text-sm border-t border-white/20 pt-4"></div></div>
-                        <div class="bg-amber-50 dark:bg-amber-950/20 rounded-2xl p-6 border-l-4 border-amber-500"><h5 class="font-bold text-sm mb-2 text-amber-900 dark:text-amber-400">💡 Legal</h5><p id="legal-info" class="text-xs text-amber-800 dark:text-amber-300"></p></div>
-                        <button id="share-result-btn" class="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-sm">📤 Compartir</button>
+    <div class="pt-16">
+        <div class="flex min-h-screen">
+            <!-- Sidebar Desktop -->
+            <aside class="hidden lg:block w-80 bg-slate-850 border-r border-slate-800/50 fixed left-0 top-16 bottom-0 overflow-y-auto custom-scrollbar">
+                <div class="p-6 space-y-6">
+                    <div>
+                        <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-3">🌎 PAÍS</label>
+                        <select id="country-select" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold text-sm focus:border-indigo-500 focus:outline-none transition">
+                            <option value="">Cargando...</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-3">MÓDULOS</label>
+                        <div class="space-y-2" id="nav-buttons"></div>
+                    </div>
+                    
+                    <div id="calc-tabs-container" class="hidden">
+                        <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-3">CALCULADORAS</label>
+                        <div class="space-y-2" id="calc-tabs"></div>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <section id="sec-intelligence" class="section-content">
-            <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
-                <h2 class="text-4xl lg:text-6xl font-black dark:text-white mb-8">Inteligencia <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">Salarial</span></h2>
-
-                <div class="grid lg:grid-cols-3 gap-8">
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 border dark:border-slate-800 shadow-lg"><h3 class="text-xl font-black mb-4">⚖️ Freelance vs Planilla</h3><div class="form-group"><label class="form-label">Sueldo en Planilla</label><input type="number" id="eq-planilla" class="form-input" placeholder="5000" min="0" step="100"></div><div class="mt-6 p-6 bg-purple-50 dark:bg-purple-950/20 rounded-xl"><div class="text-xs font-bold text-purple-600 mb-2">DEBES FACTURAR</div><div id="eq-result" class="text-4xl font-black text-purple-600">S/ 0</div><div id="eq-breakdown" class="mt-4 space-y-1 text-xs text-purple-800 dark:text-purple-300"></div></div></div>
-
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 border dark:border-slate-800 shadow-lg"><h3 class="text-xl font-black mb-4">🚦 Semaforo Mercado</h3><div class="form-group"><label class="form-label">Tu Sueldo</label><input type="number" id="sem-salary" class="form-input" placeholder="4500" min="0" step="100"></div><div class="form-group"><label class="form-label">Sector</label><select id="sem-sector" class="form-select"><option value="tecnologia">Tecnologia</option><option value="mineria">Mineria</option><option value="finanzas">Finanzas</option><option value="salud">Salud</option><option value="comercio">Comercio</option><option value="educacion">Educacion</option></select></div><div id="semaphore-result" class="mt-6"></div></div>
-
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 border dark:border-slate-800 shadow-lg"><h3 class="text-xl font-black mb-4">🚪 Ruta Escape</h3><div class="grid grid-cols-2 gap-3 mb-4"><div class="form-group"><label class="form-label">CTS</label><input type="number" id="esc-cts" class="form-input" placeholder="8000" min="0" step="100"></div><div class="form-group"><label class="form-label">Anos</label><input type="number" id="esc-years" class="form-input" placeholder="2" min="0" step="0.5"></div></div><div class="form-group"><label class="form-label">Gasto Mensual</label><input type="number" id="esc-expense" class="form-input" placeholder="2500" min="0" step="100"></div><div class="form-group"><label class="form-label">Sueldo</label><input type="number" id="esc-salary" class="form-input" placeholder="5000" min="0" step="100"></div><div class="mt-6 p-6 bg-orange-50 dark:bg-orange-950/20 rounded-xl"><div class="text-xs font-bold text-orange-600 mb-2">AUTONOMIA</div><div id="esc-months" class="text-4xl font-black text-orange-600">0 meses</div><div id="esc-breakdown" class="mt-4 space-y-1 text-xs text-orange-800 dark:text-orange-300"></div></div></div>
+            </aside>
+            
+            <!-- Main Content -->
+            <main class="flex-1 lg:ml-80">
+                <!-- Legal Disclaimer -->
+                <div class="bg-amber-950/30 border-b border-amber-900/50 px-4 py-4">
+                    <div class="max-w-7xl mx-auto flex items-start gap-3">
+                        <span class="text-amber-500 text-lg">⚖️</span>
+                        <div class="flex-1">
+                            <p class="text-amber-200 font-semibold text-sm">Simulador Educativo de Costos Laborales</p>
+                            <p class="text-amber-300/80 text-xs mt-1">Los cálculos son estimados basados en normativas vigentes a 2026. No reemplaza asesoría contable profesional.</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </section>
-
-        <section id="sec-comparator" class="section-content">
-            <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
-                <h2 class="text-4xl font-black dark:text-white mb-8">Comparador <span class="text-brand-500">Salarial</span></h2>
-                <div class="grid lg:grid-cols-3 gap-8">
-                    <div class="space-y-4"><div class="form-group"><label class="form-label">Tu Sueldo</label><input type="number" id="comp-salary" class="form-input" placeholder="0" min="0" step="100"></div><div class="form-group"><label class="form-label">Sector</label><select id="comp-sector" class="form-select"><option value="tecnologia">Tecnologia</option><option value="mineria">Mineria</option><option value="finanzas">Finanzas</option><option value="salud">Salud</option><option value="comercio">Comercio</option><option value="educacion">Educacion</option></select></div><div class="form-group"><label class="form-label">Nivel</label><select id="comp-level" class="form-select"><option value="junior">Junior</option><option value="middle">Middle</option><option value="senior">Senior</option><option value="lead">Lead</option></select></div><button id="comp-btn" class="w-full btn-primary">ANALIZAR</button></div>
-                    <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl p-8 border dark:border-slate-800"><canvas id="comparison-chart"></canvas><div id="comparison-stats" class="mt-8 grid grid-cols-3 gap-4"></div></div>
-                </div>
-            </div>
-        </section>
-
-        <section id="sec-forex" class="section-content">
-            <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
-                <h2 class="text-4xl font-black dark:text-white mb-8">Tipo de <span class="text-green-500">Cambio</span></h2>
-                <div class="grid lg:grid-cols-3 gap-8">
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border dark:border-slate-800"><div class="form-group mb-6"><label class="form-label">Monto PEN</label><input type="number" id="forex-amount" class="form-input" value="1000" min="0" step="100"></div><input type="text" id="forex-search" placeholder="Buscar..." class="form-input mb-4"><div id="forex-list" class="space-y-2 max-h-96 overflow-y-auto custom-scrollbar"></div></div>
-                    <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl p-8 border dark:border-slate-800"><h3 id="forex-pair" class="text-4xl font-black text-brand-500">USD/PEN</h3><p id="forex-rate" class="text-sm text-slate-600 dark:text-slate-400 mt-2">Tasa</p><p id="forex-converted" class="text-2xl font-black mt-4">0.00 USD</p><canvas id="forex-chart" class="mt-8"></canvas></div>
-                </div>
-            </div>
-        </section>
-
-        <section id="sec-jobs" class="section-content">
-            <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
-                <h2 class="text-4xl font-black dark:text-white mb-8">Radar de <span class="text-purple-500">Empleos</span></h2>
-                <input type="text" id="job-search" placeholder="Buscar..." class="form-input w-full mb-8">
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8" id="sector-filters"></div>
-                <div id="jobs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
-            </div>
-        </section>
-
-        <section id="sec-news" class="section-content">
-            <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
-                <h2 class="text-4xl font-black dark:text-white mb-8">Actualidad <span class="text-red-500">Laboral</span></h2>
-                <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-            </div>
-        </section>
-    </main>
-
+                
+                <!-- Calculators Section -->
+                <section id="sec-calculators" class="section-content active">
+                    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
+                        <h2 class="text-4xl lg:text-6xl font-black text-white mb-8">Motor <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-emerald-400">Calculador</span></h2>
+                        
+                        <div class="grid lg:grid-cols-12 gap-6">
+                            <div class="lg:hidden lg:col-span-12">
+                                <select id="mobile-calc-select" class="w-full p-3 bg-slate-850 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none">
+                                    <option value="">Seleccionar calculadora...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="lg:col-span-7 bg-slate-850 rounded-3xl shadow-2xl border border-slate-800 p-6 lg:p-8">
+                                <div id="calculator-form">
+                                    <div class="text-center py-12">
+                                        <div class="text-6xl mb-4">🔢</div>
+                                        <p class="text-slate-400">Selecciona una calculadora</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="lg:col-span-5 space-y-6">
+                                <div class="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-3xl p-8 text-white shadow-2xl">
+                                    <h4 class="text-xs font-black opacity-90 mb-2 tracking-wider">RESULTADO</h4>
+                                    <div id="main-result" class="text-5xl font-black mb-6">$0.00</div>
+                                    <div id="result-details" class="space-y-3 text-sm border-t border-white/20 pt-4"></div>
+                                </div>
+                                
+                                <div class="bg-slate-850 rounded-2xl p-6 border border-slate-800">
+                                    <h5 class="font-bold text-sm mb-3 text-indigo-400 flex items-center gap-2">
+                                        <span>💡</span>
+                                        <span>Información Legal</span>
+                                    </h5>
+                                    <p id="legal-info" class="text-xs text-slate-400 leading-relaxed"></p>
+                                </div>
+                                
+                                <button id="share-result-btn" class="w-full p-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition flex items-center justify-center gap-2">
+                                    <span>📤</span>
+                                    <span>Compartir Resultado</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- True Cost Section -->
+                <section id="sec-truecost" class="section-content">
+                    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
+                        <h2 class="text-4xl lg:text-6xl font-black text-white mb-8">Costo <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-500">Real</span></h2>
+                        
+                        <div class="grid lg:grid-cols-2 gap-8">
+                            <div class="bg-slate-850 rounded-3xl p-8 border border-slate-800">
+                                <h3 class="text-xl font-black mb-6 text-white">Datos del Empleado</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Sueldo Bruto Mensual</label>
+                                        <input type="number" id="tc-salary" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none" placeholder="5000" min="0" step="100">
+                                    </div>
+                                    <button id="tc-calculate-btn" class="w-full p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition">
+                                        CALCULAR COSTO REAL
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-6">
+                                <div class="grid grid-cols-2 gap-6">
+                                    <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-6 text-white">
+                                        <div class="text-xs font-black opacity-90 mb-2">COSTO EMPRESA</div>
+                                        <div id="tc-total-cost" class="text-3xl font-black">$0</div>
+                                    </div>
+                                    <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 text-white">
+                                        <div class="text-xs font-black opacity-90 mb-2">SUELDO NETO</div>
+                                        <div id="tc-net-salary" class="text-3xl font-black">$0</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-slate-850 rounded-2xl p-6 border border-slate-800">
+                                    <h4 class="font-bold text-sm mb-4 text-white">Desglose de Costos</h4>
+                                    <div id="tc-breakdown" class="space-y-3 text-sm"></div>
+                                </div>
+                                
+                                <div class="bg-slate-850 rounded-2xl p-6 border border-slate-800">
+                                    <canvas id="tc-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Expansion Simulator Section -->
+                <section id="sec-expansion" class="section-content">
+                    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
+                        <h2 class="text-4xl lg:text-6xl font-black text-white mb-8">Simulador de <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-emerald-400">Expansión</span></h2>
+                        
+                        <div class="grid lg:grid-cols-3 gap-8">
+                            <div class="bg-slate-850 rounded-3xl p-8 border border-slate-800">
+                                <h3 class="text-xl font-black mb-6 text-white">Datos del Negocio</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Meta de Ingresos Mensuales</label>
+                                        <input type="number" id="exp-target" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none" placeholder="50000" min="0" step="1000">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Sueldo Promedio por Empleado</label>
+                                        <input type="number" id="exp-avg-salary" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none" placeholder="3000" min="0" step="100">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Ingreso Promedio por Empleado</label>
+                                        <input type="number" id="exp-revenue-per" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none" placeholder="8000" min="0" step="100">
+                                    </div>
+                                    <button id="exp-calculate-btn" class="w-full p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition">
+                                        CALCULAR EXPANSIÓN
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="lg:col-span-2 space-y-6">
+                                <div class="grid grid-cols-3 gap-6">
+                                    <div class="stat-card rounded-2xl p-6 border border-slate-700">
+                                        <div class="text-xs font-black text-slate-400 mb-2">EMPLEADOS NECESARIOS</div>
+                                        <div id="exp-employees" class="text-4xl font-black text-indigo-500">0</div>
+                                    </div>
+                                    <div class="stat-card rounded-2xl p-6 border border-slate-700">
+                                        <div class="text-xs font-black text-slate-400 mb-2">COSTO TOTAL MENSUAL</div>
+                                        <div id="exp-total-cost" class="text-4xl font-black text-red-500">$0</div>
+                                    </div>
+                                    <div class="stat-card rounded-2xl p-6 border border-slate-700">
+                                        <div class="text-xs font-black text-slate-400 mb-2">ROI ESPERADO</div>
+                                        <div id="exp-roi" class="text-4xl font-black text-emerald-500">0%</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-slate-850 rounded-2xl p-8 border border-slate-800">
+                                    <h4 class="font-bold text-lg mb-6 text-white">Proyección Financiera</h4>
+                                    <canvas id="exp-chart"></canvas>
+                                </div>
+                                
+                                <div class="bg-slate-850 rounded-2xl p-6 border border-slate-800">
+                                    <h4 class="font-bold text-sm mb-4 text-white flex items-center gap-2">
+                                        <span>📊</span>
+                                        <span>Desglose Detallado</span>
+                                    </h4>
+                                    <div id="exp-breakdown" class="space-y-3 text-sm"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Global Database Section -->
+                <section id="sec-database" class="section-content">
+                    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
+                        <h2 class="text-4xl lg:text-6xl font-black text-white mb-8">Base de Datos <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-emerald-400">Global</span></h2>
+                        
+                        <div class="mb-6">
+                            <input type="text" id="country-search" class="w-full p-4 bg-slate-850 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none" placeholder="🔍 Buscar país...">
+                        </div>
+                        
+                        <div id="countries-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+                    </div>
+                </section>
+                
+                <!-- Footer -->
+                <footer class="bg-slate-850 border-t border-slate-800/50 mt-20">
+                    <div class="max-w-7xl mx-auto px-4 py-12">
+                        <div class="grid md:grid-cols-3 gap-8">
+                            <div>
+                                <h3 class="text-xl font-black text-white mb-4">SUELDO<span class="text-indigo-500">PRO</span> ULTRA</h3>
+                                <p class="text-slate-400 text-sm leading-relaxed">Calculadora laboral global con 21 países. Parte del Pentágono Financiero.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-black text-slate-400 uppercase tracking-wider mb-4">Pentágono Financiero</h4>
+                                <div id="footer-pentagon-links" class="space-y-2"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-black text-slate-400 uppercase tracking-wider mb-4">Legal</h4>
+                                <p class="text-slate-500 text-xs leading-relaxed">SueldoPro Ultra es un simulador educativo. No reemplaza asesoría profesional. Estimados 2026.</p>
+                            </div>
+                        </div>
+                        <div class="border-t border-slate-800 mt-8 pt-8 text-center">
+                            <p class="text-slate-500 text-sm">© 2026 SueldoPro Ultra - Pentágono Financiero</p>
+                        </div>
+                    </div>
+                </footer>
+            </main>
+        </div>
+    </div>
+    
     <script src="data.js"></script>
     <script src="script.js"></script>
 </body>
