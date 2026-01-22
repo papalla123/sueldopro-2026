@@ -1,7 +1,3 @@
-// ==========================================
-// SUELDOPRO 2026 - SCRIPT PRINCIPAL
-// ==========================================
-
 'use strict';
 
 const state = {
@@ -14,10 +10,6 @@ const state = {
     selectedSector: 'all'
 };
 
-// ==========================================
-// INICIALIZACIÓN
-// ==========================================
-
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initLanguage();
@@ -28,10 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderJobs();
     renderNews();
 });
-
-// ==========================================
-// TEMA (DARK/LIGHT)
-// ==========================================
 
 function initTheme() {
     if (state.theme === 'dark') {
@@ -46,10 +34,6 @@ function toggleTheme() {
     document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
     localStorage.setItem('theme', state.theme);
 }
-
-// ==========================================
-// IDIOMA
-// ==========================================
 
 function initLanguage() {
     document.getElementById('lang-text').textContent = state.currentLang.toUpperCase();
@@ -66,26 +50,19 @@ function toggleLanguage() {
 
 function updateDisclaimerText() {
     const text = state.currentLang === 'es' 
-        ? 'Los cálculos son referenciales basados en la normativa 2026. Consulte con un especialista en temas laborales o fiscales para casos específicos.'
-        : 'Calculations are referential based on 2026 regulations. Consult with a labor or tax specialist for specific cases.';
+        ? 'Los calculos son referenciales basados en la normativa 2026. Consulte con un especialista para casos especificos.'
+        : 'Calculations are referential based on 2026 regulations. Consult with a specialist for specific cases.';
     document.getElementById('disclaimer-text').textContent = text;
 }
 
-// ==========================================
-// NAVEGACIÓN
-// ==========================================
-
 function setupEventListeners() {
-    // Navegación
     document.querySelectorAll('[data-nav]').forEach(btn => {
         btn.addEventListener('click', (e) => navigate(e.target.closest('[data-nav]').dataset.nav));
     });
 
-    // Tema e idioma
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('lang-toggle').addEventListener('click', toggleLanguage);
 
-    // Menú móvil
     document.getElementById('mobile-menu-toggle').addEventListener('click', () => {
         const sidebar = document.getElementById('sidebar');
         sidebar.classList.toggle('mobile-open');
@@ -99,25 +76,18 @@ function setupEventListeners() {
 }
 
 function navigate(sectionId) {
-    // Ocultar todas las secciones
     document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
     document.getElementById(`sec-${sectionId}`)?.classList.add('active');
 
-    // Actualizar nav activo
     document.querySelectorAll('[data-nav]').forEach(b => b.classList.remove('active'));
     document.querySelector(`[data-nav="${sectionId}"]`)?.classList.add('active');
 
     state.currentSection = sectionId;
 
-    // Inicializar secciones específicas
     if (sectionId === 'forex') initForex();
     if (sectionId === 'comparator') initComparator();
     if (sectionId === 'intelligence') initIntelligence();
 }
-
-// ==========================================
-// CALCULADORAS
-// ==========================================
 
 function renderCalculators() {
     const container = document.getElementById('calc-buttons-container');
@@ -126,7 +96,7 @@ function renderCalculators() {
     container.innerHTML = Object.keys(CALCULATOR_CONFIGS).map(key => {
         const calc = CALCULATOR_CONFIGS[key];
         return `
-            <button data-calc="${key}" class="calc-tab-btn ${key === 'cts' ? 'active' : ''} group">
+            <button data-calc="${key}" class="calc-tab-btn ${key === 'cts' ? 'active' : ''}">
                 <span class="text-2xl">📋</span>
                 <div class="flex-1 text-left hidden sm:block">
                     <div class="font-bold text-sm">${calc.title[state.currentLang]}</div>
@@ -164,24 +134,14 @@ function renderCalculatorForm() {
         html += `
             <div class="form-group">
                 <label class="form-label">${field.label[state.currentLang]}</label>
-                <input 
-                    type="number" 
-                    id="${field.id}" 
-                    class="form-input" 
-                    placeholder="${field.placeholder}"
-                    ${field.min !== undefined ? `min="${field.min}"` : ''}
-                    ${field.max !== undefined ? `max="${field.max}"` : ''}
-                    step="0.01"
-                >
+                <input type="number" id="${field.id}" class="form-input" placeholder="${field.placeholder}"
+                    ${field.min !== undefined ? `min="${field.min}"` : ''} 
+                    ${field.max !== undefined ? `max="${field.max}"` : ''} step="0.01">
             </div>
         `;
     });
 
-    html += `
-        <button id="calc-btn" class="btn-primary">
-            ${state.currentLang === 'es' ? 'CALCULAR AHORA' : 'CALCULATE NOW'}
-        </button>
-    `;
+    html += `<button id="calc-btn" class="btn-primary">${state.currentLang === 'es' ? 'CALCULAR' : 'CALCULATE'}</button>`;
 
     container.innerHTML = html;
     document.getElementById('calc-btn').addEventListener('click', executeCalculation);
@@ -207,11 +167,7 @@ function displayResult(result) {
     const mainResult = document.getElementById('main-result');
     const detailsContainer = document.getElementById('result-details');
 
-    mainResult.style.animation = 'none';
-    setTimeout(() => {
-        mainResult.textContent = `S/ ${result.total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
-        mainResult.style.animation = 'fadeIn 0.5s ease-out';
-    }, 10);
+    mainResult.textContent = `S/ ${result.total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
 
     detailsContainer.innerHTML = result.details.map(detail => `
         <div class="flex justify-between items-center py-2 border-b border-white/10 last:border-0">
@@ -221,16 +177,11 @@ function displayResult(result) {
     `).join('');
 }
 
-// ==========================================
-// INTELIGENCIA SALARIAL
-// ==========================================
-
 function initIntelligence() {
     calculateEquivalence();
     calculateSemaphore();
     calculateEscape();
 
-    // Event listeners
     document.getElementById('eq-planilla')?.addEventListener('input', calculateEquivalence);
     document.getElementById('sem-salary')?.addEventListener('input', calculateSemaphore);
     document.getElementById('sem-sector')?.addEventListener('change', calculateSemaphore);
@@ -255,9 +206,9 @@ function calculateEquivalence() {
 
     document.getElementById('eq-result').textContent = `S/ ${total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
     document.getElementById('eq-breakdown').innerHTML = `
-        <div class="flex justify-between"><span>Sueldo base:</span><span>S/ ${salary.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span></div>
-        <div class="flex justify-between"><span>Beneficios (18.33%):</span><span>+ S/ ${benefits.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span></div>
-        ${retention > 0 ? `<div class="flex justify-between"><span>Retención 4ta (8%):</span><span>+ S/ ${retention.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span></div>` : ''}
+        <div class="flex justify-between"><span>Base:</span><span>S/ ${salary.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span></div>
+        <div class="flex justify-between"><span>Beneficios 18.33%:</span><span>+S/ ${benefits.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span></div>
+        ${retention > 0 ? `<div class="flex justify-between"><span>Retencion 4ta:</span><span>+S/ ${retention.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span></div>` : ''}
         <div class="flex justify-between font-bold pt-2 border-t border-purple-300"><span>TOTAL:</span><span>S/ ${total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span></div>
     `;
 }
@@ -285,16 +236,16 @@ function calculateSemaphore() {
     const lowThreshold = range.min + (avg - range.min) * 0.5;
     const topThreshold = avg + (range.max - avg) * 0.5;
 
-    let status, icon, colorClass;
+    let status, colorClass;
 
     if (salary < lowThreshold) {
-        status = state.currentLang === 'es' ? '🔴 BAJO MERCADO' : '🔴 BELOW MARKET';
+        status = '🔴 BAJO MERCADO';
         colorClass = 'semaphore-low';
     } else if (salary < topThreshold) {
-        status = state.currentLang === 'es' ? '🟡 EN PROMEDIO' : '🟡 AVERAGE';
+        status = '🟡 EN PROMEDIO';
         colorClass = 'semaphore-average';
     } else {
-        status = state.currentLang === 'es' ? '🟢 TOP MERCADO' : '🟢 TOP MARKET';
+        status = '🟢 TOP MERCADO';
         colorClass = 'semaphore-top';
     }
 
@@ -304,9 +255,7 @@ function calculateSemaphore() {
         <div class="${colorClass}">
             <div class="text-2xl font-black mb-2">${status}</div>
             <div class="text-sm font-bold mb-2">Percentil: ${Math.round(percentile)}%</div>
-            <div class="text-xs opacity-75 pt-2 border-t border-current">
-                ${state.currentLang === 'es' ? 'Rango sector' : 'Sector range'}: S/ ${range.min.toLocaleString()} - S/ ${range.max.toLocaleString()}
-            </div>
+            <div class="text-xs opacity-75 pt-2 border-t border-current">Rango: S/ ${range.min.toLocaleString()} - S/ ${range.max.toLocaleString()}</div>
         </div>
     `;
 }
@@ -318,7 +267,7 @@ function calculateEscape() {
     const salary = parseFloat(document.getElementById('esc-salary')?.value) || 0;
 
     if (expense === 0) {
-        document.getElementById('esc-months').textContent = '0 ' + (state.currentLang === 'es' ? 'meses' : 'months');
+        document.getElementById('esc-months').textContent = '0 meses';
         document.getElementById('esc-breakdown').innerHTML = '';
         return;
     }
@@ -328,18 +277,14 @@ function calculateEscape() {
     const total = cts + liquidation + vacation;
     const months = total / expense;
 
-    document.getElementById('esc-months').textContent = `${months.toFixed(1)} ${state.currentLang === 'es' ? 'meses' : 'months'}`;
+    document.getElementById('esc-months').textContent = `${months.toFixed(1)} meses`;
     document.getElementById('esc-breakdown').innerHTML = `
-        <div class="flex justify-between"><span>CTS actual:</span><span>S/ ${cts.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span></div>
-        <div class="flex justify-between"><span>${state.currentLang === 'es' ? 'Liquidación est.' : 'Est. severance'}:</span><span>S/ ${liquidation.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span></div>
-        <div class="flex justify-between"><span>${state.currentLang === 'es' ? 'Vacaciones pend.' : 'Pending vacation'}:</span><span>S/ ${vacation.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span></div>
-        <div class="flex justify-between font-bold pt-2 border-t border-orange-300"><span>${state.currentLang === 'es' ? 'Total' : 'Total'}:</span><span>S/ ${total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span></div>
+        <div class="flex justify-between"><span>CTS:</span><span>S/ ${cts.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span></div>
+        <div class="flex justify-between"><span>Liquidacion:</span><span>S/ ${liquidation.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span></div>
+        <div class="flex justify-between"><span>Vacaciones:</span><span>S/ ${vacation.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span></div>
+        <div class="flex justify-between font-bold pt-2 border-t border-orange-300"><span>TOTAL:</span><span>S/ ${total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span></div>
     `;
 }
-
-// ==========================================
-// COMPARADOR SALARIAL
-// ==========================================
 
 function initComparator() {
     document.getElementById('comp-btn')?.addEventListener('click', updateComparison);
@@ -371,22 +316,12 @@ function updateComparison() {
     state.charts.comparison = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: [state.currentLang === 'es' ? 'Mínimo' : 'Min', state.currentLang === 'es' ? 'Promedio' : 'Avg', state.currentLang === 'es' ? 'Tu Sueldo' : 'Your Salary', state.currentLang === 'es' ? 'Máximo' : 'Max'],
+            labels: ['Min', 'Avg', 'Tu Sueldo', 'Max'],
             datasets: [{
-                label: state.currentLang === 'es' ? 'Comparación (S/)' : 'Comparison ($/',
+                label: 'Comparacion',
                 data: [min, avg, salary, max],
-                backgroundColor: [
-                    'rgba(59, 130, 246, 0.2)',
-                    'rgba(59, 130, 246, 0.5)',
-                    salary >= avg ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)',
-                    'rgba(59, 130, 246, 0.7)'
-                ],
-                borderColor: [
-                    'rgb(59, 130, 246)',
-                    'rgb(59, 130, 246)',
-                    salary >= avg ? 'rgb(16, 185, 129)' : 'rgb(239, 68, 68)',
-                    'rgb(59, 130, 246)'
-                ],
+                backgroundColor: ['rgba(59, 130, 246, 0.2)', 'rgba(59, 130, 246, 0.5)', salary >= avg ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)', 'rgba(59, 130, 246, 0.7)'],
+                borderColor: ['rgb(59, 130, 246)', 'rgb(59, 130, 246)', salary >= avg ? 'rgb(16, 185, 129)' : 'rgb(239, 68, 68)', 'rgb(59, 130, 246)'],
                 borderWidth: 2,
                 borderRadius: 8
             }]
@@ -394,31 +329,14 @@ function updateComparison() {
         options: {
             responsive: true,
             maintainAspectRatio: true,
-            plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: `${sector.charAt(0).toUpperCase() + sector.slice(1)} - ${level.charAt(0).toUpperCase() + level.slice(1)}`,
-                    color: isDark ? '#e2e8f0' : '#1e293b'
-                }
-            },
+            plugins: { legend: { display: false } },
             scales: {
                 y: {
                     beginAtZero: true,
-                    ticks: {
-                        color: isDark ? '#94a3b8' : '#64748b',
-                        callback: value => `S/ ${value.toLocaleString()}`
-                    },
-                    grid: {
-                        color: isDark ? 'rgba(51, 65, 85, 0.3)' : 'rgba(226, 232, 240, 0.5)'
-                    }
+                    ticks: { color: isDark ? '#94a3b8' : '#64748b', callback: value => `S/ ${value.toLocaleString()}` },
+                    grid: { color: isDark ? 'rgba(51, 65, 85, 0.3)' : 'rgba(226, 232, 240, 0.5)' }
                 },
-                x: {
-                    ticks: {
-                        color: isDark ? '#94a3b8' : '#64748b'
-                    },
-                    grid: { display: false }
-                }
+                x: { ticks: { color: isDark ? '#94a3b8' : '#64748b' }, grid: { display: false } }
             }
         }
     });
@@ -427,42 +345,19 @@ function updateComparison() {
     const difference = salary - avg;
 
     document.getElementById('comparison-stats').innerHTML = `
-        <div class="stat-card">
-            <div class="text-xs text-slate-500 dark:text-slate-400 font-bold mb-2">${state.currentLang === 'es' ? 'Tu Percentil' : 'Your Percentile'}</div>
-            <div class="text-3xl font-black text-brand-500">${percentile}%</div>
-        </div>
-        <div class="stat-card">
-            <div class="text-xs text-slate-500 dark:text-slate-400 font-bold mb-2">${state.currentLang === 'es' ? 'vs. Promedio' : 'vs. Average'}</div>
-            <div class="text-3xl font-black ${difference >= 0 ? 'text-success-500' : 'text-danger-500'}">
-                ${difference >= 0 ? '+' : ''}S/ ${Math.abs(difference).toLocaleString('es-PE', { minimumFractionDigits: 2 })}
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="text-xs text-slate-500 dark:text-slate-400 font-bold mb-2">${state.currentLang === 'es' ? 'Rango' : 'Range'}</div>
-            <div class="text-sm font-black text-slate-700 dark:text-slate-300">
-                S/ ${min.toLocaleString()} - S/ ${max.toLocaleString()}
-            </div>
-        </div>
+        <div class="stat-card"><div class="text-xs text-slate-500 dark:text-slate-400 font-bold mb-2">Percentil</div><div class="text-3xl font-black text-brand-500">${percentile}%</div></div>
+        <div class="stat-card"><div class="text-xs text-slate-500 dark:text-slate-400 font-bold mb-2">vs. Avg</div><div class="text-3xl font-black ${difference >= 0 ? 'text-success-500' : 'text-danger-500'}">S/ ${Math.abs(difference).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</div></div>
+        <div class="stat-card"><div class="text-xs text-slate-500 dark:text-slate-400 font-bold mb-2">Rango</div><div class="text-sm font-black text-slate-700 dark:text-slate-300">S/ ${min.toLocaleString()} - S/ ${max.toLocaleString()}</div></div>
     `;
 }
-
-// ==========================================
-// FOREX
-// ==========================================
 
 function renderForexList() {
     const list = document.getElementById('forex-list');
     if (!list) return;
 
     list.innerHTML = CURRENCIES.map(curr => `
-        <button 
-            data-currency="${curr.code}"
-            class="currency-card ${curr.code === state.selectedCurrency ? 'active' : ''}"
-        >
-            <div>
-                <div class="text-xs font-bold text-slate-700 dark:text-slate-300">${curr.name}</div>
-                <div class="text-[10px] text-slate-400">${curr.symbol}</div>
-            </div>
+        <button data-currency="${curr.code}" class="currency-card ${curr.code === state.selectedCurrency ? 'active' : ''}">
+            <div><div class="text-xs font-bold text-slate-700 dark:text-slate-300">${curr.name}</div><div class="text-[10px] text-slate-400">${curr.symbol}</div></div>
             <div class="text-sm font-black text-brand-500">${curr.code}</div>
         </button>
     `).join('');
@@ -506,7 +401,7 @@ function updateForex() {
     document.getElementById('forex-rate').textContent = `1 ${currency.code} = S/ ${currency.rate.toFixed(4)}`;
     document.getElementById('forex-converted').textContent = `${converted.toFixed(2)} ${currency.code}`;
 
-    const labels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const labels = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
     const baseRate = currency.rate;
     const chartData = labels.map(() => {
         const variance = (Math.random() - 0.5) * 0.04 * baseRate;
@@ -537,60 +432,24 @@ function updateForex() {
         },
         options: {
             responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: isDark ? 'rgb(30, 41, 59)' : 'white',
-                    titleColor: isDark ? 'rgb(226, 232, 240)' : 'rgb(15, 23, 42)',
-                    bodyColor: isDark ? 'rgb(148, 163, 184)' : 'rgb(71, 85, 105)',
-                    borderColor: isDark ? 'rgb(51, 65, 85)' : 'rgb(226, 232, 240)',
-                    borderWidth: 1
-                }
-            },
+            plugins: { legend: { display: false } },
             scales: {
-                y: {
-                    ticks: {
-                        color: isDark ? '#94a3b8' : '#64748b',
-                        callback: value => `S/ ${value.toFixed(2)}`
-                    },
-                    grid: {
-                        color: isDark ? 'rgba(51, 65, 85, 0.3)' : 'rgba(226, 232, 240, 0.5)'
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: isDark ? '#94a3b8' : '#64748b'
-                    },
-                    grid: { display: false }
-                }
+                y: { ticks: { color: isDark ? '#94a3b8' : '#64748b', callback: value => `S/ ${value.toFixed(2)}` }, grid: { color: isDark ? 'rgba(51, 65, 85, 0.3)' : 'rgba(226, 232, 240, 0.5)' } },
+                x: { ticks: { color: isDark ? '#94a3b8' : '#64748b' }, grid: { display: false } }
             }
         }
     });
 }
-
-// ==========================================
-// EMPLEOS
-// ==========================================
 
 function renderSectorFilters() {
     const container = document.getElementById('sector-filters');
     if (!container) return;
 
     const sectors = ['all', 'tecnologia', 'mineria', 'finanzas', 'salud', 'comercio', 'educacion'];
-    const labels = {
-        all: state.currentLang === 'es' ? 'Todos' : 'All',
-        tecnologia: '🖥️ Tech',
-        mineria: '⛏️ Minería',
-        finanzas: '🏦 Finanzas',
-        salud: '⚕️ Salud',
-        comercio: '🛍️ Comercio',
-        educacion: '🎓 Educación'
-    };
+    const labels = { all: 'Todos', tecnologia: 'Tech', mineria: 'Mineria', finanzas: 'Finanzas', salud: 'Salud', comercio: 'Comercio', educacion: 'Educacion' };
 
     container.innerHTML = sectors.map(sector => `
-        <button data-sector="${sector}" class="sector-filter ${sector === 'all' ? 'active' : ''}">
-            ${labels[sector]}
-        </button>
+        <button data-sector="${sector}" class="sector-filter ${sector === 'all' ? 'active' : ''}">${labels[sector]}</button>
     `).join('');
 
     document.querySelectorAll('[data-sector]').forEach(btn => {
@@ -619,86 +478,35 @@ function renderJobs() {
             <h4 class="font-bold text-sm dark:text-white mb-2 line-clamp-2">${job.title}</h4>
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">${job.sector}</p>
             <div class="flex justify-between items-center mt-auto pt-4 border-t border-slate-200 dark:border-slate-700">
-                <div>
-                    <div class="text-xs text-slate-400 font-bold">${state.currentLang === 'es' ? 'Desde' : 'From'}</div>
-                    <div class="font-black text-brand-500">S/ ${job.salary.toLocaleString()}</div>
-                </div>
-                <a href="${job.link}" target="_blank" rel="noopener" class="px-3 py-2 bg-brand-500 text-white text-xs font-bold rounded-lg hover:bg-brand-600 transition">
-                    ${state.currentLang === 'es' ? 'Ver' : 'View'}
-                </a>
+                <div><div class="text-xs text-slate-400 font-bold">Desde</div><div class="font-black text-brand-500">S/ ${job.salary.toLocaleString()}</div></div>
+                <a href="${job.link}" target="_blank" rel="noopener" class="px-3 py-2 bg-brand-500 text-white text-xs font-bold rounded-lg hover:bg-brand-600 transition">Ver</a>
             </div>
         </div>
     `).join('');
 }
-
-// ==========================================
-// NOTICIAS
-// ==========================================
 
 function renderNews() {
     document.getElementById('news-grid').innerHTML = NEWS.map(article => `
         <div class="news-card">
-            <div class="flex items-center gap-2 mb-3 flex-wrap">
-                <span class="px-3 py-1 bg-brand-500 text-white text-[9px] font-black rounded-full uppercase">
-                    ${article.source}
-                </span>
-                <span class="text-[10px] text-slate-400">${article.date}</span>
-            </div>
+            <div class="flex items-center gap-2 mb-3 flex-wrap"><span class="px-3 py-1 bg-brand-500 text-white text-[9px] font-black rounded-full uppercase">${article.source}</span><span class="text-[10px] text-slate-400">${article.date}</span></div>
             <h4 class="text-base font-black dark:text-white mb-3 leading-tight">${article.title}</h4>
             <p class="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">${article.description}</p>
-            <a href="${article.link}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-bold text-brand-500 hover:text-brand-600 transition">
-                ${state.currentLang === 'es' ? 'Leer más' : 'Read more'}
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-            </a>
+            <a href="${article.link}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-bold text-brand-500 hover:text-brand-600 transition">Leer mas</a>
         </div>
     `).join('');
 }
 
-// ==========================================
-// COMPARTIR RESULTADOS
-// ==========================================
-
 document.getElementById('share-result-btn')?.addEventListener('click', () => {
     const result = document.getElementById('main-result').textContent;
     const calc = CALCULATOR_CONFIGS[state.currentCalculator];
-    const text = `${calc.title[state.currentLang]}: ${result} | SueldoPro 2026`;
+    const text = `${calc.title[state.currentLang]}: ${result}`;
 
     if (navigator.share) {
-        navigator.share({
-            title: 'SueldoPro 2026',
-            text: text,
-            url: window.location.href
-        }).catch(() => {});
+        navigator.share({ title: 'SueldoPro 2026', text: text, url: window.location.href }).catch(() => {});
     } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => {
-            showToast(state.currentLang === 'es' ? '✓ Copiado' : '✓ Copied');
-        });
+        navigator.clipboard.writeText(text).then(() => alert('Copiado!'));
     }
 });
-
-// ==========================================
-// NOTIFICACIONES
-// ==========================================
-
-function showToast(message) {
-    const toast = document.createElement('div');
-    toast.className = 'fixed bottom-4 right-4 bg-brand-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 font-bold text-sm animate-fadeIn';
-    toast.textContent = message;
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(1rem)';
-        toast.style.transition = 'all 0.3s';
-        setTimeout(() => toast.remove(), 300);
-    }, 2000);
-}
-
-// ==========================================
-// EVENT LISTENERS GLOBALES
-// ==========================================
 
 document.getElementById('job-search')?.addEventListener('input', renderJobs);
 document.getElementById('comp-salary')?.addEventListener('input', updateComparison);
