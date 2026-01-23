@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="theme-color" content="#0f172a">
-    <meta name="description" content="SueldoPro Ultra - Calculadora Laboral Global 21 Países | Pentágono Financiero">
+    <meta name="description" content="SueldoPro Ultra - Calculadora Laboral Global 21 Países con Conversión de Divisas en Tiempo Real | Pentágono Financiero">
     <title>SueldoPro Ultra | Pentágono Financiero 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-slate-900 text-slate-100">
@@ -25,7 +26,7 @@
                 </div>
             </div>
             <div class="hidden lg:flex items-center gap-2" id="pentagon-desktop"></div>
-            <button id="mobile-menu-btn" class="lg:hidden p-2 rounded-xl bg-slate-800 text-white">
+            <button id="mobile-menu-btn" class="lg:hidden p-2 rounded-xl bg-slate-800 text-white hover:bg-slate-700 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
@@ -34,16 +35,35 @@
     </nav>
 
     <!-- Mobile Nav -->
-    <div id="mobile-nav" class="fixed inset-y-0 left-0 w-80 bg-slate-900/98 backdrop-blur-xl z-50 shadow-2xl border-r border-slate-800/50 -translate-x-full transition-transform duration-300">
-        <div class="p-6 border-b border-slate-800/50 flex items-center justify-between">
+    <div id="mobile-nav" class="fixed inset-y-0 left-0 w-80 bg-slate-900/98 backdrop-blur-xl z-50 shadow-2xl border-r border-slate-800/50 -translate-x-full transition-transform duration-300 overflow-y-auto">
+        <div class="p-6 border-b border-slate-800/50 flex items-center justify-between sticky top-0 bg-slate-900/95 backdrop-blur-xl z-10">
             <h2 class="text-xl font-black text-white">PENTÁGONO</h2>
-            <button id="close-mobile-nav" class="p-2 rounded-xl bg-slate-800 text-white">
+            <button id="close-mobile-nav" class="p-2 rounded-xl bg-slate-800 text-white hover:bg-slate-700 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
         </div>
-        <div class="p-6 space-y-3" id="pentagon-mobile"></div>
+        
+        <!-- Selector de País en Mobile Nav -->
+        <div class="p-6 border-b border-slate-800/50">
+            <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-3">🌎 PAÍS</label>
+            <select id="mobile-country-select" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold text-sm focus:border-indigo-500 focus:outline-none transition">
+                <option value="">Cargando...</option>
+            </select>
+        </div>
+        
+        <!-- Enlaces Pentágono Mobile -->
+        <div class="p-6 space-y-3 border-b border-slate-800/50">
+            <h3 class="text-xs font-black text-slate-400 uppercase tracking-wider mb-3">APLICACIONES</h3>
+            <div id="pentagon-mobile"></div>
+        </div>
+        
+        <!-- Navegación Mobile -->
+        <div class="p-6">
+            <h3 class="text-xs font-black text-slate-400 uppercase tracking-wider mb-3">MÓDULOS</h3>
+            <div class="space-y-2" id="mobile-nav-buttons"></div>
+        </div>
     </div>
 
     <div class="pt-16">
@@ -73,12 +93,12 @@
             <!-- Main Content -->
             <main class="flex-1 lg:ml-80">
                 <!-- Legal Disclaimer -->
-                <div class="bg-amber-950/30 border-b border-amber-900/50 px-4 py-4">
-                    <div class="max-w-7xl mx-auto flex items-start gap-3">
-                        <span class="text-amber-500 text-lg">⚖️</span>
-                        <div class="flex-1">
-                            <p class="text-amber-200 font-semibold text-sm">Simulador Educativo de Costos Laborales</p>
-                            <p class="text-amber-300/80 text-xs mt-1">Los cálculos son estimados basados en normativas vigentes a 2026. No reemplaza asesoría contable profesional.</p>
+                <div class="bg-amber-950/30 border-b border-amber-900/50 px-4 py-3 lg:py-4">
+                    <div class="max-w-7xl mx-auto flex items-start gap-2 lg:gap-3">
+                        <span class="text-amber-500 text-base lg:text-lg flex-shrink-0">⚖️</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-amber-200 font-semibold text-xs lg:text-sm">Simulador Educativo de Costos Laborales</p>
+                            <p class="text-amber-300/80 text-[10px] lg:text-xs mt-1">Los cálculos son estimados basados en normativas vigentes a 2026. No reemplaza asesoría contable profesional.</p>
                         </div>
                     </div>
                 </div>
@@ -86,16 +106,18 @@
                 <!-- Calculators Section -->
                 <section id="sec-calculators" class="section-content active">
                     <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
-                        <h2 class="text-4xl lg:text-6xl font-black text-white mb-8">Motor <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-emerald-400">Calculador</span></h2>
+                        <h2 class="text-3xl sm:text-4xl lg:text-6xl font-black text-white mb-6 lg:mb-8">Motor <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-emerald-400">Calculador</span></h2>
                         
-                        <div class="grid lg:grid-cols-12 gap-6">
+                        <div class="grid lg:grid-cols-12 gap-4 lg:gap-6">
+                            <!-- Mobile Calculator Selector -->
                             <div class="lg:hidden lg:col-span-12">
-                                <select id="mobile-calc-select" class="w-full p-3 bg-slate-850 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none">
+                                <select id="mobile-calc-select" class="w-full p-3 bg-slate-850 border-2 border-slate-700 rounded-xl text-white font-bold text-sm focus:border-indigo-500 focus:outline-none">
                                     <option value="">Seleccionar calculadora...</option>
                                 </select>
                             </div>
                             
-                            <div class="lg:col-span-7 bg-slate-850 rounded-3xl shadow-2xl border border-slate-800 p-6 lg:p-8">
+                            <!-- Calculator Form -->
+                            <div class="lg:col-span-7 bg-slate-850 rounded-2xl lg:rounded-3xl shadow-2xl border border-slate-800 p-4 sm:p-6 lg:p-8">
                                 <div id="calculator-form">
                                     <div class="text-center py-12">
                                         <div class="text-6xl mb-4">🔢</div>
@@ -104,14 +126,15 @@
                                 </div>
                             </div>
                             
-                            <div class="lg:col-span-5 space-y-6">
-                                <div class="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-3xl p-8 text-white shadow-2xl">
+                            <!-- Results Panel -->
+                            <div class="lg:col-span-5 space-y-4 lg:space-y-6">
+                                <div class="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-2xl lg:rounded-3xl p-6 lg:p-8 text-white shadow-2xl">
                                     <h4 class="text-xs font-black opacity-90 mb-2 tracking-wider">RESULTADO</h4>
-                                    <div id="main-result" class="text-5xl font-black mb-6">$0.00</div>
-                                    <div id="result-details" class="space-y-3 text-sm border-t border-white/20 pt-4"></div>
+                                    <div id="main-result" class="text-3xl sm:text-4xl lg:text-5xl font-black mb-4 lg:mb-6 break-all">$0.00</div>
+                                    <div id="result-details" class="space-y-2 lg:space-y-3 text-sm border-t border-white/20 pt-4"></div>
                                 </div>
                                 
-                                <div class="bg-slate-850 rounded-2xl p-6 border border-slate-800">
+                                <div class="bg-slate-850 rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-slate-800">
                                     <h5 class="font-bold text-sm mb-3 text-indigo-400 flex items-center gap-2">
                                         <span>💡</span>
                                         <span>Información Legal</span>
@@ -119,21 +142,35 @@
                                     <p id="legal-info" class="text-xs text-slate-400 leading-relaxed"></p>
                                 </div>
                                 
-                                <button id="export-pdf-btn" class="w-full p-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition flex items-center justify-center gap-2">
-    <span>📄</span>
-    <span>Exportar PDF Premium</span>
-</button>
+                                <!-- Action Buttons -->
+                                <div class="grid grid-cols-1 gap-3">
+                                    <button id="export-pdf-btn" class="w-full p-3 lg:p-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-sm transition flex items-center justify-center gap-2">
+                                        <span>📄</span>
+                                        <span>Exportar PDF Premium</span>
+                                    </button>
 
-<button id="share-result-btn" class="w-full p-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition flex items-center justify-center gap-2">
-    <span>📤</span>
-    <span>Compartir Resultado</span>
-</button>
+                                    <button id="share-result-btn" class="w-full p-3 lg:p-4 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white font-bold text-sm transition flex items-center justify-center gap-2">
+                                        <span>📤</span>
+                                        <span>Compartir Resultado</span>
+                                    </button>
 
-<button id="save-calc-btn" class="w-full p-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm transition flex items-center justify-center gap-2">
-    <span>💾</span>
-    <span>Guardar Cálculo</span>
-</button>
+                                    <button id="save-calc-btn" class="w-full p-3 lg:p-4 rounded-xl bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-bold text-sm transition flex items-center justify-center gap-2">
+                                        <span>💾</span>
+                                        <span>Guardar Cálculo</span>
+                                    </button>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Currency Converter Section -->
+                <section id="sec-currency" class="section-content">
+                    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
+                        <h2 class="text-3xl sm:text-4xl lg:text-6xl font-black text-white mb-6 lg:mb-8">Conversor de <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-emerald-400">Divisas</span></h2>
+                        
+                        <div id="currency-converter-content" class="bg-slate-850 rounded-2xl lg:rounded-3xl shadow-2xl border border-slate-800 p-4 sm:p-6 lg:p-8">
+                            <!-- El contenido se genera dinámicamente -->
                         </div>
                     </div>
                 </section>
@@ -141,40 +178,40 @@
                 <!-- True Cost Section -->
                 <section id="sec-truecost" class="section-content">
                     <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
-                        <h2 class="text-4xl lg:text-6xl font-black text-white mb-8">Costo <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-500">Real</span></h2>
+                        <h2 class="text-3xl sm:text-4xl lg:text-6xl font-black text-white mb-6 lg:mb-8">Costo <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-500">Real</span></h2>
                         
-                        <div class="grid lg:grid-cols-2 gap-8">
-                            <div class="bg-slate-850 rounded-3xl p-8 border border-slate-800">
+                        <div class="grid lg:grid-cols-2 gap-6 lg:gap-8">
+                            <div class="bg-slate-850 rounded-2xl lg:rounded-3xl p-6 lg:p-8 border border-slate-800">
                                 <h3 class="text-xl font-black mb-6 text-white">Datos del Empleado</h3>
                                 <div class="space-y-4">
                                     <div>
                                         <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Sueldo Bruto Mensual</label>
-                                        <input type="number" id="tc-salary" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none" placeholder="5000" min="0" step="100">
+                                        <input type="number" id="tc-salary" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none transition" placeholder="5000" min="0" step="100">
                                     </div>
-                                    <button id="tc-calculate-btn" class="w-full p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition">
+                                    <button id="tc-calculate-btn" class="w-full p-3 lg:p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black rounded-xl hover:from-indigo-700 hover:to-indigo-800 active:from-indigo-800 active:to-indigo-900 transition">
                                         CALCULAR COSTO REAL
                                     </button>
                                 </div>
                             </div>
                             
-                            <div class="space-y-6">
-                                <div class="grid grid-cols-2 gap-6">
-                                    <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-6 text-white">
+                            <div class="space-y-4 lg:space-y-6">
+                                <div class="grid grid-cols-2 gap-4 lg:gap-6">
+                                    <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl lg:rounded-2xl p-4 lg:p-6 text-white">
                                         <div class="text-xs font-black opacity-90 mb-2">COSTO EMPRESA</div>
-                                        <div id="tc-total-cost" class="text-3xl font-black">$0</div>
+                                        <div id="tc-total-cost" class="text-2xl lg:text-3xl font-black break-all">$0</div>
                                     </div>
-                                    <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 text-white">
+                                    <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl lg:rounded-2xl p-4 lg:p-6 text-white">
                                         <div class="text-xs font-black opacity-90 mb-2">SUELDO NETO</div>
-                                        <div id="tc-net-salary" class="text-3xl font-black">$0</div>
+                                        <div id="tc-net-salary" class="text-2xl lg:text-3xl font-black break-all">$0</div>
                                     </div>
                                 </div>
                                 
-                                <div class="bg-slate-850 rounded-2xl p-6 border border-slate-800">
+                                <div class="bg-slate-850 rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-slate-800">
                                     <h4 class="font-bold text-sm mb-4 text-white">Desglose de Costos</h4>
                                     <div id="tc-breakdown" class="space-y-3 text-sm"></div>
                                 </div>
                                 
-                                <div class="bg-slate-850 rounded-2xl p-6 border border-slate-800">
+                                <div class="bg-slate-850 rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-slate-800">
                                     <canvas id="tc-chart"></canvas>
                                 </div>
                             </div>
@@ -185,52 +222,52 @@
                 <!-- Expansion Simulator Section -->
                 <section id="sec-expansion" class="section-content">
                     <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
-                        <h2 class="text-4xl lg:text-6xl font-black text-white mb-8">Simulador de <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-emerald-400">Expansión</span></h2>
+                        <h2 class="text-3xl sm:text-4xl lg:text-6xl font-black text-white mb-6 lg:mb-8">Simulador de <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-emerald-400">Expansión</span></h2>
                         
-                        <div class="grid lg:grid-cols-3 gap-8">
-                            <div class="bg-slate-850 rounded-3xl p-8 border border-slate-800">
+                        <div class="grid lg:grid-cols-3 gap-6 lg:gap-8">
+                            <div class="bg-slate-850 rounded-2xl lg:rounded-3xl p-6 lg:p-8 border border-slate-800">
                                 <h3 class="text-xl font-black mb-6 text-white">Datos del Negocio</h3>
                                 <div class="space-y-4">
                                     <div>
                                         <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Meta de Ingresos Mensuales</label>
-                                        <input type="number" id="exp-target" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none" placeholder="50000" min="0" step="1000">
+                                        <input type="number" id="exp-target" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none transition" placeholder="50000" min="0" step="1000">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Sueldo Promedio por Empleado</label>
-                                        <input type="number" id="exp-avg-salary" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none" placeholder="3000" min="0" step="100">
+                                        <input type="number" id="exp-avg-salary" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none transition" placeholder="3000" min="0" step="100">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Ingreso Promedio por Empleado</label>
-                                        <input type="number" id="exp-revenue-per" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none" placeholder="8000" min="0" step="100">
+                                        <input type="number" id="exp-revenue-per" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none transition" placeholder="8000" min="0" step="100">
                                     </div>
-                                    <button id="exp-calculate-btn" class="w-full p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition">
+                                    <button id="exp-calculate-btn" class="w-full p-3 lg:p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black rounded-xl hover:from-indigo-700 hover:to-indigo-800 active:from-indigo-800 active:to-indigo-900 transition">
                                         CALCULAR EXPANSIÓN
                                     </button>
                                 </div>
                             </div>
                             
-                            <div class="lg:col-span-2 space-y-6">
-                                <div class="grid grid-cols-3 gap-6">
-                                    <div class="stat-card rounded-2xl p-6 border border-slate-700">
-                                        <div class="text-xs font-black text-slate-400 mb-2">EMPLEADOS NECESARIOS</div>
-                                        <div id="exp-employees" class="text-4xl font-black text-indigo-500">0</div>
+                            <div class="lg:col-span-2 space-y-4 lg:space-y-6">
+                                <div class="grid grid-cols-3 gap-3 lg:gap-6">
+                                    <div class="stat-card rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-slate-700">
+                                        <div class="text-[10px] lg:text-xs font-black text-slate-400 mb-2">EMPLEADOS</div>
+                                        <div id="exp-employees" class="text-2xl lg:text-4xl font-black text-indigo-500 break-all">0</div>
                                     </div>
-                                    <div class="stat-card rounded-2xl p-6 border border-slate-700">
-                                        <div class="text-xs font-black text-slate-400 mb-2">COSTO TOTAL MENSUAL</div>
-                                        <div id="exp-total-cost" class="text-4xl font-black text-red-500">$0</div>
+                                    <div class="stat-card rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-slate-700">
+                                        <div class="text-[10px] lg:text-xs font-black text-slate-400 mb-2">COSTO TOTAL</div>
+                                        <div id="exp-total-cost" class="text-2xl lg:text-4xl font-black text-red-500 break-all">$0</div>
                                     </div>
-                                    <div class="stat-card rounded-2xl p-6 border border-slate-700">
-                                        <div class="text-xs font-black text-slate-400 mb-2">ROI ESPERADO</div>
-                                        <div id="exp-roi" class="text-4xl font-black text-emerald-500">0%</div>
+                                    <div class="stat-card rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-slate-700">
+                                        <div class="text-[10px] lg:text-xs font-black text-slate-400 mb-2">ROI</div>
+                                        <div id="exp-roi" class="text-2xl lg:text-4xl font-black text-emerald-500 break-all">0%</div>
                                     </div>
                                 </div>
                                 
-                                <div class="bg-slate-850 rounded-2xl p-8 border border-slate-800">
-                                    <h4 class="font-bold text-lg mb-6 text-white">Proyección Financiera</h4>
+                                <div class="bg-slate-850 rounded-xl lg:rounded-2xl p-6 lg:p-8 border border-slate-800">
+                                    <h4 class="font-bold text-base lg:text-lg mb-4 lg:mb-6 text-white">Proyección Financiera</h4>
                                     <canvas id="exp-chart"></canvas>
                                 </div>
                                 
-                                <div class="bg-slate-850 rounded-2xl p-6 border border-slate-800">
+                                <div class="bg-slate-850 rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-slate-800">
                                     <h4 class="font-bold text-sm mb-4 text-white flex items-center gap-2">
                                         <span>📊</span>
                                         <span>Desglose Detallado</span>
@@ -245,23 +282,23 @@
                 <!-- Global Database Section -->
                 <section id="sec-database" class="section-content">
                     <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
-                        <h2 class="text-4xl lg:text-6xl font-black text-white mb-8">Base de Datos <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-emerald-400">Global</span></h2>
+                        <h2 class="text-3xl sm:text-4xl lg:text-6xl font-black text-white mb-6 lg:mb-8">Base de Datos <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-emerald-400">Global</span></h2>
                         
-                        <div class="mb-6">
-                            <input type="text" id="country-search" class="w-full p-4 bg-slate-850 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none" placeholder="🔍 Buscar país...">
+                        <div class="mb-4 lg:mb-6">
+                            <input type="text" id="country-search" class="w-full p-3 lg:p-4 bg-slate-850 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none transition" placeholder="🔍 Buscar país...">
                         </div>
                         
-                        <div id="countries-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+                        <div id="countries-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6"></div>
                     </div>
                 </section>
                 
                 <!-- Footer -->
-                <footer class="bg-slate-850 border-t border-slate-800/50 mt-20">
-                    <div class="max-w-7xl mx-auto px-4 py-12">
-                        <div class="grid md:grid-cols-3 gap-8">
+                <footer class="bg-slate-850 border-t border-slate-800/50 mt-12 lg:mt-20">
+                    <div class="max-w-7xl mx-auto px-4 py-8 lg:py-12">
+                        <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
                             <div>
                                 <h3 class="text-xl font-black text-white mb-4">SUELDO<span class="text-indigo-500">PRO</span> ULTRA</h3>
-                                <p class="text-slate-400 text-sm leading-relaxed">Calculadora laboral global con 21 países. Parte del Pentágono Financiero.</p>
+                                <p class="text-slate-400 text-sm leading-relaxed">Calculadora laboral global con 21 países y conversión de divisas en tiempo real. Parte del Pentágono Financiero.</p>
                             </div>
                             <div>
                                 <h4 class="text-sm font-black text-slate-400 uppercase tracking-wider mb-4">Pentágono Financiero</h4>
@@ -272,8 +309,8 @@
                                 <p class="text-slate-500 text-xs leading-relaxed">SueldoPro Ultra es un simulador educativo. No reemplaza asesoría profesional. Estimados 2026.</p>
                             </div>
                         </div>
-                        <div class="border-t border-slate-800 mt-8 pt-8 text-center">
-                            <p class="text-slate-500 text-sm">© 2026 SueldoPro Ultra - Pentágono Financiero</p>
+                        <div class="border-t border-slate-800 mt-6 lg:mt-8 pt-6 lg:pt-8 text-center">
+                            <p class="text-slate-500 text-xs lg:text-sm">© 2026 SueldoPro Ultra - Pentágono Financiero</p>
                         </div>
                     </div>
                 </footer>

@@ -10,6 +10,7 @@ body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
 }
 
 /* Animaciones */
@@ -21,6 +22,11 @@ body {
 @keyframes slideUp {
     from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
 }
 
 .section-content {
@@ -47,10 +53,15 @@ body {
     border-radius: 10px;
 }
 
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+}
+
 /* Botones de navegación */
 .nav-btn {
     transition: all 0.3s ease;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .nav-btn:hover {
@@ -67,6 +78,7 @@ body {
 .calc-tab {
     transition: all 0.3s ease;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .calc-tab:hover {
@@ -84,6 +96,7 @@ body {
 .country-card {
     transition: all 0.3s ease;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .country-card:hover {
@@ -92,11 +105,18 @@ body {
     box-shadow: 0 12px 32px -8px rgba(99, 102, 241, 0.4);
 }
 
-/* Inputs y selects */
+.country-card:active {
+    transform: translateY(-2px);
+}
+
+/* Inputs y selects - Optimización móvil */
 input[type="number"],
 input[type="text"],
 select {
-    font-size: 16px !important; /* Previene zoom en móviles */
+    font-size: 16px !important; /* Previene zoom en móviles iOS */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 input:focus,
@@ -104,9 +124,34 @@ select:focus {
     outline: none;
 }
 
+/* Mejora de touch targets para móviles */
+button, 
+a, 
+.country-card,
+.calc-tab,
+.nav-btn {
+    min-height: 44px; /* Tamaño mínimo recomendado por Apple */
+    min-width: 44px;
+}
+
+@media (max-width: 768px) {
+    button, 
+    a, 
+    .country-card,
+    .calc-tab,
+    .nav-btn {
+        min-height: 48px; /* Más grande en móviles */
+    }
+}
+
 /* Stat cards */
 .stat-card {
     background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(79, 70, 229, 0.02) 100%);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(79, 70, 229, 0.04) 100%);
 }
 
 /* Form groups */
@@ -114,9 +159,89 @@ select:focus {
     margin-bottom: 1.25rem;
 }
 
+/* Loading states */
+.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Mejoras de performance móvil */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+a {
+    -webkit-tap-highlight-color: rgba(99, 102, 241, 0.2);
+    touch-action: manipulation; /* Mejora la respuesta táctil */
+}
+
+/* Prevenir selección de texto en botones */
+button,
+.nav-btn,
+.calc-tab,
+.country-card {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Optimización de scrolling en móviles */
+.overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+/* Mejora de contraste para legibilidad móvil */
+@media (max-width: 640px) {
+    body {
+        font-size: 14px;
+    }
+    
+    h2 {
+        line-height: 1.2;
+    }
+    
+    .text-xs {
+        font-size: 0.7rem;
+    }
+}
+
+/* Botones con feedback visual en móvil */
+button:active,
+.calc-tab:active,
+.nav-btn:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+}
+
+/* Gradientes optimizados */
+.bg-gradient-to-r,
+.bg-gradient-to-br {
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+}
+
+/* Mejoras de accesibilidad */
+:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+/* Canvas responsivos */
+canvas {
+    max-width: 100%;
+    height: auto !important;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .nav-btn:hover {
+        transform: none;
+    }
+    
+    .calc-tab:hover {
         transform: none;
     }
 }
@@ -125,11 +250,104 @@ select:focus {
     .country-card:hover {
         transform: translateY(-2px);
     }
+    
+    /* Ajustar padding en móviles */
+    section {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    /* Mejorar legibilidad de números grandes */
+    #main-result,
+    #tc-total-cost,
+    #tc-net-salary,
+    #exp-employees,
+    #exp-total-cost,
+    #exp-roi {
+        word-break: break-all;
+        hyphens: auto;
+    }
+}
+
+@media (max-width: 640px) {
+    /* Reducir espaciado en pantallas pequeñas */
+    .space-y-6 > * + * {
+        margin-top: 1rem;
+    }
+    
+    /* Optimizar gráficos para móviles */
+    canvas {
+        height: 250px !important;
+    }
+}
+
+/* Mejoras para landscape en móviles */
+@media (max-height: 500px) and (orientation: landscape) {
+    .section-content {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Loading spinner para tasas de cambio */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Mejoras de contraste para dark mode */
+@media (prefers-color-scheme: dark) {
+    body {
+        color: #f1f5f9;
+    }
+}
+
+/* Optimización de fuentes para móviles */
+@media (max-width: 640px) {
+    html {
+        font-size: 15px; /* Base más pequeña en móviles */
+    }
+}
+
+/* Transiciones suaves para cambios de sección */
+.section-content {
+    will-change: opacity, transform;
+}
+
+/* Mejoras de performance para animaciones */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Safe area para dispositivos con notch */
+@supports (padding: env(safe-area-inset-bottom)) {
+    body {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    nav {
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
 }
 
 /* Print styles */
 @media print {
-    nav, aside, button, .nav-btn {
+    nav, aside, button, .nav-btn, footer {
         display: none !important;
     }
     
@@ -140,4 +358,60 @@ select:focus {
     .section-content {
         page-break-inside: avoid;
     }
+    
+    * {
+        color: #000 !important;
+        background: #fff !important;
+    }
+}
+
+/* Mejoras visuales para formularios */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Estilos para el conversor de divisas */
+#currency-converter-content {
+    min-height: 300px;
+}
+
+/* Mejora de interactividad en tarjetas de divisas */
+[data-currency] {
+    transition: all 0.2s ease;
+}
+
+[data-currency]:hover {
+    background-color: #1e293b;
+    transform: scale(1.05);
+}
+
+[data-currency]:active {
+    transform: scale(0.98);
+}
+
+/* Skeleton loading para tasas de cambio */
+.skeleton {
+    background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s ease-in-out infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Mejora de tooltips en gráficos */
+.chartjs-tooltip {
+    opacity: 1 !important;
+    background: rgba(15, 23, 42, 0.95) !important;
+    border: 1px solid #6366f1 !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
 }
