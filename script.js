@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     selectCalculator('neto');
     showWelcomeMessage();
-    initCurrencyConverter();
     fetchExchangeRates();
 });
 
@@ -86,10 +85,19 @@ function renderPentagonLinks() {
 
 function renderCountrySelect() {
     const select = document.getElementById('country-select');
-    select.innerHTML = Object.values(COUNTRIES_DATA).map(country => 
+    const mobileSelect = document.getElementById('mobile-country-select');
+    
+    const options = Object.values(COUNTRIES_DATA).map(country => 
         `<option value="${country.code}">${country.flag} ${country.name}</option>`
     ).join('');
+    
+    select.innerHTML = options;
     select.value = state.currentCountry;
+    
+    if (mobileSelect) {
+        mobileSelect.innerHTML = options;
+        mobileSelect.value = state.currentCountry;
+    }
 }
 
 // ==========================================
@@ -182,22 +190,19 @@ async function fetchExchangeRates() {
     updateCurrencyStatus('loading');
     
     try {
-        // Usar ExchangeRate-API (gratuita, sin necesidad de API key)
         const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
         
         if (!response.ok) throw new Error('Error al obtener tasas de cambio');
         
         const data = await response.json();
         state.exchangeRates = data.rates;
-        state.exchangeRates['USD'] = 1; // Asegurar que USD esté incluido
+        state.exchangeRates['USD'] = 1;
         
-        // Obtener historial para gráficos (últimos 30 días)
         await fetchCurrencyHistory();
         
         updateCurrencyStatus('success');
         updateCurrencyConverter();
         
-        // Guardar en localStorage con timestamp
         localStorage.setItem('sueldopro_rates', JSON.stringify({
             rates: state.exchangeRates,
             timestamp: Date.now()
@@ -206,7 +211,6 @@ async function fetchExchangeRates() {
     } catch (error) {
         console.error('Error fetching rates:', error);
         
-        // Intentar cargar desde localStorage si falla
         const cached = localStorage.getItem('sueldopro_rates');
         if (cached) {
             const { rates, timestamp } = JSON.parse(cached);
@@ -228,8 +232,6 @@ async function fetchExchangeRates() {
 
 async function fetchCurrencyHistory() {
     try {
-        // Para el historial, podemos usar una API alternativa o simularlo
-        // Como la API gratuita no incluye historial, simularemos datos realistas
         const currencies = ['EUR', 'MXN', 'COP', 'PEN', 'CLP', 'ARS', 'BRL'];
         const days = 30;
         
@@ -241,7 +243,6 @@ async function fetchCurrencyHistory() {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
                 
-                // Simular variación realista (+/- 2%)
                 const variation = (Math.random() - 0.5) * 0.04;
                 const rate = baseRate * (1 + variation);
                 
@@ -391,7 +392,6 @@ function updateCurrencyConverter() {
     
     if (!toAmountEl || !state.exchangeRates[fromCurrency] || !state.exchangeRates[toCurrency]) return;
     
-    // Convertir: USD es la base, entonces convertimos from -> USD -> to
     const fromRate = state.exchangeRates[fromCurrency];
     const toRate = state.exchangeRates[toCurrency];
     const conversionRate = toRate / fromRate;
@@ -448,7 +448,6 @@ function updatePopularRates() {
         `;
     }).join('');
     
-    // Permitir click rápido para seleccionar
     container.querySelectorAll('[data-currency]').forEach(card => {
         card.addEventListener('click', () => {
             const currency = card.dataset.currency;
@@ -564,7 +563,6 @@ function setupEventListeners() {
         document.getElementById('mobile-nav').classList.add('-translate-x-full');
     });
     
-    // Sincronizar ambos selectores de país (desktop y mobile)
     document.getElementById('country-select').addEventListener('change', (e) => {
         state.currentCountry = e.target.value;
         localStorage.setItem('sueldopro_country', state.currentCountry);
@@ -572,16 +570,8 @@ function setupEventListeners() {
         if (mobileSelect) mobileSelect.value = state.currentCountry;
     });
     
-    // Mobile country selector
     const mobileCountrySelect = document.getElementById('mobile-country-select');
     if (mobileCountrySelect) {
-        // Llenar opciones
-        mobileCountrySelect.innerHTML = Object.values(COUNTRIES_DATA).map(country => 
-            `<option value="${country.code}">${country.flag} ${country.name}</option>`
-        ).join('');
-        mobileCountrySelect.value = state.currentCountry;
-        
-        // Evento de cambio
         mobileCountrySelect.addEventListener('change', (e) => {
             state.currentCountry = e.target.value;
             localStorage.setItem('sueldopro_country', state.currentCountry);
@@ -642,7 +632,6 @@ function navigate(sectionId) {
     document.getElementById('calc-tabs-container').classList.toggle('hidden', sectionId !== 'calculators');
     document.getElementById('mobile-nav').classList.add('-translate-x-full');
     
-    // Inicializar conversor cuando se navega a la sección
     if (sectionId === 'currency') {
         initCurrencyConverter();
         if (Object.keys(state.exchangeRates).length === 0) {
@@ -692,3 +681,406 @@ function renderCalculatorForm() {
                     placeholder="${field.placeholder}" 
                     ${field.min !== undefined ? `min="${field.min}"` : ''} 
                     ${field.max !== undefined ? `max="${field.max}"` : ''}
+                    ${field.step !== undefined ? `step="${field.step}"` : ''}>
+            </div>
+        `;
+    });
+    
+    html += `
+        <button id="calc-btn" class="w-full p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition mt-2">
+            CALCULAR
+        </button>
+    `;
+    
+    container.innerHTML = html;
+    
+    document.getElementById('calc-btn').addEventListener('click', executeCalculation);
+    document.getElementById('legal-info').textContent = calc.legalInfo;
+    document.getElementById('main-result').textContent = '$0.00';
+    document.getElementById('result-details').innerHTML = '';
+}
+
+function executeCalculation() {
+    const calc = CALCULATOR_CONFIGS[state.currentCalculator];
+    const country = COUNTRIES_DATA[state.currentCountry];
+    
+    const values = {};
+    calc.fields.forEach(field => {
+        const input = document.getElementById(field.id);
+        values[field.id] = input.value;
+    });
+    
+    const result = calc.calculate(values, country);
+    state.lastResult = { result, calc, country, values };
+    displayResult(result, country);
+}
+
+function displayResult(result, country) {
+    const mainResult = document.getElementById('main-result');
+    const detailsContainer = document.getElementById('result-details');
+    
+    mainResult.textContent = `${country.currencySymbol} ${result.total.toLocaleString('es', { minimumFractionDigits: 2 })}`;
+    
+    detailsContainer.innerHTML = result.details.map(detail => `
+        <div class="flex justify-between items-center py-2 border-b border-white/10 last:border-0">
+            <span class="text-sm opacity-90">${detail.label}</span>
+            <span class="font-bold">${detail.value}</span>
+        </div>
+    `).join('');
+}
+
+// ==========================================
+// EXPORTAR PDF PREMIUM
+// ==========================================
+
+function exportPDF() {
+    if (!state.lastResult) {
+        alert('⚠️ Primero realiza un cálculo antes de exportar el PDF');
+        return;
+    }
+    
+    const { result, calc, country } = state.lastResult;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    doc.setFillColor(99, 102, 241);
+    doc.rect(0, 0, 210, 40, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont(undefined, 'bold');
+    doc.text('SUELDOPRO ULTRA', 105, 20, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text('Pentágono Financiero - Auditoría Laboral', 105, 28, { align: 'center' });
+    
+    doc.setFontSize(9);
+    doc.text(`Fecha: ${new Date().toLocaleDateString('es-ES')}`, 15, 35);
+    doc.text(`País: ${country.flag} ${country.name}`, 150, 35);
+    
+    doc.setDrawColor(99, 102, 241);
+    doc.setLineWidth(0.5);
+    doc.line(15, 42, 195, 42);
+    
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text(`${calc.icon} ${calc.title}`, 15, 55);
+    
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(100, 116, 139);
+    doc.text(calc.description, 15, 62);
+    
+    doc.setFillColor(239, 246, 255);
+    doc.roundedRect(15, 70, 180, 25, 3, 3, 'F');
+    
+    doc.setTextColor(99, 102, 241);
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('RESULTADO TOTAL', 105, 80, { align: 'center' });
+    
+    doc.setFontSize(20);
+    const resultText = `${country.currencySymbol} ${result.total.toLocaleString('es', { minimumFractionDigits: 2 })}`;
+    doc.text(resultText, 105, 90, { align: 'center' });
+    
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('Desglose Detallado', 15, 110);
+    
+    let yPos = 120;
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.1);
+    
+    result.details.forEach((detail) => {
+        doc.setTextColor(71, 85, 105);
+        doc.text(detail.label, 20, yPos);
+        
+        doc.setTextColor(30, 41, 59);
+        doc.setFont(undefined, 'bold');
+        doc.text(detail.value, 175, yPos, { align: 'right' });
+        
+        doc.line(20, yPos + 2, 190, yPos + 2);
+        
+        doc.setFont(undefined, 'normal');
+        yPos += 10;
+    });
+    
+    yPos += 10;
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(217, 119, 6);
+    doc.text('💡 Información Legal', 15, yPos);
+    
+    yPos += 8;
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(120, 113, 108);
+    const legalText = doc.splitTextToSize(calc.legalInfo, 180);
+    doc.text(legalText, 15, yPos);
+    
+    yPos += legalText.length * 5 + 10;
+    doc.setFillColor(254, 243, 199);
+    doc.roundedRect(15, yPos, 180, 25, 2, 2, 'F');
+    
+    yPos += 8;
+    doc.setFontSize(8);
+    doc.setTextColor(146, 64, 14);
+    doc.setFont(undefined, 'bold');
+    doc.text('⚖️ DISCLAIMER LEGAL', 20, yPos);
+    
+    yPos += 5;
+    doc.setFont(undefined, 'normal');
+    const disclaimer = doc.splitTextToSize('SueldoPro Ultra es un simulador educativo. Los cálculos son estimados basados en normativas 2026. No reemplaza asesoría profesional.', 170);
+    doc.text(disclaimer, 20, yPos);
+    
+    doc.setFillColor(15, 23, 42);
+    doc.rect(0, 280, 210, 17, 'F');
+    
+    doc.setTextColor(148, 163, 184);
+    doc.setFontSize(8);
+    doc.text('© 2026 SueldoPro Ultra - Pentágono Financiero', 105, 290, { align: 'center' });
+    doc.text('sueldopro-2026.vercel.app', 105, 294, { align: 'center' });
+    
+    const filename = `SueldoPro_${calc.id}_${country.code}_${Date.now()}.pdf`;
+    doc.save(filename);
+    
+    setTimeout(() => {
+        alert(`✅ PDF exportado exitosamente!\n\n📄 ${filename}\n\n💰 ${resultText}`);
+    }, 300);
+}
+
+// ==========================================
+// GUARDAR CÁLCULO
+// ==========================================
+
+function saveCalculation() {
+    if (!state.lastResult) {
+        alert('⚠️ Primero realiza un cálculo antes de guardarlo');
+        return;
+    }
+    
+    const { result, calc, country } = state.lastResult;
+    const resultText = `${country.currencySymbol} ${result.total.toLocaleString('es', { minimumFractionDigits: 2 })}`;
+    
+    const savedCalc = {
+        id: Date.now(),
+        calculator: calc.title,
+        country: `${country.flag} ${country.name}`,
+        result: resultText,
+        date: new Date().toLocaleDateString('es-ES'),
+        time: new Date().toLocaleTimeString('es-ES')
+    };
+    
+    state.savedCalculations.unshift(savedCalc);
+    if (state.savedCalculations.length > 10) {
+        state.savedCalculations = state.savedCalculations.slice(0, 10);
+    }
+    
+    localStorage.setItem('sueldopro_saved_calcs', JSON.stringify(state.savedCalculations));
+    
+    alert(`💾 Cálculo guardado!\n\n${calc.icon} ${calc.title}\n${resultText}\n\n📊 Total guardados: ${state.savedCalculations.length}/10`);
+}
+
+// ==========================================
+// COSTO REAL
+// ==========================================
+
+function calculateTrueCost() {
+    const salary = parseFloat(document.getElementById('tc-salary').value) || 0;
+    const country = COUNTRIES_DATA[state.currentCountry];
+    
+    if (salary === 0) {
+        alert('Por favor ingresa un sueldo válido');
+        return;
+    }
+    
+    const pension = salary * country.pension;
+    const health = salary * country.healthInsurance;
+    const social = salary * country.socialSecurity;
+    const employerTax = salary * country.employerTax;
+    
+    const totalCost = salary + employerTax;
+    const netSalary = salary - pension - health - social;
+    
+    document.getElementById('tc-total-cost').textContent = `${country.currencySymbol} ${totalCost.toLocaleString('es', { minimumFractionDigits: 0 })}`;
+    document.getElementById('tc-net-salary').textContent = `${country.currencySymbol} ${netSalary.toLocaleString('es', { minimumFractionDigits: 0 })}`;
+    
+    const breakdown = document.getElementById('tc-breakdown');
+    breakdown.innerHTML = `
+        <div class="flex justify-between py-2 border-b border-slate-700">
+            <span class="text-slate-400">Sueldo Base</span>
+            <span class="font-bold text-white">${country.currencySymbol} ${salary.toLocaleString('es', { minimumFractionDigits: 0 })}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-slate-700">
+            <span class="text-slate-400">Cargas Patronales (${(country.employerTax * 100).toFixed(1)}%)</span>
+            <span class="font-bold text-red-400">+${country.currencySymbol} ${employerTax.toLocaleString('es', { minimumFractionDigits: 0 })}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-slate-700">
+            <span class="text-slate-400">Pensión (${(country.pension * 100).toFixed(1)}%)</span>
+            <span class="font-bold text-amber-400">-${country.currencySymbol} ${pension.toLocaleString('es', { minimumFractionDigits: 0 })}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-slate-700">
+            <span class="text-slate-400">Salud (${(country.healthInsurance * 100).toFixed(1)}%)</span>
+            <span class="font-bold text-amber-400">-${country.currencySymbol} ${health.toLocaleString('es', { minimumFractionDigits: 0 })}</span>
+        </div>
+        <div class="flex justify-between py-2">
+            <span class="text-slate-400">Seguridad Social (${(country.socialSecurity * 100).toFixed(1)}%)</span>
+            <span class="font-bold text-amber-400">-${country.currencySymbol} ${social.toLocaleString('es', { minimumFractionDigits: 0 })}</span>
+        </div>
+    `;
+    
+    renderTrueCostChart(salary, employerTax, netSalary);
+}
+
+function renderTrueCostChart(salary, employerTax, netSalary) {
+    const ctx = document.getElementById('tc-chart');
+    
+    if (state.charts.trueCost) {
+        state.charts.trueCost.destroy();
+    }
+    
+    state.charts.trueCost = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Sueldo Neto', 'Cargas Patronales', 'Descuentos'],
+            datasets: [{
+                data: [netSalary, employerTax, salary - netSalary],
+                backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#94a3b8', padding: 15, font: { size: 12, weight: 'bold' } }
+                }
+            }
+        }
+    });
+}
+
+// ==========================================
+// SIMULADOR DE EXPANSIÓN
+// ==========================================
+
+function calculateExpansion() {
+    const target = parseFloat(document.getElementById('exp-target').value) || 0;
+    const avgSalary = parseFloat(document.getElementById('exp-avg-salary').value) || 0;
+    const revenuePerEmployee = parseFloat(document.getElementById('exp-revenue-per').value) || 0;
+    const country = COUNTRIES_DATA[state.currentCountry];
+    
+    if (target === 0 || avgSalary === 0 || revenuePerEmployee === 0) {
+        alert('Por favor completa todos los campos');
+        return;
+    }
+    
+    const employees = Math.ceil(target / revenuePerEmployee);
+    const totalSalaryCost = employees * avgSalary;
+    const totalCost = totalSalaryCost * (1 + country.employerTax);
+    const roi = ((target - totalCost) / totalCost * 100).toFixed(1);
+    
+    document.getElementById('exp-employees').textContent = employees;
+    document.getElementById('exp-total-cost').textContent = `${country.currencySymbol} ${totalCost.toLocaleString('es', { minimumFractionDigits: 0 })}`;
+    document.getElementById('exp-roi').textContent = `${roi}%`;
+    
+    const breakdown = document.getElementById('exp-breakdown');
+    breakdown.innerHTML = `
+        <div class="flex justify-between py-2 border-b border-slate-700">
+            <span class="text-slate-400">Empleados Necesarios</span>
+            <span class="font-bold text-indigo-400">${employees}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-slate-700">
+            <span class="text-slate-400">Salarios Totales</span>
+            <span class="font-bold text-white">${country.currencySymbol} ${totalSalaryCost.toLocaleString('es', { minimumFractionDigits: 0 })}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-slate-700">
+            <span class="text-slate-400">Cargas Patronales</span>
+            <span class="font-bold text-red-400">${country.currencySymbol} ${(totalCost - totalSalaryCost).toLocaleString('es', { minimumFractionDigits: 0 })}</span>
+        </div>
+        <div class="flex justify-between py-2">
+            <span class="text-slate-400">Ingresos Proyectados</span>
+            <span class="font-bold text-emerald-400">${country.currencySymbol} ${target.toLocaleString('es', { minimumFractionDigits: 0 })}</span>
+        </div>
+    `;
+    
+    renderExpansionChart(totalSalaryCost, totalCost - totalSalaryCost, target);
+}
+
+function renderExpansionChart(salaries, taxes, revenue) {
+    const ctx = document.getElementById('exp-chart');
+    
+    if (state.charts.expansion) {
+        state.charts.expansion.destroy();
+    }
+    
+    state.charts.expansion = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Costos', 'Ingresos'],
+            datasets: [{
+                label: 'Salarios',
+                data: [salaries, 0],
+                backgroundColor: '#6366f1'
+            }, {
+                label: 'Cargas',
+                data: [taxes, 0],
+                backgroundColor: '#ef4444'
+            }, {
+                label: 'Ingresos',
+                data: [0, revenue],
+                backgroundColor: '#10b981'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                x: { stacked: true, ticks: { color: '#94a3b8' }, grid: { display: false } },
+                y: { stacked: true, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(51, 65, 85, 0.3)' } }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#94a3b8', padding: 15, font: { size: 12, weight: 'bold' } }
+                }
+            }
+        }
+    });
+}
+
+// ==========================================
+// COMPARTIR RESULTADO
+// ==========================================
+
+function shareResult() {
+    if (!state.lastResult) {
+        alert('⚠️ Primero realiza un cálculo antes de compartir');
+        return;
+    }
+    
+    const { result, calc, country } = state.lastResult;
+    const resultText = `${country.currencySymbol} ${result.total.toLocaleString('es', { minimumFractionDigits: 2 })}`;
+    const text = `${calc.icon} ${calc.title} (${country.flag} ${country.name})\n\n💰 Resultado: ${resultText}\n\n✅ Calculado con SueldoPro Ultra\n🌎 sueldopro-2026.vercel.app`;
+
+    if (navigator.share) {
+        navigator.share({
+            title: 'SueldoPro Ultra - Pentágono Financiero',
+            text: text,
+            url: window.location.href
+        }).catch(() => {});
+    } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert('✅ Resultado copiado al portapapeles!\n\n' + text);
+        });
+    } else {
+        alert('📋 Copia este resultado:\n\n' + text);
+    }
+}
