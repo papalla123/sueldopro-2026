@@ -31,12 +31,12 @@ window.PENTAGON_LINKS = {
         color: 'from-emerald-500 to-green-600'
     },
     margin: {
-        name: 'Margin Master Pro',
-        icon: '📈',
-        url: 'https://margin-master-pro-pboy.vercel.app',
-        description: 'Optimización de Márgenes',
-        color: 'from-orange-500 to-red-500'
-    }
+        name: 'MarginAxis Global', 
+        icon: '📊',                
+        url: 'https://margin-axis-global.vercel.app', 
+        description: 'Ingeniería de Rentabilidad Enterprise',
+        color: 'from-emerald-500 to-teal-600'
+    },
 };
 
 // BASE DE DATOS GLOBAL - 21 PAÍSES
