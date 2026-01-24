@@ -30,10 +30,10 @@ window.PENTAGON_LINKS = {
         description: 'Protección Patrimonial',
         color: 'from-emerald-500 to-green-600'
     },
-     margin: {
+      margin: {
         name: 'MarginAxis Global', 
         icon: '📊',                
-        url: 'https://margin-master-pro.vercel.app', 
+        url: 'https://margin-master-pro-pboy.vercel.app', 
         description: 'Ingeniería de Rentabilidad Enterprise',
         color: 'from-emerald-500 to-teal-600'
     },
