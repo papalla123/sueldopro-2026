@@ -10,7 +10,7 @@ window.PENTAGON_LINKS = {
     },
     marginaxis: {
         name: 'MarginAxis Global',
-        url: 'https://margin-axis-global.vercel.app',
+        url: 'https://margin-master-pro-pboy.vercel.app',
         icon: '📊',
         color: 'from-green-500 to-emerald-500'
     },
