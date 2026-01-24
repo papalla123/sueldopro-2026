@@ -1,42 +1,37 @@
 'use strict';
 
-// PENTÁGONO FINANCIERO - Enlaces Dinámicos
+// ===== PENTAGON LINKS (Sincronización Global 2026) =====
 window.PENTAGON_LINKS = {
     sueldopro: {
         name: 'SueldoPro Ultra',
-        icon: '💰',
-        url: window.location.href,
-        description: 'Calculadora Laboral Global',
-        color: 'from-indigo-500 to-indigo-700'
-    },
-    liquidez: {
-        name: 'Liquidez Force',
-        icon: '💧',
-        url: 'https://liquidez-force.vercel.app',
-        description: 'Gestión de Flujo de Caja',
+        url: 'https://sueldopro-2026.vercel.app',
+        icon: '💼',
         color: 'from-blue-500 to-cyan-500'
     },
-    lead: {
-        name: 'Lead Target',
+    marginaxis: {
+        name: 'MarginAxis Global',
+        url: 'https://margin-axis-global.vercel.app',
+        icon: '📊',
+        color: 'from-green-500 to-emerald-500'
+    },
+    leadnexus: {
+        name: 'LeadNexus AI',
+        url: 'https://lead-target.vercel.app',
         icon: '🎯',
-        url: 'https://lead-target-rpvx.vercel.app',
-        description: 'CRM de Prospectos',
-        color: 'from-purple-500 to-pink-500'
+        color: 'from-violet-500 to-fuchsia-500'
+    },
+    liquidezforce: {
+        name: 'Liquidez Force',
+        url: 'https://liquidez-force.vercel.app',
+        icon: '💰',
+        color: 'from-yellow-500 to-orange-500'
     },
     wealth: {
         name: 'Wealth Armor AI',
-        icon: '🛡️',
         url: 'https://wealth-armor-ai.vercel.app',
-        description: 'Protección Patrimonial',
+        icon: '🛡️',
         color: 'from-emerald-500 to-green-600'
-    },
-      margin: {
-        name: 'MarginAxis Global', 
-        icon: '📊',                
-        url: 'https://margin-master-pro-pboy.vercel.app', 
-        description: 'Ingeniería de Rentabilidad Enterprise',
-        color: 'from-emerald-500 to-teal-600'
-    },
+    }
 };
 
 // BASE DE DATOS GLOBAL - 21 PAÍSES
