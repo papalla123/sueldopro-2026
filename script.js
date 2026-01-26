@@ -290,9 +290,12 @@ function renderCalculatorForm() {
     `;
     
     calc.fields.forEach(field => {
+        const fieldClass = field.dependsOn ? `field-conditional hidden` : '';
+        const dataAttrs = field.dependsOn ? `data-depends-on="${field.dependsOn}" data-show-when="${field.showWhen}"` : '';
+        
         if (field.type === 'select') {
             html += `
-                <div class="form-group mb-4">
+                <div class="form-group mb-4 ${fieldClass}" ${dataAttrs}>
                     <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">${field.label}</label>
                     <select id="${field.id}" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none transition">
                         ${field.options.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('')}
@@ -302,7 +305,7 @@ function renderCalculatorForm() {
             `;
         } else {
             html += `
-                <div class="form-group mb-4">
+                <div class="form-group mb-4 ${fieldClass}" ${dataAttrs}>
                     <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">${field.label}</label>
                     <input type="${field.type}" id="${field.id}" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none transition" 
                         placeholder="${field.placeholder}" 
@@ -323,10 +326,42 @@ function renderCalculatorForm() {
     
     container.innerHTML = html;
     
+    // Setup conditional field listeners
+    calc.fields.forEach(field => {
+        const input = document.getElementById(field.id);
+        if (!input) return;
+        
+        // Si este campo controla otros campos
+        const hasDependent = calc.fields.some(f => f.dependsOn === field.id);
+        if (hasDependent) {
+            input.addEventListener('change', () => updateConditionalFields(calc));
+        }
+    });
+    
+    // Initialize conditional fields visibility
+    updateConditionalFields(calc);
+    
     document.getElementById('calc-btn').addEventListener('click', executeCalculation);
     document.getElementById('legal-info').textContent = calc.legalInfo;
     document.getElementById('main-result').textContent = 'S/ 0.00';
     document.getElementById('result-details').innerHTML = '';
+}
+
+function updateConditionalFields(calc) {
+    calc.fields.forEach(field => {
+        if (field.dependsOn) {
+            const parentInput = document.getElementById(field.dependsOn);
+            const fieldGroup = document.querySelector(`[data-depends-on="${field.dependsOn}"][data-show-when="${field.showWhen}"]`);
+            
+            if (parentInput && fieldGroup) {
+                if (parentInput.value === field.showWhen) {
+                    fieldGroup.classList.remove('hidden');
+                } else {
+                    fieldGroup.classList.add('hidden');
+                }
+            }
+        }
+    });
 }
 
 function executeCalculation() {
@@ -352,15 +387,33 @@ function displayResult(result) {
     
     detailsContainer.innerHTML = result.details.map(detail => {
         let colorClass = 'text-white';
+        let styleClass = '';
+        
+        if (detail.type === 'header') {
+            return `
+                <div class="pt-3 pb-2 font-bold text-indigo-300 text-xs uppercase tracking-wider border-b border-indigo-500/30">
+                    ${detail.label}
+                </div>
+            `;
+        }
+        
+        if (detail.type === 'separator') {
+            return `<div class="h-2"></div>`;
+        }
+        
         if (detail.type === 'ingreso') colorClass = 'text-emerald-400';
         if (detail.type === 'descuento') colorClass = 'text-red-400';
         if (detail.type === 'costo') colorClass = 'text-amber-400';
-        if (detail.type === 'subtotal') colorClass = 'text-indigo-400 font-bold';
+        if (detail.type === 'subtotal') {
+            colorClass = 'text-indigo-400 font-bold text-base';
+            styleClass = 'bg-indigo-950/30 rounded-lg px-2';
+        }
         if (detail.type === 'warning') colorClass = 'text-amber-500';
         if (detail.type === 'info') colorClass = 'text-slate-400';
+        if (detail.type === 'base') colorClass = 'text-white font-semibold';
         
         return `
-            <div class="flex justify-between items-center py-2 border-b border-white/10 last:border-0">
+            <div class="flex justify-between items-center py-2 border-b border-white/10 last:border-0 ${styleClass}">
                 <span class="text-sm opacity-90">${detail.label}</span>
                 <span class="font-bold ${colorClass}">${detail.value}</span>
             </div>
@@ -382,38 +435,71 @@ function calculateTrueCost() {
         return;
     }
     
-    // Calcular usando la función del calculador de costo empleador
-    const values = {
-        'emp-salary': salary.toString(),
-        'emp-hijos': tieneHijos ? 'si' : 'no',
-        'emp-senati': 'no'
-    };
+    const asigFamiliar = tieneHijos && regimen.beneficios.asignacionFamiliar ? calcularAsignacionFamiliar() : 0;
     
-    const empleadorCalc = CALCULATOR_CONFIGS.costo_empleador;
-    const resultEmpleador = empleadorCalc.calculate(values, regimen);
+    // Calcular usando la función de costo empleador
+    const costoCalc = calcularCostoEmpleador(salary, asigFamiliar, regimen, {
+        aplicaSenati: false,
+        tieneEPS: false,
+        nivelRiesgo: 'medio'
+    });
     
-    // Calcular sueldo neto
-    const netoValues = {
-        'neto-salary': salary.toString(),
-        'neto-afp-type': 'prima',
-        'neto-hijos': tieneHijos ? 'si' : 'no'
-    };
+    // Calcular sueldo neto (simplificado con AFP Prima flujo)
+    const afpCalc = calcularAFP(salary, 'prima', 'flujo', 0);
+    const sueldoBruto = salary + asigFamiliar;
     
-    const netoCalc = CALCULATOR_CONFIGS.neto;
-    const resultNeto = netoCalc.calculate(netoValues, regimen);
+    // Impuesto 5ta simplificado
+    const ingresoAnual = sueldoBruto * 12;
+    const uitAnual = PERU_DATA.rentaQuinta.uit;
+    const deduccion = PERU_DATA.rentaQuinta.deduccion * uitAnual;
+    const baseImponible = Math.max(0, ingresoAnual - deduccion);
     
-    document.getElementById('tc-total-cost').textContent = `S/ ${resultEmpleador.total.toLocaleString('es-PE', { minimumFractionDigits: 0 })}`;
-    document.getElementById('tc-net-salary').textContent = `S/ ${resultNeto.total.toLocaleString('es-PE', { minimumFractionDigits: 0 })}`;
+    let impuestoAnual = 0;
+    let acumulado = 0;
+    
+    PERU_DATA.rentaQuinta.tramos.forEach(tramo => {
+        if (tramo.hasta) {
+            const limite = tramo.hasta * uitAnual;
+            if (baseImponible > acumulado) {
+                const imponible = Math.min(baseImponible - acumulado, limite - acumulado);
+                impuestoAnual += imponible * tramo.tasa;
+                acumulado = limite;
+            }
+        } else if (tramo.desde) {
+            if (baseImponible > acumulado) {
+                const imponible = baseImponible - acumulado;
+                impuestoAnual += imponible * tramo.tasa;
+            }
+        }
+    });
+    
+    const impuestoMensual = impuestoAnual / 12;
+    const netoEmpleado = sueldoBruto - afpCalc.total - impuestoMensual;
+    
+    document.getElementById('tc-total-cost').textContent = `S/ ${costoCalc.costoTotal.toLocaleString('es-PE', { minimumFractionDigits: 0 })}`;
+    document.getElementById('tc-net-salary').textContent = `S/ ${netoEmpleado.toLocaleString('es-PE', { minimumFractionDigits: 0 })}`;
     
     const breakdown = document.getElementById('tc-breakdown');
-    breakdown.innerHTML = resultEmpleador.details.filter(d => d.type !== 'info').map(detail => `
+    breakdown.innerHTML = `
         <div class="flex justify-between py-2 border-b border-slate-700">
-            <span class="text-slate-400">${detail.label}</span>
-            <span class="font-bold ${detail.type === 'costo' ? 'text-red-400' : 'text-white'}">${detail.value}</span>
+            <span class="text-slate-400">Sueldo Bruto</span>
+            <span class="font-bold text-white">S/ ${costoCalc.sueldoBruto.toLocaleString('es-PE', { minimumFractionDigits: 0 })}</span>
         </div>
-    `).join('');
+        <div class="flex justify-between py-2 border-b border-slate-700">
+            <span class="text-slate-400">Cargas Directas</span>
+            <span class="font-bold text-red-400">+S/ ${costoCalc.cargasDirectas.toLocaleString('es-PE', { minimumFractionDigits: 0 })}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-slate-700">
+            <span class="text-slate-400">Provisión Beneficios</span>
+            <span class="font-bold text-amber-400">+S/ ${costoCalc.provisionesBeneficios.toLocaleString('es-PE', { minimumFractionDigits: 0 })}</span>
+        </div>
+        <div class="flex justify-between py-2 border-t-2 border-indigo-500/30 mt-2 pt-3">
+            <span class="text-indigo-300 font-bold">Carga Social</span>
+            <span class="font-bold text-indigo-400">${costoCalc.porcentajeCarga.toFixed(1)}%</span>
+        </div>
+    `;
     
-    renderTrueCostChart(salary, resultEmpleador.total, resultNeto.total);
+    renderTrueCostChart(salary, costoCalc.costoTotal, netoEmpleado);
 }
 
 function renderTrueCostChart(salary, costoTotal, netoEmpleado) {
@@ -473,17 +559,15 @@ function calculateComparison() {
         return;
     }
     
-    const values = {
-        'emp-salary': salary.toString(),
-        'emp-hijos': tieneHijos ? 'si' : 'no',
-        'emp-senati': 'no'
-    };
-    
-    const empleadorCalc = CALCULATOR_CONFIGS.costo_empleador;
+    const asigFamiliar = tieneHijos ? calcularAsignacionFamiliar() : 0;
     const resultados = {};
     
     Object.values(REGIMENES_PERU).forEach(regimen => {
-        resultados[regimen.id] = empleadorCalc.calculate(values, regimen);
+        resultados[regimen.id] = calcularCostoEmpleador(salary, asigFamiliar, regimen, {
+            aplicaSenati: false,
+            tieneEPS: false,
+            nivelRiesgo: 'medio'
+        });
     });
     
     displayComparison(resultados, salary);
@@ -492,11 +576,11 @@ function calculateComparison() {
 function displayComparison(resultados, salary) {
     const container = document.getElementById('comp-results');
     
-    const html = Object.entries(resultados).map(([regimenId, result]) => {
+    const html = Object.entries(resultados).map(([regimenId, costoCalc]) => {
         const regimen = REGIMENES_PERU[regimenId];
-        const costoMensual = result.total;
+        const costoMensual = costoCalc.costoTotal;
         const costoAnual = costoMensual * 12;
-        const ahorroVsGeneral = regimenId !== 'general' ? resultados.general.total - costoMensual : 0;
+        const ahorroVsGeneral = regimenId !== 'general' ? resultados.general.costoTotal - costoMensual : 0;
         
         return `
             <div class="bg-slate-850 rounded-2xl p-6 border-2 ${regimenId === 'general' ? 'border-indigo-500' : 'border-slate-700'}">
@@ -514,15 +598,19 @@ function displayComparison(resultados, salary) {
                         <div class="text-2xl font-black text-indigo-400">S/ ${costoMensual.toLocaleString('es-PE', { minimumFractionDigits: 0 })}</div>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-3 gap-3">
                         <div class="bg-slate-900 rounded-xl p-3">
-                            <div class="text-xs text-slate-500 mb-1">Costo Anual</div>
-                            <div class="text-lg font-bold text-white">S/ ${costoAnual.toLocaleString('es-PE', { minimumFractionDigits: 0 })}</div>
+                            <div class="text-xs text-slate-500 mb-1">Anual</div>
+                            <div class="text-sm font-bold text-white">S/ ${costoAnual.toLocaleString('es-PE', { minimumFractionDigits: 0 })}</div>
                         </div>
                         <div class="bg-slate-900 rounded-xl p-3">
-                            <div class="text-xs text-slate-500 mb-1">${ahorroVsGeneral > 0 ? 'Ahorro' : 'Diferencia'}</div>
-                            <div class="text-lg font-bold ${ahorroVsGeneral > 0 ? 'text-emerald-400' : 'text-slate-400'}">
-                                ${ahorroVsGeneral > 0 ? '- ' : ''}S/ ${Math.abs(ahorroVsGeneral).toLocaleString('es-PE', { minimumFractionDigits: 0 })}
+                            <div class="text-xs text-slate-500 mb-1">Carga</div>
+                            <div class="text-sm font-bold text-amber-400">${costoCalc.porcentajeCarga.toFixed(1)}%</div>
+                        </div>
+                        <div class="bg-slate-900 rounded-xl p-3">
+                            <div class="text-xs text-slate-500 mb-1">${ahorroVsGeneral > 0 ? 'Ahorro' : 'Dif.'}</div>
+                            <div class="text-sm font-bold ${ahorroVsGeneral > 0 ? 'text-emerald-400' : 'text-slate-400'}">
+                                ${ahorroVsGeneral > 0 ? '-' : ''}S/ ${Math.abs(ahorroVsGeneral).toLocaleString('es-PE', { minimumFractionDigits: 0 })}
                             </div>
                         </div>
                     </div>
@@ -555,7 +643,7 @@ function renderComparisonChart(resultados) {
     }
     
     const labels = Object.values(REGIMENES_PERU).map(r => r.nombre);
-    const data = Object.values(resultados).map(r => r.total);
+    const data = Object.values(resultados).map(r => r.costoTotal);
     
     state.charts.comparison = new Chart(ctx, {
         type: 'bar',
