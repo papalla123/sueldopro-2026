@@ -33,7 +33,6 @@ function renderPentagonLinks() {
     const desktop = document.getElementById('pentagon-desktop');
     const mobile = document.getElementById('pentagon-mobile');
     const footer = document.getElementById('footer-pentagon-links');
-    
     Object.values(PENTAGON_LINKS).forEach(link => {
         desktop.innerHTML += `<a href="${link.url}" target="${link.url === window.location.href ? '_self' : '_blank'}" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-gradient-to-r ${link.color} text-white font-bold text-xs hover:scale-105 transition">${link.icon} ${link.name}</a>`;
         mobile.innerHTML += `<a href="${link.url}" target="${link.url === window.location.href ? '_self' : '_blank'}" rel="noopener noreferrer" class="block p-4 rounded-xl bg-gradient-to-r ${link.color} text-white"><div class="text-2xl mb-2">${link.icon}</div><div class="font-black text-sm">${link.name}</div></a>`;
@@ -44,7 +43,6 @@ function renderPentagonLinks() {
 function renderRegimenSelect() {
     const select = document.getElementById('regimen-select');
     const mobileSelect = document.getElementById('mobile-regimen-select');
-    
     const options = Object.values(REGIMENES_PERU).map(regimen => `<option value="${regimen.id}">${regimen.icon} ${regimen.nombre}</option>`).join('');
     select.innerHTML = options;
     select.value = state.currentRegimen;
@@ -193,11 +191,8 @@ function updateConditionalFields(calc) {
             const parentInput = document.getElementById(field.dependsOn);
             const fieldGroup = document.querySelector(`[data-depends-on="${field.dependsOn}"][data-show-when="${field.showWhen}"]`);
             if (parentInput && fieldGroup) {
-                if (parentInput.value === field.showWhen) {
-                    fieldGroup.classList.remove('hidden');
-                } else {
-                    fieldGroup.classList.add('hidden');
-                }
+                if (parentInput.value === field.showWhen) fieldGroup.classList.remove('hidden');
+                else fieldGroup.classList.add('hidden');
             }
         }
     });
@@ -220,7 +215,6 @@ function displayResult(result) {
     const mainResult = document.getElementById('main-result');
     const detailsContainer = document.getElementById('result-details');
     mainResult.textContent = `S/ ${result.total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
-    
     detailsContainer.innerHTML = result.details.map(detail => {
         let colorClass = 'text-white', styleClass = '';
         if (detail.type === 'header') return `<div class="pt-3 pb-2 font-bold text-indigo-300 text-xs uppercase tracking-wider border-b border-indigo-500/30">${detail.label}</div>`;
@@ -228,16 +222,15 @@ function displayResult(result) {
         if (detail.type === 'ingreso') colorClass = 'text-emerald-400';
         if (detail.type === 'descuento') colorClass = 'text-red-400';
         if (detail.type === 'costo') colorClass = 'text-amber-400';
-        if (detail.type === 'subtotal') {
-            colorClass = 'text-indigo-400 font-bold text-base';
-            styleClass = 'bg-indigo-950/30 rounded-lg px-2';
-        }
+        if (detail.type === 'subtotal') { colorClass = 'text-indigo-400 font-bold text-base'; styleClass = 'bg-indigo-950/30 rounded-lg px-2'; }
         if (detail.type === 'warning') colorClass = 'text-amber-500';
         if (detail.type === 'info') colorClass = 'text-slate-400';
         if (detail.type === 'base') colorClass = 'text-white font-semibold';
         return `<div class="flex justify-between items-center py-2 border-b border-white/10 last:border-0 ${styleClass}"><span class="text-sm opacity-90">${detail.label}</span><span class="font-bold ${colorClass}">${detail.value}</span></div>`;
     }).join('');
 }
+
+// CONTINUACIÓN script.js - PARTE 2/3
 
 function calculateTrueCost() {
     const salary = parseFloat(document.getElementById('tc-salary').value) || 0;
@@ -393,7 +386,7 @@ function displayStrategicComparison(comparacion, salary) {
     const container = document.getElementById('strategic-results');
     const baseGeneral = comparacion.general.costoMensual;
     
-    const mobilecards = Object.values(comparacion).map(data => {
+    const mobileCards = Object.values(comparacion).map(data => {
         const ahorro = baseGeneral - data.costoMensual;
         const ahorroAnual = ahorro * 12;
         return `
@@ -426,13 +419,15 @@ function displayStrategicComparison(comparacion, salary) {
     container.innerHTML = `
         <div class="bg-slate-850 rounded-2xl p-6 border border-slate-800 overflow-x-auto">
             <h3 class="text-xl font-black mb-6 text-white">Análisis Comparativo Estratégico</h3>
-            <div class="block lg:hidden space-y-4">${mobilecards}</div>
+            <div class="block lg:hidden space-y-4">${mobileCards}</div>
             <div class="hidden lg:block"><table class="w-full"><thead><tr class="border-b border-slate-700"><th class="text-left py-4 px-4 text-sm font-black text-indigo-400">RÉGIMEN</th><th class="text-right py-4 px-4 text-sm font-black text-indigo-400">MENSUAL</th><th class="text-right py-4 px-4 text-sm font-black text-indigo-400">ANUAL</th><th class="text-right py-4 px-4 text-sm font-black text-indigo-400">CARGA %</th><th class="text-right py-4 px-4 text-sm font-black text-indigo-400">AHORRO AÑO</th></tr></thead><tbody>${desktopTable}</tbody></table></div>
             <div class="mt-6 p-4 bg-indigo-950/30 rounded-xl border border-indigo-800/50"><div class="text-xs text-indigo-300 mb-2 font-bold">💡 INSIGHT ESTRATÉGICO</div><p class="text-sm text-slate-300">${comparacion.pequena.costoMensual < comparacion.general.costoMensual ? `La Pequeña Empresa genera un ahorro de <strong class="text-emerald-400">S/ ${(baseGeneral - comparacion.pequena.costoMensual).toLocaleString('es-PE', { minimumFractionDigits: 0 })}</strong> mensual vs Régimen General.` : 'El Régimen General ofrece más beneficios pero con mayor costo laboral.'}</p></div>
         </div>
     `;
     syncToLiquidezForce({ costoMensual: comparacion.general.costoMensual, tipo: 'costo_empleador_comparativo', regimen: 'general', fecha: new Date().toISOString() });
 }
+
+// CONTINUACIÓN Y CIERRE script.js - PARTE 3/3
 
 function exportPDF() {
     if (!state.lastResult) { alert('⚠️ Primero realiza un cálculo antes de exportar el PDF'); return; }
@@ -576,3 +571,4 @@ function syncToLiquidezForce(data) {
         console.log('✅ Sincronizado con Liquidez Force:', bridgeData);
     } catch (error) { console.warn('⚠️ Error sincronizando con Pentágono:', error); }
 }
+
