@@ -1,509 +1,790 @@
 'use strict';
 
 // =====================================================================
-// SUELDOPRO ULTRA PERÚ 2026 - MAIN SCRIPT COMPLETO
+// SUELDOPRO ULTRA PERÚ 2026 - CONTROLADOR PRINCIPAL
+// Sistema Profesional de Gestión de Calculadoras
 // =====================================================================
 
-const state = {
-    currentRegimen: localStorage.getItem('sueldopro_regimen') || 'general',
-    currentSection: 'calculators',
+const APP_STATE = {
     currentCalculator: null,
-    charts: {},
-    lastResult: null
+    currentRegimen: 'general',
+    currentResult: null
 };
 
+// ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Inicializando SueldoPro Ultra Perú 2026...');
-    renderPentagonLinks();
-    renderRegimenSelect();
-    renderNavigation();
-    renderCalculatorTabs();
-    setupEventListeners();
-    console.log('✅ SueldoPro Ultra iniciado correctamente');
+    console.log('🚀 Iniciando SueldoPro Ultra Profesional...');
+    inicializarAplicacion();
 });
 
-// ===== PENTAGON LINKS =====
-function renderPentagonLinks() {
-    const desktop = document.getElementById('pentagon-desktop');
-    const mobile = document.getElementById('pentagon-mobile');
-    const footer = document.getElementById('footer-pentagon-links');
-    if (!desktop || !mobile || !footer) return;
-    Object.values(PENTAGON_LINKS).forEach(link => {
-        const target = link.url.includes(window.location.hostname) ? '_self' : '_blank';
-        desktop.innerHTML += `<a href="${link.url}" target="${target}" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-gradient-to-r ${link.color} text-white font-bold text-xs hover:scale-105 transition" title="${link.description}">${link.icon} ${link.name}</a>`;
-        mobile.innerHTML += `<a href="${link.url}" target="${target}" rel="noopener noreferrer" class="block p-4 rounded-xl bg-gradient-to-r ${link.color} text-white hover:scale-105 transition"><div class="text-2xl mb-2">${link.icon}</div><div class="font-black text-sm">${link.name}</div><div class="text-xs opacity-80 mt-1">${link.description}</div></a>`;
-        footer.innerHTML += `<a href="${link.url}" target="${target}" rel="noopener noreferrer" class="text-sm text-slate-400 hover:text-indigo-400 transition">${link.icon} ${link.name}</a>`;
-    });
+function inicializarAplicacion() {
+    renderizarSelectorRegimen();
+    configurarEventListeners();
+    mostrarCalculadoraPorDefecto();
+    console.log('✅ Sistema Profesional Activo');
 }
 
-// ===== RÉGIMEN SELECT =====
-function renderRegimenSelect() {
-    const select = document.getElementById('regimen-select');
-    const mobileSelect = document.getElementById('mobile-regimen-select');
-    if (!select || !mobileSelect) return;
-    const options = Object.values(REGIMENES_PERU).map(r => `<option value="${r.id}">${r.icon} ${r.nombre}</option>`).join('');
-    select.innerHTML = options; select.value = state.currentRegimen;
-    mobileSelect.innerHTML = options; mobileSelect.value = state.currentRegimen;
-    updateRegimenInfo();
-}
-
-function updateRegimenInfo() {
-    const regimen = REGIMENES_PERU[state.currentRegimen];
-    const infoDiv = document.getElementById('regimen-info');
-    if (!infoDiv || !regimen) return;
-    infoDiv.innerHTML = `
-        <div class="bg-indigo-950/30 border border-indigo-800/50 rounded-xl p-4">
-            <div class="flex items-start gap-3">
-                <div class="text-2xl">${regimen.icon}</div>
-                <div class="flex-1">
-                    <h4 class="font-bold text-indigo-300 mb-1">${regimen.nombre}</h4>
-                    <p class="text-xs text-slate-400 mb-3">${regimen.descripcion}</p>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div><span class="text-slate-500">Gratificaciones:</span> <span class="text-white font-bold ml-2">${regimen.gratificaciones ? (regimen.gratificacionesFactor * 100) + '%' : 'No'}</span></div>
-                        <div><span class="text-slate-500">CTS:</span> <span class="text-white font-bold ml-2">${regimen.cts ? (regimen.ctsFactor * 100) + '%' : 'No'}</span></div>
-                        <div><span class="text-slate-500">Vacaciones:</span> <span class="text-white font-bold ml-2">${regimen.vacaciones} días</span></div>
-                        <div><span class="text-slate-500">Asig. Familiar:</span> <span class="text-white font-bold ml-2">${regimen.asignacionFamiliar ? 'Sí' : 'No'}</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// ===== NAVEGACIÓN =====
-function renderNavigation() {
-    const nav = document.getElementById('nav-buttons');
-    const mobileNav = document.getElementById('mobile-nav-buttons');
-    if (!nav || !mobileNav) return;
-    const sections = [
-        { id: 'calculators', icon: '🔢', name: 'Calculadoras' },
-        { id: 'truecost', icon: '💎', name: 'Costo Real' },
-        { id: 'comparison', icon: '📊', name: 'Comparador' }
-    ];
-    sections.forEach(section => {
-        const isActive = section.id === 'calculators';
-        const buttonHTML = `<button data-nav="${section.id}" class="nav-btn w-full p-3 rounded-xl font-bold text-sm flex items-center gap-2 ${isActive ? 'active bg-gradient-to-r from-indigo-600 to-indigo-500 text-white' : 'bg-slate-900 text-slate-400'}">${section.icon} ${section.name}</button>`;
-        nav.innerHTML += buttonHTML;
-        mobileNav.innerHTML += buttonHTML;
-    });
-}
-
-// ===== CALCULADORA TABS =====
-function renderCalculatorTabs() {
-    const tabsContainer = document.getElementById('calc-tabs');
-    const mobileSelect = document.getElementById('mobile-calc-select');
-    if (!tabsContainer || !mobileSelect) return;
+// ===== SELECTOR DE RÉGIMEN =====
+function renderizarSelectorRegimen() {
+    const selector = document.getElementById('regimen-selector');
+    if (!selector) return;
     
-    let tabsHTML = '';
-    let optionsHTML = '<option value="">Seleccionar calculadora...</option>';
-    
-    Object.values(CALCULADORAS).forEach(calc => {
-        tabsHTML += `
-            <button data-calc="${calc.id}" class="calc-tab px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition bg-slate-900 text-slate-400 hover:bg-slate-800">
-                <span class="text-xl">${calc.icon}</span>
-                <span class="hidden lg:inline">${calc.titulo}</span>
-            </button>
-        `;
-        optionsHTML += `<option value="${calc.id}">${calc.icon} ${calc.titulo}</option>`;
-    });
-    
-    tabsContainer.innerHTML = tabsHTML;
-    mobileSelect.innerHTML = optionsHTML;
-    
-    document.querySelectorAll('[data-calc]').forEach(btn => {
-        btn.addEventListener('click', () => selectCalculator(btn.getAttribute('data-calc')));
-    });
-    
-    mobileSelect.addEventListener('change', (e) => {
-        if (e.target.value) selectCalculator(e.target.value);
-    });
-}
-
-function selectCalculator(calcId) {
-    state.currentCalculator = calcId;
-    const calc = CALCULADORAS[calcId];
-    if (!calc) return;
-    
-    document.querySelectorAll('[data-calc]').forEach(btn => {
-        btn.classList.remove('active', 'bg-gradient-to-r', 'from-indigo-600', 'to-indigo-500', 'text-white');
-        btn.classList.add('bg-slate-900', 'text-slate-400');
-        if (btn.getAttribute('data-calc') === calcId) {
-            btn.classList.add('active', 'bg-gradient-to-r', 'from-indigo-600', 'to-indigo-500', 'text-white');
-            btn.classList.remove('bg-slate-900', 'text-slate-400');
-        }
-    });
-    
-    const mobileSelect = document.getElementById('mobile-calc-select');
-    if (mobileSelect) mobileSelect.value = calcId;
-    
-    renderCalculatorForm(calc);
-    hideResults();
-}
-
-function renderCalculatorForm(calc) {
-    const formContainer = document.getElementById('calculator-form');
-    if (!formContainer) return;
-    
-    let html = `
-        <div class="mb-6">
-            <div class="flex items-center gap-3 mb-3">
-                <span class="text-4xl">${calc.icon}</span>
-                <div>
-                    <h3 class="text-2xl font-black text-white">${calc.titulo}</h3>
-                    <p class="text-sm text-slate-400">${calc.desc}</p>
-                </div>
-            </div>
-        </div>
-        <form id="calc-form" class="space-y-4">
+    selector.innerHTML = `
+        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Régimen Laboral</label>
+        <select id="regimen-select" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition">
+            <option value="general">🏢 Régimen General</option>
+            <option value="pequena">🏪 Pequeña Empresa (MYPE)</option>
+            <option value="micro">🏠 Microempresa</option>
+        </select>
     `;
     
-    calc.campos.forEach(campo => {
-        const shouldShow = !campo.cond || (campo.cond && document.getElementById(campo.cond)?.value === campo.condVal);
-        html += `<div class="campo-wrapper" data-cond="${campo.cond || ''}" data-condval="${campo.condVal || ''}" ${!shouldShow ? 'style="display:none"' : ''}>
-            <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">${campo.label}</label>`;
-        
-        if (campo.type === 'select') {
-            html += `<select id="${campo.id}" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none transition">`;
-            campo.options.forEach(opt => {
-                html += `<option value="${opt.v}">${opt.l}</option>`;
-            });
-            html += `</select>`;
-        } else {
-            html += `<input type="${campo.type}" id="${campo.id}" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 focus:outline-none transition" placeholder="${campo.placeholder || ''}" ${campo.min !== undefined ? `min="${campo.min}"` : ''} ${campo.max !== undefined ? `max="${campo.max}"` : ''} ${campo.step !== undefined ? `step="${campo.step}"` : ''}>`;
-        }
-        html += `</div>`;
-    });
-    
-    html += `
-        <button type="submit" class="w-full p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black rounded-xl hover:from-indigo-700 hover:to-indigo-800 active:from-indigo-800 active:to-indigo-900 transition shadow-lg hover:shadow-indigo-500/50 text-lg">
-            ✨ CALCULAR ${calc.titulo.toUpperCase()}
-        </button>
-    </form>`;
-    
-    formContainer.innerHTML = html;
-    
-    calc.campos.forEach(campo => {
-        if (campo.cond) {
-            const condInput = document.getElementById(campo.cond);
-            if (condInput) {
-                condInput.addEventListener('change', () => updateConditionalFields(calc));
-            }
+    document.getElementById('regimen-select').addEventListener('change', (e) => {
+        APP_STATE.currentRegimen = e.target.value;
+        if (APP_STATE.currentCalculator) {
+            mostrarCalculadora(APP_STATE.currentCalculator);
         }
     });
-    
-    document.getElementById('calc-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        executeCalculation(calc);
-    });
-}
-
-function updateConditionalFields(calc) {
-    calc.campos.forEach(campo => {
-        if (campo.cond) {
-            const condInput = document.getElementById(campo.cond);
-            const wrapper = document.querySelector(`[data-cond="${campo.cond}"][data-condval="${campo.condVal}"]`);
-            if (condInput && wrapper) {
-                wrapper.style.display = condInput.value === campo.condVal ? 'block' : 'none';
-            }
-        }
-    });
-}
-
-function executeCalculation(calc) {
-    const valores = {};
-    calc.campos.forEach(campo => {
-        const el = document.getElementById(campo.id);
-        if (el) valores[campo.id] = el.value;
-    });
-    
-    const regimen = REGIMENES_PERU[state.currentRegimen];
-    const resultado = calc.calcular(valores, regimen);
-    
-    state.lastResult = { calculator: calc.id, result: resultado, regimen: regimen.nombre };
-    displayResult(resultado, calc);
-}
-
-function displayResult(resultado, calc) {
-    const resultContainer = document.getElementById('result-container');
-    const mainResult = document.getElementById('main-result');
-    const detailsContainer = document.getElementById('details-container');
-    
-    if (!resultContainer || !mainResult || !detailsContainer) return;
-    
-    mainResult.innerHTML = `
-        <div class="text-5xl lg:text-6xl font-black">S/ ${resultado.total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</div>
-        <div class="text-xs opacity-75 mt-2">${calc.titulo}</div>
-    `;
-    
-    let detailsHTML = '<div class="space-y-3">';
-    resultado.detalles.forEach(det => {
-        const colorClass = det.color ? `text-${det.color}-400` : 'text-white';
-        const boldClass = det.bold ? 'font-black text-base' : 'font-normal';
-        detailsHTML += `
-            <div class="flex justify-between items-center text-sm ${boldClass}">
-                <span class="text-slate-400">${det.l}</span>
-                <span class="${colorClass}">${det.v}</span>
-            </div>
-        `;
-    });
-    detailsHTML += '</div>';
-    detailsContainer.innerHTML = detailsHTML;
-    
-    resultContainer.classList.remove('hidden');
-    renderResultChart(resultado, calc);
-}
-
-function renderResultChart(resultado, calc) {
-    const canvas = document.getElementById('result-chart');
-    if (!canvas) return;
-    
-    if (state.charts.result) state.charts.result.destroy();
-    
-    const labels = resultado.detalles.map(d => d.l);
-    const valores = resultado.detalles.map(d => {
-        const match = d.v.match(/[\d,]+\.?\d*/);
-        return match ? parseFloat(match[0].replace(/,/g, '')) : 0;
-    });
-    
-    const ctx = canvas.getContext('2d');
-    state.charts.result = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: calc.titulo,
-                data: valores,
-                backgroundColor: 'rgba(99, 102, 241, 0.8)',
-                borderColor: 'rgba(99, 102, 241, 1)',
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => `S/ ${ctx.parsed.y.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        color: '#94a3b8',
-                        callback: (value) => 'S/ ' + value.toLocaleString('es-PE')
-                    },
-                    grid: { color: 'rgba(71, 85, 105, 0.3)' }
-                },
-                x: { ticks: { color: '#94a3b8', display: false }, grid: { display: false } }
-            }
-        }
-    });
-}
-
-function hideResults() {
-    const resultContainer = document.getElementById('result-container');
-    if (resultContainer) resultContainer.classList.add('hidden');
 }
 
 // ===== EVENT LISTENERS =====
-function setupEventListeners() {
-    ['regimen-select', 'mobile-regimen-select'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('change', (e) => {
-                state.currentRegimen = e.target.value;
-                localStorage.setItem('sueldopro_regimen', state.currentRegimen);
-                document.getElementById('regimen-select').value = state.currentRegimen;
-                document.getElementById('mobile-regimen-select').value = state.currentRegimen;
-                updateRegimenInfo();
-                if (state.currentCalculator) selectCalculator(state.currentCalculator);
-            });
-        }
-    });
-    
-    document.querySelectorAll('[data-nav]').forEach(btn => {
-        btn.addEventListener('click', () => navigate(btn.getAttribute('data-nav')));
-    });
-    
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const closeMobileNav = document.getElementById('close-mobile-nav');
-    const mobileNav = document.getElementById('mobile-nav');
-    
-    if (mobileMenuBtn && mobileNav) {
-        mobileMenuBtn.addEventListener('click', () => {
-            mobileNav.classList.remove('-translate-x-full');
-            mobileNav.classList.add('translate-x-0');
-        });
-    }
-    
-    if (closeMobileNav && mobileNav) {
-        closeMobileNav.addEventListener('click', () => {
-            mobileNav.classList.remove('translate-x-0');
-            mobileNav.classList.add('-translate-x-full');
-        });
-    }
-    
-    const tcBtn = document.getElementById('tc-calculate-btn');
-    if (tcBtn) tcBtn.addEventListener('click', calculateTrueCost);
-    
-    const compBtn = document.getElementById('comp-calculate-btn');
-    if (compBtn) compBtn.addEventListener('click', calculateComparison);
-    
-    const strategicBtn = document.getElementById('strategic-compare-btn');
-    if (strategicBtn) strategicBtn.addEventListener('click', calculateStrategicComparison);
-    
-    const exportBtn = document.getElementById('export-pdf-btn');
-    if (exportBtn) exportBtn.addEventListener('click', () => alert('Función PDF disponible en versión completa'));
-    
-    const shareBtn = document.getElementById('share-result-btn');
-    if (shareBtn) shareBtn.addEventListener('click', shareResult);
-    
-    const saveBtn = document.getElementById('save-calc-btn');
-    if (saveBtn) saveBtn.addEventListener('click', () => alert('Cálculo guardado localmente'));
+function configurarEventListeners() {
+    document.getElementById('btn-calc-neto').addEventListener('click', () => mostrarCalculadora('neto'));
+    document.getElementById('btn-calc-horas').addEventListener('click', () => mostrarCalculadora('horas'));
+    document.getElementById('btn-calc-cts').addEventListener('click', () => mostrarCalculadora('cts'));
+    document.getElementById('btn-calc-gratif').addEventListener('click', () => mostrarCalculadora('gratif'));
+    document.getElementById('btn-calc-liquidacion').addEventListener('click', () => mostrarCalculadora('liquidacion'));
+    document.getElementById('btn-calc-costo').addEventListener('click', () => mostrarCalculadora('costo'));
 }
 
-function navigate(sectionId) {
-    document.querySelectorAll('[data-nav]').forEach(btn => {
+function mostrarCalculadoraPorDefecto() {
+    mostrarCalculadora('neto');
+}
+
+// ===== RENDERIZADO DE CALCULADORAS =====
+function mostrarCalculadora(tipo) {
+    APP_STATE.currentCalculator = tipo;
+    
+    document.querySelectorAll('[id^="btn-calc-"]').forEach(btn => {
         btn.classList.remove('active', 'bg-gradient-to-r', 'from-indigo-600', 'to-indigo-500', 'text-white');
         btn.classList.add('bg-slate-900', 'text-slate-400');
-        if (btn.getAttribute('data-nav') === sectionId) {
-            btn.classList.add('active', 'bg-gradient-to-r', 'from-indigo-600', 'to-indigo-500', 'text-white');
-            btn.classList.remove('bg-slate-900', 'text-slate-400');
+    });
+    
+    const btnActivo = document.getElementById(`btn-calc-${tipo}`);
+    if (btnActivo) {
+        btnActivo.classList.remove('bg-slate-900', 'text-slate-400');
+        btnActivo.classList.add('active', 'bg-gradient-to-r', 'from-indigo-600', 'to-indigo-500', 'text-white');
+    }
+    
+    const formularioContainer = document.getElementById('formulario-calculadora');
+    const resultadoContainer = document.getElementById('resultado-calculadora');
+    
+    if (resultadoContainer) {
+        resultadoContainer.classList.add('hidden');
+    }
+    
+    switch(tipo) {
+        case 'neto':
+            renderizarCalculadoraNeto(formularioContainer);
+            break;
+        case 'horas':
+            renderizarCalculadoraHoras(formularioContainer);
+            break;
+        case 'cts':
+            renderizarCalculadoraCTS(formularioContainer);
+            break;
+        case 'gratif':
+            renderizarCalculadoraGratificaciones(formularioContainer);
+            break;
+        case 'liquidacion':
+            renderizarCalculadoraLiquidacion(formularioContainer);
+            break;
+        case 'costo':
+            renderizarCalculadoraCosto(formularioContainer);
+            break;
+    }
+}
+
+// =====================================================================
+// CALCULADORA 1: SALARIO NETO
+// =====================================================================
+function renderizarCalculadoraNeto(container) {
+    container.innerHTML = `
+        <div class="mb-6">
+            <h2 class="text-3xl font-black text-white mb-2">💵 Salario Neto</h2>
+            <p class="text-slate-400">Cálculo preciso de sueldo líquido con proyección anual de Renta 5ta</p>
+        </div>
+        
+        <form id="form-neto" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Sueldo Bruto Mensual (S/)</label>
+                <input type="number" id="neto-salario" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition" placeholder="5000" min="1075" step="0.01" required>
+            </div>
+            
+            <div>
+                <label class="flex items-center gap-3 p-4 bg-slate-900 border-2 border-slate-700 rounded-xl cursor-pointer hover:border-indigo-500 transition">
+                    <input type="checkbox" id="neto-af" class="w-5 h-5 rounded border-slate-600">
+                    <span class="text-white font-bold">Asignación Familiar (+ S/ 107.50)</span>
+                </label>
+            </div>
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Sistema de Pensiones</label>
+                <select id="neto-sistema" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition">
+                    <option value="afp">AFP</option>
+                    <option value="onp">ONP (13%)</option>
+                </select>
+            </div>
+            
+            <div id="neto-afp-container">
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">AFP</label>
+                <select id="neto-afp" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition">
+                    <option value="integra">AFP Integra (Comisión 0.82%)</option>
+                    <option value="prima">AFP Prima (Comisión 1.60%)</option>
+                    <option value="profuturo">AFP Profuturo (Comisión 1.69%)</option>
+                    <option value="habitat">AFP Habitat (Comisión 1.47%)</option>
+                </select>
+            </div>
+            
+            <div id="neto-comision-container">
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Tipo de Comisión</label>
+                <select id="neto-comision" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition">
+                    <option value="flujo">Flujo (sobre sueldo)</option>
+                    <option value="mixta">Mixta (sueldo + saldo acumulado)</option>
+                </select>
+            </div>
+            
+            <div id="neto-saldo-container" class="hidden">
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Saldo Acumulado AFP (S/)</label>
+                <input type="number" id="neto-saldo" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition" placeholder="50000" min="0" step="0.01">
+            </div>
+            
+            <button type="submit" class="w-full p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black text-lg rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition shadow-lg">
+                ✨ CALCULAR SALARIO NETO
+            </button>
+        </form>
+    `;
+    
+    const sistemaSelect = document.getElementById('neto-sistema');
+    const afpContainer = document.getElementById('neto-afp-container');
+    const comisionContainer = document.getElementById('neto-comision-container');
+    const comisionSelect = document.getElementById('neto-comision');
+    const saldoContainer = document.getElementById('neto-saldo-container');
+    
+    sistemaSelect.addEventListener('change', () => {
+        if (sistemaSelect.value === 'afp') {
+            afpContainer.classList.remove('hidden');
+            comisionContainer.classList.remove('hidden');
+        } else {
+            afpContainer.classList.add('hidden');
+            comisionContainer.classList.add('hidden');
+            saldoContainer.classList.add('hidden');
         }
     });
     
-    document.querySelectorAll('.section-content').forEach(section => {
-        section.classList.remove('active');
-        if (section.id === `sec-${sectionId}`) section.classList.add('active');
+    comisionSelect.addEventListener('change', () => {
+        if (comisionSelect.value === 'mixta') {
+            saldoContainer.classList.remove('hidden');
+        } else {
+            saldoContainer.classList.add('hidden');
+        }
     });
     
-    const tabsContainer = document.getElementById('calc-tabs-container');
-    if (tabsContainer) tabsContainer.style.display = sectionId === 'calculators' ? 'block' : 'none';
-    
-    const mobileNav = document.getElementById('mobile-nav');
-    if (mobileNav) {
-        mobileNav.classList.remove('translate-x-0');
-        mobileNav.classList.add('-translate-x-full');
-    }
-    
-    state.currentSection = sectionId;
+    document.getElementById('form-neto').addEventListener('submit', (e) => {
+        e.preventDefault();
+        ejecutarCalculoNeto();
+    });
 }
 
-function calculateTrueCost() {
-    const salary = parseFloat(document.getElementById('tc-salary')?.value) || 0;
-    const hijos = document.getElementById('tc-hijos')?.value === 'si';
-    if (salary < PERU_DATA.minWage) { alert('⚠️ Ingresa un sueldo válido (mínimo S/ ' + PERU_DATA.minWage + ')'); return; }
-    const regimen = REGIMENES_PERU[state.currentRegimen];
-    const netoCalc = calcularSalarioNeto(salary, regimen, { tieneHijos: hijos });
-    const costoCalc = calcularCostoEmpleador(salary, hijos, regimen, { nivelRiesgo: 'medio' });
-    const netSalaryEl = document.getElementById('tc-net-salary');
-    const totalCostEl = document.getElementById('tc-total-cost');
-    const breakdownEl = document.getElementById('tc-breakdown');
-    if (netSalaryEl) netSalaryEl.textContent = `S/ ${netoCalc.salarioNeto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
-    if (totalCostEl) totalCostEl.textContent = `S/ ${costoCalc.costoTotal.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
-    if (breakdownEl) {
-        breakdownEl.innerHTML = `
-            <div class="space-y-3">
-                <div class="flex justify-between text-sm"><span class="text-slate-400">Sueldo Bruto</span><span class="text-white font-bold">S/ ${salary.toFixed(2)}</span></div>
-                ${costoCalc.asigFamiliar > 0 ? `<div class="flex justify-between text-sm"><span class="text-slate-400">Asignación Familiar</span><span class="text-emerald-400 font-bold">+ S/ ${costoCalc.asigFamiliar.toFixed(2)}</span></div>` : ''}
-                <div class="border-t border-slate-700 my-2"></div>
-                <div class="flex justify-between text-sm"><span class="text-slate-400">ESSALUD (9%)</span><span class="text-orange-400 font-bold">+ S/ ${costoCalc.essalud.toFixed(2)}</span></div>
-                <div class="flex justify-between text-sm"><span class="text-slate-400">Vida Ley</span><span class="text-orange-400 font-bold">+ S/ ${costoCalc.vidaLey.toFixed(2)}</span></div>
-                <div class="flex justify-between text-sm"><span class="text-slate-400">Gratif. (prov.)</span><span class="text-orange-400 font-bold">+ S/ ${costoCalc.provGratificaciones.toFixed(2)}</span></div>
-                <div class="flex justify-between text-sm"><span class="text-slate-400">CTS (prov.)</span><span class="text-orange-400 font-bold">+ S/ ${costoCalc.provCTS.toFixed(2)}</span></div>
-                <div class="flex justify-between text-sm"><span class="text-slate-400">Vacaciones (prov.)</span><span class="text-orange-400 font-bold">+ S/ ${costoCalc.provVacaciones.toFixed(2)}</span></div>
-                <div class="border-t border-slate-700 my-2"></div>
-                <div class="flex justify-between text-sm"><span class="text-slate-400">Carga Social</span><span class="text-indigo-400 font-bold">${costoCalc.porcentajeCarga.toFixed(1)}%</span></div>
+function ejecutarCalculoNeto() {
+    const params = {
+        salarioBruto: parseFloat(document.getElementById('neto-salario').value),
+        tieneAsignacionFamiliar: document.getElementById('neto-af').checked,
+        sistemaPension: document.getElementById('neto-sistema').value,
+        afp: document.getElementById('neto-afp').value,
+        tipoComision: document.getElementById('neto-comision').value,
+        saldoAcumuladoAFP: parseFloat(document.getElementById('neto-saldo').value) || 0,
+        regimen: APP_STATE.currentRegimen
+    };
+    
+    const resultado = calcularSalarioNeto(params);
+    APP_STATE.currentResult = resultado;
+    mostrarResultadoNeto(resultado);
+}
+
+function mostrarResultadoNeto(resultado) {
+    const container = document.getElementById('resultado-calculadora');
+    
+    let detallesPensionHTML = '';
+    if (resultado.detallesPension.aporteFondo !== undefined) {
+        detallesPensionHTML = `
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-slate-400">Aporte Fondo (10%)</span><span class="text-red-400">- S/ ${resultado.detallesPension.aporteFondo.toFixed(2)}</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Seguro Invalidez (1.70%)</span><span class="text-red-400">- S/ ${resultado.detallesPension.seguroInvalidez.toFixed(2)}</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Comisión</span><span class="text-red-400">- S/ ${resultado.detallesPension.comision.toFixed(2)}</span></div>
             </div>
         `;
     }
+    
+    let detallesRentaHTML = '';
+    resultado.detallesTramos.forEach(tramo => {
+        const tasaPorcentaje = (tramo.tasa * 100).toFixed(0);
+        detallesRentaHTML += `
+            <div class="flex justify-between text-sm">
+                <span class="text-slate-400">Tramo ${tasaPorcentaje}%</span>
+                <span class="text-slate-300">S/ ${tramo.impuesto.toFixed(2)}</span>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = `
+        <div class="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-2xl p-8 text-white mb-6">
+            <div class="text-xs font-black opacity-75 mb-2">SALARIO NETO MENSUAL</div>
+            <div class="text-6xl font-black mb-2">S/ ${resultado.salarioNeto.toFixed(2)}</div>
+            <div class="text-sm opacity-90">Después de descuentos AFP/ONP e impuestos</div>
+        </div>
+        
+        <div class="bg-slate-850 rounded-2xl p-6 mb-6 border border-slate-800">
+            <h4 class="font-bold text-white mb-4">📊 Desglose Detallado</h4>
+            <div class="space-y-3">
+                <div class="flex justify-between"><span class="text-slate-400">Sueldo Bruto</span><span class="text-white font-bold">S/ ${resultado.salarioBruto.toFixed(2)}</span></div>
+                ${resultado.asignacionFamiliar > 0 ? `<div class="flex justify-between"><span class="text-slate-400">+ Asignación Familiar</span><span class="text-emerald-400 font-bold">S/ ${resultado.asignacionFamiliar.toFixed(2)}</span></div>` : ''}
+                <div class="border-t border-slate-700 my-2"></div>
+                <div class="flex justify-between"><span class="text-slate-400">= Base Remunerativa</span><span class="text-white font-bold">S/ ${resultado.baseRemunerativa.toFixed(2)}</span></div>
+                <div class="border-t border-slate-700 my-2"></div>
+                <div class="flex justify-between font-bold"><span class="text-slate-400">- Descuento Pensión</span><span class="text-red-400">S/ ${resultado.descuentoPension.toFixed(2)}</span></div>
+                ${detallesPensionHTML}
+                <div class="border-t border-slate-700 my-2"></div>
+                <div class="flex justify-between font-bold"><span class="text-slate-400">- Impuesto Renta 5ta</span><span class="text-red-400">S/ ${resultado.impuestoMensual.toFixed(2)}</span></div>
+                ${detallesRentaHTML}
+                <div class="text-xs text-slate-500 mt-2">
+                    Proyección anual: S/ ${resultado.ingresoAnualTotal.toFixed(2)}<br>
+                    Base imponible: S/ ${resultado.baseImponibleAnual.toFixed(2)}<br>
+                    Impuesto anual: S/ ${resultado.impuestoAnual.toFixed(2)}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.classList.remove('hidden');
 }
 
-function calculateComparison() {
-    const salary = parseFloat(document.getElementById('comp-salary')?.value) || 0;
-    const hijos = document.getElementById('comp-hijos')?.value === 'si';
-    if (salary < PERU_DATA.minWage) { alert('⚠️ Ingresa un sueldo válido'); return; }
-    const resultsContainer = document.getElementById('comp-results');
-    if (!resultsContainer) return;
-    let html = '';
-    Object.values(REGIMENES_PERU).forEach(regimen => {
-        const netoCalc = calcularSalarioNeto(salary, regimen, { tieneHijos: hijos });
-        const costoCalc = calcularCostoEmpleador(salary, hijos, regimen);
-        html += `<div class="bg-slate-850 rounded-2xl p-6 border border-slate-800"><div class="flex items-center gap-3 mb-4"><div class="text-3xl">${regimen.icon}</div><div><h3 class="text-lg font-black text-white">${regimen.nombre}</h3><p class="text-xs text-slate-500">${regimen.descripcion}</p></div></div><div class="space-y-3"><div class="bg-indigo-950/30 border border-indigo-800/50 rounded-xl p-3"><div class="text-xs text-slate-400 mb-1">Salario Neto</div><div class="text-2xl font-black text-emerald-400">S/ ${netoCalc.salarioNeto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</div></div><div class="bg-orange-950/30 border border-orange-800/50 rounded-xl p-3"><div class="text-xs text-slate-400 mb-1">Costo Empresa</div><div class="text-2xl font-black text-orange-400">S/ ${costoCalc.costoTotal.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</div></div><div class="grid grid-cols-2 gap-2 text-xs"><div><span class="text-slate-500">Carga Social:</span><span class="text-white font-bold ml-1">${costoCalc.porcentajeCarga.toFixed(1)}%</span></div><div><span class="text-slate-500">Descuentos:</span><span class="text-white font-bold ml-1">S/ ${(netoCalc.descuentoPension + netoCalc.impuesto5ta).toFixed(0)}</span></div></div></div></div>`;
+// =====================================================================
+// CALCULADORA 2: HORAS EXTRAS
+// =====================================================================
+function renderizarCalculadoraHoras(container) {
+    container.innerHTML = `
+        <div class="mb-6">
+            <h2 class="text-3xl font-black text-white mb-2">⏰ Horas Extras</h2>
+            <p class="text-slate-400">Cálculo de sobretiempo con criterio contable (25% y 35% por separado)</p>
+        </div>
+        
+        <form id="form-horas" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Sueldo Bruto Mensual (S/)</label>
+                <input type="number" id="horas-salario" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition" placeholder="5000" min="1075" step="0.01" required>
+            </div>
+            
+            <div>
+                <label class="flex items-center gap-3 p-4 bg-slate-900 border-2 border-slate-700 rounded-xl cursor-pointer hover:border-indigo-500 transition">
+                    <input type="checkbox" id="horas-af" class="w-5 h-5 rounded border-slate-600">
+                    <span class="text-white font-bold">Asignación Familiar (+ S/ 107.50)</span>
+                </label>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Horas al 25%</label>
+                    <input type="number" id="horas-25" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition" placeholder="0" min="0" step="0.5" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Horas al 35%</label>
+                    <input type="number" id="horas-35" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition" placeholder="0" min="0" step="0.5" required>
+                </div>
+            </div>
+            
+            <div>
+                <label class="flex items-center gap-3 p-4 bg-slate-900 border-2 border-slate-700 rounded-xl cursor-pointer hover:border-indigo-500 transition">
+                    <input type="checkbox" id="horas-nocturno" class="w-5 h-5 rounded border-slate-600">
+                    <span class="text-white font-bold">Horario Nocturno (Recargo 35% sobre RMV)</span>
+                </label>
+            </div>
+            
+            <button type="submit" class="w-full p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black text-lg rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition shadow-lg">
+                ✨ CALCULAR HORAS EXTRAS
+            </button>
+        </form>
+    `;
+    
+    document.getElementById('form-horas').addEventListener('submit', (e) => {
+        e.preventDefault();
+        ejecutarCalculoHoras();
     });
-    resultsContainer.innerHTML = html;
-    renderComparisonChart(salary, hijos);
 }
 
-function renderComparisonChart(salary, hijos) {
-    const canvas = document.getElementById('comp-chart');
-    if (!canvas) return;
-    if (state.charts.comparison) state.charts.comparison.destroy();
-    const labels = [], netosData = [], costosData = [];
-    Object.values(REGIMENES_PERU).forEach(regimen => {
-        const netoCalc = calcularSalarioNeto(salary, regimen, { tieneHijos: hijos });
-        const costoCalc = calcularCostoEmpleador(salary, hijos, regimen);
-        labels.push(regimen.nombre);
-        netosData.push(netoCalc.salarioNeto);
-        costosData.push(costoCalc.costoTotal);
-    });
-    const ctx = canvas.getContext('2d');
-    state.charts.comparison = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                { label: 'Salario Neto', data: netosData, backgroundColor: 'rgba(52, 211, 153, 0.8)', borderColor: 'rgba(52, 211, 153, 1)', borderWidth: 2 },
-                { label: 'Costo Empresa', data: costosData, backgroundColor: 'rgba(251, 146, 60, 0.8)', borderColor: 'rgba(251, 146, 60, 1)', borderWidth: 2 }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { size: 12 }, padding: 16 } } },
-            scales: {
-                y: { beginAtZero: true, ticks: { color: '#94a3b8', callback: (value) => 'S/ ' + value.toLocaleString('es-PE', { maximumFractionDigits: 0 }) }, grid: { color: 'rgba(71, 85, 105, 0.3)' } },
-                x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
-            }
-        }
+function ejecutarCalculoHoras() {
+    const params = {
+        salarioBruto: parseFloat(document.getElementById('horas-salario').value),
+        tieneAsignacionFamiliar: document.getElementById('horas-af').checked,
+        horas25: parseFloat(document.getElementById('horas-25').value),
+        horas35: parseFloat(document.getElementById('horas-35').value),
+        horarioNocturno: document.getElementById('horas-nocturno').checked,
+        regimen: APP_STATE.currentRegimen
+    };
+    
+    const resultado = calcularHorasExtras(params);
+    APP_STATE.currentResult = resultado;
+    mostrarResultadoHoras(resultado);
+}
+
+function mostrarResultadoHoras(resultado) {
+    const container = document.getElementById('resultado-calculadora');
+    
+    container.innerHTML = `
+        <div class="bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl p-8 text-white mb-6">
+            <div class="text-xs font-black opacity-75 mb-2">TOTAL HORAS EXTRAS</div>
+            <div class="text-6xl font-black mb-2">S/ ${resultado.totalPago.toFixed(2)}</div>
+            <div class="text-sm opacity-90">Pago adicional por sobretiempo</div>
+        </div>
+        
+        <div class="bg-slate-850 rounded-2xl p-6 mb-6 border border-slate-800">
+            <h4 class="font-bold text-white mb-4">📊 Desglose Detallado</h4>
+            <div class="space-y-3">
+                <div class="flex justify-between"><span class="text-slate-400">Base Remunerativa</span><span class="text-white font-bold">S/ ${resultado.baseRemunerativa.toFixed(2)}</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Valor Hora Base</span><span class="text-white font-bold">S/ ${resultado.valorHoraBase.toFixed(2)}</span></div>
+                ${resultado.aplicaRecargNocturno ? `<div class="flex justify-between"><span class="text-slate-400">Con Recargo Nocturno</span><span class="text-emerald-400 font-bold">S/ ${resultado.valorHoraBaseConNocturno.toFixed(2)}</span></div>` : ''}
+                <div class="border-t border-slate-700 my-2"></div>
+                <div class="bg-blue-950/30 border border-blue-800/50 rounded-xl p-4">
+                    <div class="font-bold text-blue-300 mb-2">Horas al 25%</div>
+                    <div class="flex justify-between text-sm"><span class="text-slate-400">Cantidad</span><span class="text-white">${resultado.horas25}h</span></div>
+                    <div class="flex justify-between text-sm"><span class="text-slate-400">Valor por hora</span><span class="text-white">S/ ${resultado.valorHora25.toFixed(2)}</span></div>
+                    <div class="flex justify-between text-sm font-bold mt-2"><span class="text-blue-300">Subtotal 25%</span><span class="text-blue-400">S/ ${resultado.pagoHoras25.toFixed(2)}</span></div>
+                </div>
+                <div class="bg-purple-950/30 border border-purple-800/50 rounded-xl p-4">
+                    <div class="font-bold text-purple-300 mb-2">Horas al 35%</div>
+                    <div class="flex justify-between text-sm"><span class="text-slate-400">Cantidad</span><span class="text-white">${resultado.horas35}h</span></div>
+                    <div class="flex justify-between text-sm"><span class="text-slate-400">Valor por hora</span><span class="text-white">S/ ${resultado.valorHora35.toFixed(2)}</span></div>
+                    <div class="flex justify-between text-sm font-bold mt-2"><span class="text-purple-300">Subtotal 35%</span><span class="text-purple-400">S/ ${resultado.pagoHoras35.toFixed(2)}</span></div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.classList.remove('hidden');
+}
+
+// =====================================================================
+// CALCULADORA 3: CTS
+// =====================================================================
+function renderizarCalculadoraCTS(container) {
+    container.innerHTML = `
+        <div class="mb-6">
+            <h2 class="text-3xl font-black text-white mb-2">🏦 CTS</h2>
+            <p class="text-slate-400">Compensación por Tiempo de Servicios (incluye 1/6 de gratificación)</p>
+        </div>
+        
+        <form id="form-cts" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Sueldo Bruto Mensual (S/)</label>
+                <input type="number" id="cts-salario" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition" placeholder="5000" min="1075" step="0.01" required>
+            </div>
+            
+            <div>
+                <label class="flex items-center gap-3 p-4 bg-slate-900 border-2 border-slate-700 rounded-xl cursor-pointer hover:border-indigo-500 transition">
+                    <input type="checkbox" id="cts-af" class="w-5 h-5 rounded border-slate-600">
+                    <span class="text-white font-bold">Asignación Familiar (+ S/ 107.50)</span>
+                </label>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Meses trabajados</label>
+                    <input type="number" id="cts-meses" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition" placeholder="6" min="0" max="6" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Días trabajados</label>
+                    <input type="number" id="cts-dias" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition" placeholder="0" min="0" max="29" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="w-full p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black text-lg rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition shadow-lg">
+                ✨ CALCULAR CTS
+            </button>
+        </form>
+    `;
+    
+    document.getElementById('form-cts').addEventListener('submit', (e) => {
+        e.preventDefault();
+        ejecutarCalculoCTS();
     });
 }
 
-function calculateStrategicComparison() {
-    const salary = parseFloat(document.getElementById('strategic-salary')?.value) || 0;
-    const anios = parseFloat(document.getElementById('strategic-years')?.value) || 1;
-    const hijos = document.getElementById('strategic-hijos')?.value === 'si';
-    if (salary < PERU_DATA.minWage) { alert('⚠️ Ingresa un sueldo válido'); return; }
-    const resultsContainer = document.getElementById('strategic-results');
-    if (!resultsContainer) return;
-    let html = '<div class="grid gap-6">';
-    Object.values(REGIMENES_PERU).forEach(regimen => {
-        const netoCalc = calcularSalarioNeto(salary, regimen, { tieneHijos: hijos });
-        const costoCalc = calcularCostoEmpleador(salary, hijos, regimen);
-        const gratifCalc = calcularGratificaciones(salary, hijos, regimen, false);
-        const ctsCalc = calcularCTS(salary, hijos, regimen, 6);
-        const netoAnual = netoCalc.salarioNeto * 12, gratifAnual = gratifCalc.gratificacionTotal, ctsAnual = ctsCalc.ctsTotal * 2, costoAnual = costoCalc.costoTotal * 12;
-        const totalTrabajador = netoAnual + gratifAnual + ctsAnual, totalEmpleador = costoAnual;
-        html += `<div class="bg-slate-850 rounded-2xl p-6 border-2 border-slate-800 hover:border-indigo-500 transition"><div class="flex items-center justify-between mb-4"><div class="flex items-center gap-3"><div class="text-4xl">${regimen.icon}</div><div><h3 class="text-xl font-black text-white">${regimen.nombre}</h3><p class="text-xs text-slate-500">${anios} ${anios === 1 ? 'año' : 'años'}</p></div></div></div><div class="space-y-4"><div class="bg-emerald-950/30 border border-emerald-800/50 rounded-xl p-4"><div class="text-xs text-slate-400 mb-2">💰 INGRESOS TRABAJADOR/AÑO</div><div class="text-3xl font-black text-emerald-400 mb-2">S/ ${totalTrabajador.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</div><div class="space-y-1 text-xs"><div class="flex justify-between"><span class="text-slate-500">Neto × 12:</span><span class="text-slate-300">S/ ${netoAnual.toFixed(0)}</span></div>${gratifAnual > 0 ? `<div class="flex justify-between"><span class="text-slate-500">Gratificaciones:</span><span class="text-slate-300">S/ ${gratifAnual.toFixed(0)}</span></div>` : ''}${ctsAnual > 0 ? `<div class="flex justify-between"><span class="text-slate-500">CTS:</span><span class="text-slate-300">S/ ${ctsAnual.toFixed(0)}</span></div>` : ''}</div></div><div class="bg-orange-950/30 border border-orange-800/50 rounded-xl p-4"><div class="text-xs text-slate-400 mb-2">🏢 COSTO EMPRESA/AÑO</div><div class="text-3xl font-black text-orange-400">S/ ${totalEmpleador.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</div><div class="text-xs text-slate-500 mt-1">Carga social: ${costoCalc.porcentajeCarga.toFixed(1)}%</div></div><div class="grid grid-cols-2 gap-3 text-xs"><div class="bg-slate-900 rounded-lg p-3"><div class="text-slate-500 mb-1">Total ${anios} ${anios === 1 ? 'año' : 'años'}</div><div class="text-lg font-black text-indigo-400">S/ ${(totalTrabajador * anios).toLocaleString('es-PE', { maximumFractionDigits: 0 })}</div></div><div class="bg-slate-900 rounded-lg p-3"><div class="text-slate-500 mb-1">Costo ${anios} ${anios === 1 ? 'año' : 'años'}</div><div class="text-lg font-black text-orange-400">S/ ${(totalEmpleador * anios).toLocaleString('es-PE', { maximumFractionDigits: 0 })}</div></div></div></div></div>`;
-    });
-    html += '</div>';
-    resultsContainer.innerHTML = html;
+function ejecutarCalculoCTS() {
+    const params = {
+        salarioBruto: parseFloat(document.getElementById('cts-salario').value),
+        tieneAsignacionFamiliar: document.getElementById('cts-af').checked,
+        mesesTrabajados: parseInt(document.getElementById('cts-meses').value),
+        diasTrabajados: parseInt(document.getElementById('cts-dias').value),
+        regimen: APP_STATE.currentRegimen
+    };
+    
+    const resultado = calcularCTS(params);
+    APP_STATE.currentResult = resultado;
+    mostrarResultadoCTS(resultado);
 }
 
-function shareResult() {
-    if (!state.lastResult) { alert('⚠️ Primero realiza un cálculo'); return; }
-    const text = `Resultado SueldoPro Perú 2026\n🇵🇪 100% Legislación Peruana\nsueldopro-2026.vercel.app`;
-    if (navigator.share) {
-        navigator.share({ title: 'SueldoPro Perú', text, url: window.location.href }).catch(() => {});
-    } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => alert('✅ Copiado al portapapeles'));
-    } else {
-        alert('📋 ' + text);
+function mostrarResultadoCTS(resultado) {
+    const container = document.getElementById('resultado-calculadora');
+    
+    if (resultado.mensaje) {
+        container.innerHTML = `
+            <div class="bg-slate-850 rounded-2xl p-8 text-center border border-slate-800">
+                <div class="text-4xl mb-4">⚠️</div>
+                <div class="text-white font-bold">${resultado.mensaje}</div>
+            </div>
+        `;
+        container.classList.remove('hidden');
+        return;
     }
+    
+    container.innerHTML = `
+        <div class="bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-2xl p-8 text-white mb-6">
+            <div class="text-xs font-black opacity-75 mb-2">CTS SEMESTRAL</div>
+            <div class="text-6xl font-black mb-2">S/ ${resultado.ctsSemestral.toFixed(2)}</div>
+            <div class="text-sm opacity-90">Compensación por Tiempo de Servicios</div>
+        </div>
+        
+        <div class="bg-slate-850 rounded-2xl p-6 mb-6 border border-slate-800">
+            <h4 class="font-bold text-white mb-4">📊 Composición de la Base</h4>
+            <div class="space-y-3">
+                <div class="flex justify-between"><span class="text-slate-400">Sueldo Bruto</span><span class="text-white font-bold">S/ ${resultado.salarioBruto.toFixed(2)}</span></div>
+                ${resultado.asignacionFamiliar > 0 ? `<div class="flex justify-between"><span class="text-slate-400">+ Asignación Familiar</span><span class="text-emerald-400 font-bold">S/ ${resultado.asignacionFamiliar.toFixed(2)}</span></div>` : ''}
+                <div class="flex justify-between"><span class="text-slate-400">+ 1/6 Gratificación</span><span class="text-emerald-400 font-bold">S/ ${resultado.sextoGratificacion.toFixed(2)}</span></div>
+                <div class="border-t border-slate-700 my-2"></div>
+                <div class="flex justify-between"><span class="text-slate-400">= Remuneración Computable</span><span class="text-white font-bold">S/ ${resultado.remuneracionComputable.toFixed(2)}</span></div>
+                <div class="border-t border-slate-700 my-2"></div>
+                <div class="flex justify-between"><span class="text-slate-400">Tiempo trabajado</span><span class="text-white">${resultado.mesesTrabajados} meses, ${resultado.diasTrabajados} días</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Total días</span><span class="text-white">${resultado.totalDias} días</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Factor régimen</span><span class="text-white">${(resultado.factorRegimen * 100)}%</span></div>
+            </div>
+        </div>
+    `;
+    
+    container.classList.remove('hidden');
 }
 
-console.log('✅ SCRIPT.JS CARGADO - Todos los Event Listeners Activos');
+// =====================================================================
+// CALCULADORA 4: GRATIFICACIONES
+// =====================================================================
+function renderizarCalculadoraGratificaciones(container) {
+    container.innerHTML = `
+        <div class="mb-6">
+            <h2 class="text-3xl font-black text-white mb-2">🎁 Gratificaciones</h2>
+            <p class="text-slate-400">Gratificaciones Julio y Diciembre con Bonificación Extraordinaria 9%</p>
+        </div>
+        
+        <form id="form-gratif" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Sueldo Bruto Mensual (S/)</label>
+                <input type="number" id="gratif-salario" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition" placeholder="5000" min="1075" step="0.01" required>
+            </div>
+            
+            <div>
+                <label class="flex items-center gap-3 p-4 bg-slate-900 border-2 border-slate-700 rounded-xl cursor-pointer hover:border-indigo-500 transition">
+                    <input type="checkbox" id="gratif-af" class="w-5 h-5 rounded border-slate-600">
+                    <span class="text-white font-bold">Asignación Familiar (+ S/ 107.50)</span>
+                </label>
+            </div>
+            
+            <div>
+                <label class="flex items-center gap-3 p-4 bg-slate-900 border-2 border-slate-700 rounded-xl cursor-pointer hover:border-indigo-500 transition">
+                    <input type="checkbox" id="gratif-eps" class="w-5 h-5 rounded border-slate-600">
+                    <span class="text-white font-bold">Tiene EPS Privada (Bonif. 6.75% en vez de 9%)</span>
+                </label>
+            </div>
+            
+            <button type="submit" class="w-full p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black text-lg rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition shadow-lg">
+                ✨ CALCULAR GRATIFICACIONES
+            </button>
+        </form>
+    `;
+    
+    document.getElementById('form-gratif').addEventListener('submit', (e) => {
+        e.preventDefault();
+        ejecutarCalculoGratificaciones();
+    });
+}
+
+function ejecutarCalculoGratificaciones() {
+    const params = {
+        salarioBruto: parseFloat(document.getElementById('gratif-salario').value),
+        tieneAsignacionFamiliar: document.getElementById('gratif-af').checked,
+        tieneEPS: document.getElementById('gratif-eps').checked,
+        regimen: APP_STATE.currentRegimen
+    };
+    
+    const resultado = calcularGratificaciones(params);
+    APP_STATE.currentResult = resultado;
+    mostrarResultadoGratificaciones(resultado);
+}
+
+function mostrarResultadoGratificaciones(resultado) {
+    const container = document.getElementById('resultado-calculadora');
+    
+    if (resultado.mensaje) {
+        container.innerHTML = `
+            <div class="bg-slate-850 rounded-2xl p-8 text-center border border-slate-800">
+                <div class="text-4xl mb-4">⚠️</div>
+                <div class="text-white font-bold">${resultado.mensaje}</div>
+            </div>
+        `;
+        container.classList.remove('hidden');
+        return;
+    }
+    
+    const bonifPorcentaje = (resultado.tasaBonificacion * 100).toFixed(2);
+    
+    container.innerHTML = `
+        <div class="bg-gradient-to-br from-yellow-600 to-yellow-800 rounded-2xl p-8 text-white mb-6">
+            <div class="text-xs font-black opacity-75 mb-2">GRATIFICACIONES ANUALES</div>
+            <div class="text-6xl font-black mb-2">S/ ${resultado.gratificacionAnual.toFixed(2)}</div>
+            <div class="text-sm opacity-90">Julio + Diciembre (incluye Bonif. Extraordinaria)</div>
+        </div>
+        
+        <div class="bg-slate-850 rounded-2xl p-6 mb-6 border border-slate-800">
+            <h4 class="font-bold text-white mb-4">📊 Desglose por Gratificación</h4>
+            <div class="space-y-3">
+                <div class="flex justify-between"><span class="text-slate-400">Base Remunerativa</span><span class="text-white font-bold">S/ ${resultado.baseRemunerativa.toFixed(2)}</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Gratificación Base</span><span class="text-white font-bold">S/ ${resultado.gratificacionBase.toFixed(2)}</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">+ Bonif. Extraordinaria (${bonifPorcentaje}%)</span><span class="text-emerald-400 font-bold">S/ ${resultado.bonificacionExtraordinaria.toFixed(2)}</span></div>
+                <div class="border-t border-slate-700 my-2"></div>
+                <div class="flex justify-between"><span class="text-slate-400">= Total por Gratificación</span><span class="text-white font-bold text-lg">S/ ${resultado.totalPorGratificacion.toFixed(2)}</span></div>
+                <div class="border-t border-slate-700 my-2"></div>
+                <div class="text-xs text-slate-500">
+                    Julio: S/ ${resultado.totalPorGratificacion.toFixed(2)}<br>
+                    Diciembre: S/ ${resultado.totalPorGratificacion.toFixed(2)}<br>
+                    Total año: S/ ${resultado.gratificacionAnual.toFixed(2)}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.classList.remove('hidden');
+}
+
+// =====================================================================
+// CALCULADORA 5: LIQUIDACIÓN
+// =====================================================================
+function renderizarCalculadoraLiquidacion(container) {
+    container.innerHTML = `
+        <div class="mb-6">
+            <h2 class="text-3xl font-black text-white mb-2">📋 Liquidación de Beneficios</h2>
+            <p class="text-slate-400">Cálculo completo de beneficios sociales por cese laboral</p>
+        </div>
+        
+        <form id="form-liquidacion" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Sueldo Bruto Mensual (S/)</label>
+                <input type="number" id="liq-salario" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition" placeholder="5000" min="1075" step="0.01" required>
+            </div>
+            
+            <div>
+                <label class="flex items-center gap-3 p-4 bg-slate-900 border-2 border-slate-700 rounded-xl cursor-pointer hover:border-indigo-500 transition">
+                    <input type="checkbox" id="liq-af" class="w-5 h-5 rounded border-slate-600">
+                    <span class="text-white font-bold">Asignación Familiar (+ S/ 107.50)</span>
+                </label>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Fecha de Inicio</label>
+                    <input type="date" id="liq-inicio" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Fecha de Cese</label>
+                    <input type="date" id="liq-cese" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition" required>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Meses para Gratificación Pendiente (0-6)</label>
+                <input type="number" id="liq-gratif-meses" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition" placeholder="3" min="0" max="6" required>
+            </div>
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Días de Vacaciones No Gozadas</label>
+                <input type="number" id="liq-vac-dias" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition" placeholder="10" min="0" max="30" required>
+            </div>
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Tipo de Salida</label>
+                <select id="liq-tipo" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition">
+                    <option value="renuncia">Renuncia Voluntaria</option>
+                    <option value="despido">Despido (con indemnización)</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="w-full p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black text-lg rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition shadow-lg">
+                ✨ CALCULAR LIQUIDACIÓN
+            </button>
+        </form>
+    `;
+    
+    document.getElementById('form-liquidacion').addEventListener('submit', (e) => {
+        e.preventDefault();
+        ejecutarCalculoLiquidacion();
+    });
+}
+
+function ejecutarCalculoLiquidacion() {
+    const params = {
+        salarioBruto: parseFloat(document.getElementById('liq-salario').value),
+        tieneAsignacionFamiliar: document.getElementById('liq-af').checked,
+        fechaInicio: document.getElementById('liq-inicio').value,
+        fechaCese: document.getElementById('liq-cese').value,
+        gratificacionPendiente: parseInt(document.getElementById('liq-gratif-meses').value),
+        vacacionesNoGozadas: parseInt(document.getElementById('liq-vac-dias').value),
+        tipoSalida: document.getElementById('liq-tipo').value,
+        regimen: APP_STATE.currentRegimen
+    };
+    
+    const resultado = calcularLiquidacion(params);
+    APP_STATE.currentResult = resultado;
+    mostrarResultadoLiquidacion(resultado);
+}
+
+function mostrarResultadoLiquidacion(resultado) {
+    const container = document.getElementById('resultado-calculadora');
+    
+    container.innerHTML = `
+        <div class="bg-gradient-to-br from-orange-600 to-orange-800 rounded-2xl p-8 text-white mb-6">
+            <div class="text-xs font-black opacity-75 mb-2">LIQUIDACIÓN TOTAL</div>
+            <div class="text-6xl font-black mb-2">S/ ${resultado.totalLiquidacion.toFixed(2)}</div>
+            <div class="text-sm opacity-90">Beneficios sociales por cese laboral</div>
+        </div>
+        
+        <div class="bg-slate-850 rounded-2xl p-6 mb-6 border border-slate-800">
+            <h4 class="font-bold text-white mb-4">⏱️ Tiempo Trabajado</h4>
+            <div class="space-y-2">
+                <div class="flex justify-between"><span class="text-slate-400">Años</span><span class="text-white font-bold">${resultado.tiempoTrabajado.anios}</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Meses</span><span class="text-white font-bold">${resultado.tiempoTrabajado.meses}</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Días</span><span class="text-white font-bold">${resultado.tiempoTrabajado.dias}</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Total días</span><span class="text-white">${resultado.tiempoTrabajado.totalDias}</span></div>
+            </div>
+        </div>
+        
+        <div class="bg-slate-850 rounded-2xl p-6 mb-6 border border-slate-800">
+            <h4 class="font-bold text-white mb-4">📊 Desglose de Beneficios</h4>
+            <div class="space-y-3">
+                <div class="flex justify-between"><span class="text-slate-400">CTS Pendiente</span><span class="text-white font-bold">S/ ${resultado.ctsPendiente.toFixed(2)}</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Gratificación Trunca</span><span class="text-white font-bold">S/ ${resultado.gratificacionTrunca.toFixed(2)}</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Vacaciones Truncas (${resultado.diasVacaciones} días)</span><span class="text-white font-bold">S/ ${resultado.vacacionesTruncas.toFixed(2)}</span></div>
+                ${resultado.indemnizacion > 0 ? `<div class="flex justify-between"><span class="text-slate-400">Indemnización por Despido</span><span class="text-orange-400 font-bold">S/ ${resultado.indemnizacion.toFixed(2)}</span></div>` : ''}
+                <div class="border-t border-slate-700 my-2"></div>
+                <div class="flex justify-between text-lg"><span class="text-slate-400 font-bold">TOTAL A PAGAR</span><span class="text-white font-black">S/ ${resultado.totalLiquidacion.toFixed(2)}</span></div>
+            </div>
+        </div>
+    `;
+    
+    container.classList.remove('hidden');
+}
+
+// =====================================================================
+// CALCULADORA 6: COSTO EMPLEADOR
+// =====================================================================
+function renderizarCalculadoraCosto(container) {
+    container.innerHTML = `
+        <div class="mb-6">
+            <h2 class="text-3xl font-black text-white mb-2">🏢 Costo Total Empleador</h2>
+            <p class="text-slate-400">Costo mensual completo para la empresa (sueldo + cargas + provisiones)</p>
+        </div>
+        
+        <form id="form-costo" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Sueldo Bruto Mensual (S/)</label>
+                <input type="number" id="costo-salario" class="w-full p-3 bg-slate-900 border-2 border-slate-700 rounded-xl text-white font-bold focus:border-indigo-500 transition" placeholder="5000" min="1075" step="0.01" required>
+            </div>
+            
+            <div>
+                <label class="flex items-center gap-3 p-4 bg-slate-900 border-2 border-slate-700 rounded-xl cursor-pointer hover:border-indigo-500 transition">
+                    <input type="checkbox" id="costo-af" class="w-5 h-5 rounded border-slate-600">
+                    <span class="text-white font-bold">Asignación Familiar (+ S/ 107.50)</span>
+                </label>
+            </div>
+            
+            <div>
+                <label class="flex items-center gap-3 p-4 bg-slate-900 border-2 border-slate-700 rounded-xl cursor-pointer hover:border-indigo-500 transition">
+                    <input type="checkbox" id="costo-senati" class="w-5 h-5 rounded border-slate-600">
+                    <span class="text-white font-bold">Aplica SENATI (+ 0.75%)</span>
+                </label>
+            </div>
+            
+            <button type="submit" class="w-full p-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black text-lg rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition shadow-lg">
+                ✨ CALCULAR COSTO EMPLEADOR
+            </button>
+        </form>
+    `;
+    
+    document.getElementById('form-costo').addEventListener('submit', (e) => {
+        e.preventDefault();
+        ejecutarCalculoCosto();
+    });
+}
+
+function ejecutarCalculoCosto() {
+    const params = {
+        salarioBruto: parseFloat(document.getElementById('costo-salario').value),
+        tieneAsignacionFamiliar: document.getElementById('costo-af').checked,
+        aplicaSENATI: document.getElementById('costo-senati').checked,
+        regimen: APP_STATE.currentRegimen
+    };
+    
+    const resultado = calcularCostoEmpleador(params);
+    APP_STATE.currentResult = resultado;
+    mostrarResultadoCosto(resultado);
+}
+
+function mostrarResultadoCosto(resultado) {
+    const container = document.getElementById('resultado-calculadora');
+    
+    container.innerHTML = `
+        <div class="bg-gradient-to-br from-red-600 to-red-800 rounded-2xl p-8 text-white mb-6">
+            <div class="text-xs font-black opacity-75 mb-2">COSTO MENSUAL TOTAL</div>
+            <div class="text-6xl font-black mb-2">S/ ${resultado.costoTotalMensual.toFixed(2)}</div>
+            <div class="text-sm opacity-90">Inversión total de la empresa por empleado</div>
+        </div>
+        
+        <div class="bg-slate-850 rounded-2xl p-6 mb-6 border border-slate-800">
+            <h4 class="font-bold text-white mb-4">💰 Composición del Costo</h4>
+            <div class="space-y-3">
+                <div class="flex justify-between"><span class="text-slate-400">Sueldo Bruto</span><span class="text-white font-bold">S/ ${resultado.salarioBruto.toFixed(2)}</span></div>
+                ${resultado.asignacionFamiliar > 0 ? `<div class="flex justify-between"><span class="text-slate-400">+ Asignación Familiar</span><span class="text-emerald-400 font-bold">S/ ${resultado.asignacionFamiliar.toFixed(2)}</span></div>` : ''}
+                <div class="border-t border-slate-700 my-2"></div>
+                <div class="bg-orange-950/30 border border-orange-800/50 rounded-xl p-4">
+                    <div class="font-bold text-orange-300 mb-2">Cargas Sociales Directas</div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-400">ESSALUD (9%)</span><span class="text-white">S/ ${resultado.essalud.toFixed(2)}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">Vida Ley (0.53%)</span><span class="text-white">S/ ${resultado.vidaLey.toFixed(2)}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">SCTR (1.24%)</span><span class="text-white">S/ ${resultado.sctr.toFixed(2)}</span></div>
+                        ${resultado.senati > 0 ? `<div class="flex justify-between"><span class="text-slate-400">SENATI (0.75%)</span><span class="text-white">S/ ${resultado.senati.toFixed(2)}</span></div>` : ''}
+                        <div class="flex justify-between font-bold"><span class="text-orange-300">Subtotal Cargas</span><span class="text-orange-400">S/ ${resultado.totalCargasSociales.toFixed(2)}</span></div>
+                    </div>
+                </div>
+                <div class="bg-purple-950/30 border border-purple-800/50 rounded-xl p-4">
+                    <div class="font-bold text-purple-300 mb-2">Provisiones Mensuales</div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-400">Gratificaciones</span><span class="text-white">S/ ${resultado.provisionGratificaciones.toFixed(2)}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">CTS</span><span class="text-white">S/ ${resultado.provisionCTS.toFixed(2)}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">Vacaciones</span><span class="text-white">S/ ${resultado.provisionVacaciones.toFixed(2)}</span></div>
+                        <div class="flex justify-between font-bold"><span class="text-purple-300">Subtotal Provisiones</span><span class="text-purple-400">S/ ${resultado.totalProvisiones.toFixed(2)}</span></div>
+                    </div>
+                </div>
+                <div class="border-t border-slate-700 my-2"></div>
+                <div class="flex justify-between text-lg"><span class="text-slate-400">Carga Adicional</span><span class="text-red-400 font-bold">${resultado.porcentajeCarga.toFixed(2)}%</span></div>
+            </div>
+        </div>
+    `;
+    
+    container.classList.remove('hidden');
+}
+
+console.log('✅ SCRIPT.JS PROFESIONAL CARGADO - Gestión Robusta del DOM Activa');
