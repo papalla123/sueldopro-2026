@@ -325,4 +325,242 @@ window.calcularCostoEmpleador = function(salarioBruto, tieneHijos, regimen, opts
     };
 };
 
-console.log('✅ DATA.JS CARGADO - Funciones Core Disponibles');
+// =====================================================================
+// CALCULADORAS CONFIGURATION
+// =====================================================================
+
+window.CALCULADORAS = {
+    neto: {
+        id: 'neto',
+        icon: '💵',
+        titulo: 'Salario Neto',
+        desc: 'Calcula tu sueldo líquido después de descuentos AFP/ONP e impuestos',
+        campos: [
+            { id: 'neto-salary', label: 'Sueldo Bruto Mensual (S/)', type: 'number', placeholder: '5000', min: 1075 },
+            { id: 'neto-hijos', label: '¿Tienes hijos menores?', type: 'select', options: [{v:'no',l:'No'},{v:'si',l:'Sí (+ S/ 107.50)'}] },
+            { id: 'neto-pension', label: 'Sistema de Pensiones', type: 'select', options: [{v:'afp',l:'AFP'},{v:'onp',l:'ONP (13%)'}] },
+            { id: 'neto-afp', label: 'AFP', type: 'select', options: [{v:'integra',l:'Integra'},{v:'prima',l:'Prima'},{v:'profuturo',l:'Profuturo'},{v:'habitat',l:'Habitat'}], cond: 'neto-pension', condVal: 'afp' },
+            { id: 'neto-comision', label: 'Tipo Comisión', type: 'select', options: [{v:'flujo',l:'Flujo'},{v:'mixta',l:'Mixta'}], cond: 'neto-pension', condVal: 'afp' }
+        ],
+        calcular: function(valores, regimen) {
+            const sal = parseFloat(valores['neto-salary']) || 0;
+            const hijos = valores['neto-hijos'] === 'si';
+            const pension = valores['neto-pension'] || 'afp';
+            const afp = valores['neto-afp'] || 'integra';
+            const comision = valores['neto-comision'] || 'flujo';
+            const res = calcularSalarioNeto(sal, regimen, { tieneHijos: hijos, sistemaPension: pension, afpNombre: afp, tipoComisionAFP: comision });
+            return {
+                total: res.salarioNeto,
+                detalles: [
+                    { l: 'Sueldo Bruto', v: `S/ ${res.salarioBruto.toFixed(2)}` },
+                    ...(res.asigFamiliar > 0 ? [{ l: '+ Asig. Familiar', v: `S/ ${res.asigFamiliar.toFixed(2)}`, color: 'emerald' }] : []),
+                    { l: '= Base Remunerativa', v: `S/ ${res.baseRemunerativa.toFixed(2)}`, bold: true },
+                    { l: '- Pensión', v: `S/ ${res.descuentoPension.toFixed(2)}`, color: 'red' },
+                    { l: '- Renta 5ta', v: `S/ ${res.impuesto5ta.toFixed(2)}`, color: 'red' }
+                ]
+            };
+        }
+    },
+    bruto: {
+        id: 'bruto',
+        icon: '🎯',
+        titulo: 'Bruto desde Neto',
+        desc: 'Calcula el bruto necesario para obtener un neto deseado',
+        campos: [
+            { id: 'bruto-neto', label: 'Neto Deseado (S/)', type: 'number', placeholder: '4000', min: 800 },
+            { id: 'bruto-hijos', label: '¿Tienes hijos?', type: 'select', options: [{v:'no',l:'No'},{v:'si',l:'Sí'}] },
+            { id: 'bruto-pension', label: 'Sistema Pensiones', type: 'select', options: [{v:'afp',l:'AFP'},{v:'onp',l:'ONP'}] }
+        ],
+        calcular: function(valores, regimen) {
+            const neto = parseFloat(valores['bruto-neto']) || 0;
+            const hijos = valores['bruto-hijos'] === 'si';
+            const pension = valores['bruto-pension'] || 'afp';
+            const bruto = calcularSalarioBruto(neto, regimen, { tieneHijos: hijos, sistemaPension: pension });
+            const verif = calcularSalarioNeto(bruto, regimen, { tieneHijos: hijos, sistemaPension: pension });
+            return {
+                total: bruto,
+                detalles: [
+                    { l: 'Neto Deseado', v: `S/ ${neto.toFixed(2)}` },
+                    { l: 'Bruto Necesario', v: `S/ ${bruto.toFixed(2)}`, bold: true, color: 'indigo' },
+                    { l: 'Neto Real', v: `S/ ${verif.salarioNeto.toFixed(2)}` },
+                    { l: 'Precisión', v: `± S/ ${Math.abs(verif.salarioNeto - neto).toFixed(2)}`, color: 'slate' }
+                ]
+            };
+        }
+    },
+    horas_extra: {
+        id: 'horas_extra',
+        icon: '⏰',
+        titulo: 'Horas Extra',
+        desc: 'Calcula pago de horas extraordinarias (Regla Diaria: 2h/día al 25%, resto al 35%)',
+        campos: [
+            { id: 'he-salary', label: 'Sueldo Bruto (S/)', type: 'number', placeholder: '5000', min: 1075 },
+            { id: 'he-hijos', label: '¿Tienes hijos?', type: 'select', options: [{v:'no',l:'No'},{v:'si',l:'Sí'}] },
+            { id: 'he-horas', label: 'Total Horas Extra Mes', type: 'number', placeholder: '20', min: 0 },
+            { id: 'he-dias', label: 'Días con HE', type: 'number', placeholder: '10', min: 1 },
+            { id: 'he-nocturno', label: 'Trabajo Nocturno', type: 'select', options: [{v:'no',l:'No'},{v:'si',l:'Sí (+35%)'}] }
+        ],
+        calcular: function(valores, regimen) {
+            const sal = parseFloat(valores['he-salary']) || 0;
+            const hijos = valores['he-hijos'] === 'si';
+            const horas = parseFloat(valores['he-horas']) || 0;
+            const dias = parseFloat(valores['he-dias']) || 1;
+            const nocturno = valores['he-nocturno'] === 'si';
+            const res = calcularHorasExtra(sal, hijos, regimen, horas, dias, nocturno);
+            return {
+                total: res.totalPago,
+                detalles: [
+                    { l: 'Valor Hora Base', v: `S/ ${res.valorHora.toFixed(2)}` },
+                    { l: 'Horas al 25%', v: `${res.totalHoras25}h × S/ ${res.valorHora25.toFixed(2)}`, color: 'blue' },
+                    { l: 'Pago 25%', v: `S/ ${res.pago25.toFixed(2)}`, color: 'blue' },
+                    { l: 'Horas al 35%', v: `${res.totalHoras35}h × S/ ${res.valorHora35.toFixed(2)}`, color: 'purple' },
+                    { l: 'Pago 35%', v: `S/ ${res.pago35.toFixed(2)}`, color: 'purple' }
+                ]
+            };
+        }
+    },
+    cts: {
+        id: 'cts',
+        icon: '🏦',
+        titulo: 'CTS',
+        desc: 'Compensación por Tiempo de Servicios (Base = Sueldo + AF + 1/6 Gratif)',
+        campos: [
+            { id: 'cts-salary', label: 'Sueldo Bruto (S/)', type: 'number', placeholder: '5000', min: 1075 },
+            { id: 'cts-hijos', label: '¿Tienes hijos?', type: 'select', options: [{v:'no',l:'No'},{v:'si',l:'Sí'}] },
+            { id: 'cts-meses', label: 'Meses trabajados (1-6)', type: 'number', placeholder: '6', min: 1, max: 6 }
+        ],
+        calcular: function(valores, regimen) {
+            const sal = parseFloat(valores['cts-salary']) || 0;
+            const hijos = valores['cts-hijos'] === 'si';
+            const meses = parseFloat(valores['cts-meses']) || 6;
+            const res = calcularCTS(sal, hijos, regimen, meses);
+            if (!regimen.cts) return { total: 0, detalles: [{ l: 'Sin CTS en ' + regimen.nombre, v: '-', color: 'slate' }] };
+            return {
+                total: res.ctsTotal,
+                detalles: [
+                    { l: 'Rem. Computable', v: `S/ ${res.remuneracionComputable.toFixed(2)}` },
+                    { l: '(incluye 1/6 Gratif)', v: `S/ ${res.sextoGratificacion.toFixed(2)}`, color: 'emerald' },
+                    { l: 'Meses', v: `${meses}` },
+                    { l: 'Factor Régimen', v: `${(regimen.ctsFactor * 100)}%`, color: 'indigo' }
+                ]
+            };
+        }
+    },
+    gratificaciones: {
+        id: 'gratificaciones',
+        icon: '🎁',
+        titulo: 'Gratificaciones',
+        desc: 'Gratificaciones Julio/Diciembre + Bonif. Extraordinaria 9% (Ley 30334)',
+        campos: [
+            { id: 'gratif-salary', label: 'Sueldo Bruto (S/)', type: 'number', placeholder: '5000', min: 1075 },
+            { id: 'gratif-hijos', label: '¿Tienes hijos?', type: 'select', options: [{v:'no',l:'No'},{v:'si',l:'Sí'}] },
+            { id: 'gratif-eps', label: 'EPS Privada', type: 'select', options: [{v:'no',l:'No (9%)'},{v:'si',l:'Sí (6.75%)'}] }
+        ],
+        calcular: function(valores, regimen) {
+            const sal = parseFloat(valores['gratif-salary']) || 0;
+            const hijos = valores['gratif-hijos'] === 'si';
+            const eps = valores['gratif-eps'] === 'si';
+            const res = calcularGratificaciones(sal, hijos, regimen, eps);
+            if (!regimen.gratificaciones) return { total: 0, detalles: [{ l: 'Sin Gratif en ' + regimen.nombre, v: '-', color: 'slate' }] };
+            return {
+                total: res.gratificacionTotal,
+                detalles: [
+                    { l: 'Gratif Base', v: `S/ ${res.gratificacionBase.toFixed(2)}` },
+                    { l: `+ Bonif ${(res.tasaBonif * 100).toFixed(2)}%`, v: `S/ ${res.bonifExtraordinaria.toFixed(2)}`, color: 'emerald' },
+                    { l: '= Por Gratif', v: `S/ ${res.totalPorGratificacion.toFixed(2)}`, bold: true },
+                    { l: 'Total Año (×2)', v: `S/ ${res.gratificacionTotal.toFixed(2)}`, bold: true, color: 'indigo' }
+                ]
+            };
+        }
+    },
+    liquidacion: {
+        id: 'liquidacion',
+        icon: '📋',
+        titulo: 'Liquidación',
+        desc: 'Cálculo de beneficios por cese laboral',
+        campos: [
+            { id: 'liq-salary', label: 'Sueldo Bruto (S/)', type: 'number', placeholder: '5000', min: 1075 },
+            { id: 'liq-hijos', label: '¿Tienes hijos?', type: 'select', options: [{v:'no',l:'No'},{v:'si',l:'Sí'}] },
+            { id: 'liq-anios', label: 'Años trabajados', type: 'number', placeholder: '3.5', min: 0.1, step: 0.1 },
+            { id: 'liq-tipo', label: 'Tipo Salida', type: 'select', options: [{v:'despido',l:'Despido'},{v:'renuncia',l:'Renuncia'}] }
+        ],
+        calcular: function(valores, regimen) {
+            const sal = parseFloat(valores['liq-salary']) || 0;
+            const hijos = valores['liq-hijos'] === 'si';
+            const anios = parseFloat(valores['liq-anios']) || 0;
+            const tipo = valores['liq-tipo'] || 'despido';
+            const res = calcularLiquidacion(sal, hijos, regimen, anios, tipo, false);
+            return {
+                total: res.totalLiquidacion,
+                detalles: [
+                    { l: 'CTS Pendiente', v: `S/ ${res.ctsPendiente.toFixed(2)}`, color: 'blue' },
+                    { l: 'Vac. Truncas', v: `S/ ${res.vacacionesTruncas.toFixed(2)}`, color: 'blue' },
+                    { l: 'Gratif. Trunca', v: `S/ ${res.gratificacionTrunca.toFixed(2)}`, color: 'blue' },
+                    { l: 'Indemnización', v: `S/ ${res.indemnizacion.toFixed(2)}`, color: tipo === 'despido' ? 'orange' : 'slate' }
+                ]
+            };
+        }
+    },
+    costo_empleador: {
+        id: 'costo_empleador',
+        icon: '🏢',
+        titulo: 'Costo Empleador',
+        desc: 'Costo total mensual para la empresa (sueldo + cargas + provisiones)',
+        campos: [
+            { id: 'emp-salary', label: 'Sueldo Bruto (S/)', type: 'number', placeholder: '5000', min: 1075 },
+            { id: 'emp-hijos', label: '¿Tiene hijos?', type: 'select', options: [{v:'no',l:'No'},{v:'si',l:'Sí'}] }
+        ],
+        calcular: function(valores, regimen) {
+            const sal = parseFloat(valores['emp-salary']) || 0;
+            const hijos = valores['emp-hijos'] === 'si';
+            const res = calcularCostoEmpleador(sal, hijos, regimen);
+            return {
+                total: res.costoTotal,
+                detalles: [
+                    { l: 'Sueldo Bruto', v: `S/ ${res.sueldoBruto.toFixed(2)}` },
+                    ...(res.asigFamiliar > 0 ? [{ l: '+ Asig. Familiar', v: `S/ ${res.asigFamiliar.toFixed(2)}`, color: 'emerald' }] : []),
+                    { l: '+ ESSALUD (9%)', v: `S/ ${res.essalud.toFixed(2)}`, color: 'orange' },
+                    { l: '+ Vida Ley', v: `S/ ${res.vidaLey.toFixed(2)}`, color: 'orange' },
+                    { l: '+ Gratif (prov)', v: `S/ ${res.provGratificaciones.toFixed(2)}`, color: 'purple' },
+                    { l: '+ CTS (prov)', v: `S/ ${res.provCTS.toFixed(2)}`, color: 'purple' },
+                    { l: '+ Vac (prov)', v: `S/ ${res.provVacaciones.toFixed(2)}`, color: 'purple' },
+                    { l: 'Carga Social', v: `${res.porcentajeCarga.toFixed(1)}%`, bold: true, color: 'indigo' }
+                ]
+            };
+        }
+    },
+    utilidades: {
+        id: 'utilidades',
+        icon: '💎',
+        titulo: 'Utilidades',
+        desc: 'Participación en utilidades de la empresa (50% días + 50% remuneración)',
+        campos: [
+            { id: 'util-salary', label: 'Sueldo Mensual (S/)', type: 'number', placeholder: '5000', min: 1075 },
+            { id: 'util-dias', label: 'Días trabajados año', type: 'number', placeholder: '360', min: 1 },
+            { id: 'util-utilidad', label: 'Utilidad Empresa (S/)', type: 'number', placeholder: '100000', min: 0 },
+            { id: 'util-sector', label: 'Sector', type: 'select', options: [{v:'0.10',l:'Pesquera/Telecom (10%)'},{v:'0.08',l:'Minería/Comercio (8%)'},{v:'0.05',l:'Otras (5%)'}] }
+        ],
+        calcular: function(valores, regimen) {
+            const sal = parseFloat(valores['util-salary']) || 0;
+            const dias = parseFloat(valores['util-dias']) || 360;
+            const util = parseFloat(valores['util-utilidad']) || 0;
+            const sector = parseFloat(valores['util-sector']) || 0.05;
+            const utilDist = util * sector;
+            const porDias = (utilDist * 0.5 * dias) / 360;
+            const porRem = (utilDist * 0.5 * sal * 12) / (sal * 12);
+            const total = Math.min(porDias + porRem, sal * 18);
+            return {
+                total: round2(total),
+                detalles: [
+                    { l: 'Utilidad Empresa', v: `S/ ${util.toFixed(2)}` },
+                    { l: `a distribuir (${(sector*100)}%)`, v: `S/ ${utilDist.toFixed(2)}`, color: 'blue' },
+                    { l: '50% por días', v: `S/ ${porDias.toFixed(2)}`, color: 'emerald' },
+                    { l: '50% por rem', v: `S/ ${porRem.toFixed(2)}`, color: 'emerald' },
+                    { l: 'Tope', v: `18 sueldos`, color: 'slate' }
+                ]
+            };
+        }
+    }
+};
+
+console.log('✅ DATA.JS CARGADO - 8 Calculadoras Activas');
