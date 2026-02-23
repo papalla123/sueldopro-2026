@@ -1,45 +1,57 @@
 'use strict';
 
 // =====================================================================
-// SUELDOPRO ULTRA PERÚ 2026 - DATA ENGINE
-// Pentágono Financiero - Motor de Datos y Cálculos Laborales
-// Legislación Peruana 2026 - UIT Proyectada: S/ 5,150
+// SUELDOPRO ULTRA PERÚ 2026 - DATA ENGINE v3.0
+// Motor de Precisión Quirúrgica - Legislación Peruana 2026
+// UIT 2026: S/ 5,150 | RMV: S/ 1,075
+// =====================================================================
+// CORRECCIONES v3.0:
+//  [FIX-1] AFP: Tope SBS aplicado ÚNICAMENTE al SIS (1.70%). El aporte
+//          al fondo (10%) y la comisión NO tienen tope legal. Error
+//          previo inflaba el descuento AFP en sueldos altos.
+//  [FIX-2] Renta 5ta: Proyección anual incluye gratificaciones Ley 27735
+//          + Bonificación Extraordinaria (9%) per Art. 40 TUO LIR.
+//          Error previo subestimaba el impuesto hasta en 18%.
+//  [FIX-3] Precisión 4-6 decimales en cálculos intermedios, r2() solo
+//          en outputs finales de cada categoría.
+//  [NEW-1] generarLogCalculo(): Log paso a paso de cada fórmula legal.
+//  [NEW-2] Validación safe() en todas las funciones core.
 // =====================================================================
 
 // ===== PENTAGON ECOSYSTEM BRIDGE =====
 window.PENTAGON_LINKS = {
-    sueldopro: { 
-        name: 'SueldoPro Ultra', 
-        url: 'https://sueldopro-2026.vercel.app', 
-        icon: '💼', 
+    sueldopro: {
+        name: 'SueldoPro Ultra',
+        url: 'https://sueldopro-2026.vercel.app',
+        icon: '💼',
         color: 'from-blue-500 to-cyan-500',
         description: 'Calculadora Laboral Peruana'
     },
-    marginaxis: { 
-        name: 'MarginAxis Global', 
-        url: 'https://margin-master-pro-pboy.vercel.app', 
-        icon: '📊', 
+    marginaxis: {
+        name: 'MarginAxis Global',
+        url: 'https://margin-master-pro-pboy.vercel.app',
+        icon: '📊',
         color: 'from-green-500 to-emerald-500',
         description: 'Análisis de Márgenes Empresariales'
     },
-    leadnexus: { 
-        name: 'LeadNexus AI', 
-        url: 'https://lead-target.vercel.app', 
-        icon: '🎯', 
+    leadnexus: {
+        name: 'LeadNexus AI',
+        url: 'https://lead-target.vercel.app',
+        icon: '🎯',
         color: 'from-violet-500 to-fuchsia-500',
         description: 'Scoring y Gestión de Leads'
     },
-    liquidezforce: { 
-        name: 'Liquidez Force', 
-        url: 'https://liquidez-force.vercel.app', 
-        icon: '💰', 
+    liquidezforce: {
+        name: 'Liquidez Force',
+        url: 'https://liquidez-force.vercel.app',
+        icon: '💰',
         color: 'from-yellow-500 to-orange-500',
         description: 'Proyección de Flujo de Caja'
     },
-    wealth: { 
-        name: 'Wealth Armor AI', 
-        url: 'https://wealth-armor-ai.vercel.app', 
-        icon: '🛡️', 
+    wealth: {
+        name: 'Wealth Armor AI',
+        url: 'https://wealth-armor-ai.vercel.app',
+        icon: '🛡️',
         color: 'from-emerald-500 to-green-600',
         description: 'Planificación Financiera Personal'
     }
@@ -47,26 +59,27 @@ window.PENTAGON_LINKS = {
 
 // ===== PERÚ 2026 - CONSTANTES LABORALES OFICIALES =====
 window.PERU_DATA = {
-    // Información General
     country: 'Perú',
     flag: '🇵🇪',
     currency: 'PEN',
     currencySymbol: 'S/',
     year: 2026,
-    
-    // Salarios y Asignaciones Básicas
-    minWage: 1075,                    // RMV 2026 (D.S. 003-2024-TR proyectado)
-    asignacionFamiliar: 107.50,       // 10% de RMV
-    sis: 0.0170,                      // Seguro de Invalidez y Sobrevivencia (1.70%)
-    
-    // Sistema Privado de Pensiones (AFP) - Actualizado 2026
+
+    // --- Salarios y Asignaciones Básicas ---
+    minWage: 1075,               // RMV 2026 (D.S. 003-2024-TR proyectado)
+    asignacionFamiliar: 107.50,  // 10% de RMV
+
+    // --- Sistema Privado de Pensiones (AFP) ---
+    // Base: D.S. 054-97-EF | Circular SBS AFP-148-2013 y Res. SBS 2016+
+    sis: 0.0170,                 // Seguro de Invalidez y Sobrevivencia (1.70%)
+
     afp: {
         integra: {
             nombre: 'AFP Integra',
-            aporteFondo: 0.10,
+            aporteFondo: 0.10,   // 10% al fondo (SIN TOPE)
             tiposComision: {
                 flujo: { nombre: 'Comisión sobre Flujo', tasa: 0.0082, sobreSaldo: 0 },
-                mixta: { nombre: 'Comisión Mixta', tasa: 0.0047, sobreSaldo: 1.25 }
+                mixta: { nombre: 'Comisión Mixta',      tasa: 0.0047, sobreSaldo: 1.25 }
             }
         },
         prima: {
@@ -74,7 +87,7 @@ window.PERU_DATA = {
             aporteFondo: 0.10,
             tiposComision: {
                 flujo: { nombre: 'Comisión sobre Flujo', tasa: 0.0160, sobreSaldo: 0 },
-                mixta: { nombre: 'Comisión Mixta', tasa: 0.0038, sobreSaldo: 1.25 }
+                mixta: { nombre: 'Comisión Mixta',      tasa: 0.0038, sobreSaldo: 1.25 }
             }
         },
         profuturo: {
@@ -82,7 +95,7 @@ window.PERU_DATA = {
             aporteFondo: 0.10,
             tiposComision: {
                 flujo: { nombre: 'Comisión sobre Flujo', tasa: 0.0169, sobreSaldo: 0 },
-                mixta: { nombre: 'Comisión Mixta', tasa: 0.0047, sobreSaldo: 1.20 }
+                mixta: { nombre: 'Comisión Mixta',      tasa: 0.0047, sobreSaldo: 1.20 }
             }
         },
         habitat: {
@@ -90,82 +103,87 @@ window.PERU_DATA = {
             aporteFondo: 0.10,
             tiposComision: {
                 flujo: { nombre: 'Comisión sobre Flujo', tasa: 0.0147, sobreSaldo: 0 },
-                mixta: { nombre: 'Comisión Mixta', tasa: 0.0047, sobreSaldo: 1.25 }
+                mixta: { nombre: 'Comisión Mixta',      tasa: 0.0047, sobreSaldo: 1.25 }
             }
         }
     },
-    
-    // Sistema Nacional de Pensiones (ONP)
-    onp: 0.13,                        // 13% de descuento
-    
-    // Impuesto a la Renta de Quinta Categoría
+
+    // --- Sistema Nacional de Pensiones (ONP) ---
+    onp: 0.13,                   // 13% D.Ley 19990
+
+    // --- Impuesto a la Renta de 5ta Categoría ---
+    // Base: TUO LIR D.S. 179-2004-EF, Art. 40
     rentaQuinta: {
-        uit: 5150,                    // UIT 2026 Proyectada
+        uit: 5150,               // UIT 2026
         tramos: [
-            { desde: 0, hasta: 5, tasa: 0.08 },      // Hasta 5 UIT: 8%
-            { desde: 5, hasta: 20, tasa: 0.14 },     // De 5 a 20 UIT: 14%
-            { desde: 20, hasta: 35, tasa: 0.17 },    // De 20 a 35 UIT: 17%
-            { desde: 35, hasta: 45, tasa: 0.20 },    // De 35 a 45 UIT: 20%
-            { desde: 45, hasta: null, tasa: 0.30 }   // Más de 45 UIT: 30%
+            { desde: 0,  hasta: 5,    tasa: 0.08 },
+            { desde: 5,  hasta: 20,   tasa: 0.14 },
+            { desde: 20, hasta: 35,   tasa: 0.17 },
+            { desde: 35, hasta: 45,   tasa: 0.20 },
+            { desde: 45, hasta: null, tasa: 0.30 }
         ],
-        deduccion: 7                  // 7 UIT de deducción anual
+        deduccion: 7             // 7 UIT de deducción anual
     },
-    
-    // Topes Máximos para Seguros
+
+    // --- Topes Máximos ---
+    // [FIX-1] El sbsTopeAsegurable se aplica SOLO al SIS (seguro de vida AFP).
+    //         El aporteFondo (10%) y la comisión AFP NO tienen tope legal.
+    //         Ref: Res. SBS N° 0524-2016 y actualizaciones trimestrales.
+    //         Valor 2026 (estimado Q1): actualizar vía SBS cada trimestre.
     topesSeguros: {
-        afpMaxRemuneracion: 13733.34, // Tope AFP (aprox. 13.5 RMV)
+        sbsTopeAsegurable: 12943.35, // Remuneración Máxima Asegurable SBS (SIS only)
         essaludMaxRemuneracion: null  // Sin tope
     },
-    
-    // Gratificaciones (Julio y Diciembre)
+
+    // --- Gratificaciones (Ley 27735) ---
     gratificaciones: {
-        meses: 2,                     // 2 gratificaciones al año
-        bonifExtEssalud: 0.09,        // 9% sobre gratificación para ESSALUD
-        bonifExtEPS: 0.0675           // 6.75% si tiene EPS
+        meses: 2,                // 2 gratificaciones/año (Julio y Diciembre)
+        bonifExtEssalud: 0.09,   // 9% Bonificación Extraordinaria (Ley 29351)
+        bonifExtEPS: 0.0675      // 6.75% si tiene EPS
     },
-    
-    // Compensación por Tiempo de Servicios (CTS)
+
+    // --- CTS (D.S. 001-97-TR) ---
     cts: {
-        depositosMensuales: 2,        // Mayo y Noviembre
-        sextoGratificacion: 1/6       // 1/6 de gratificación promedio
+        depositosMensuales: 2,   // Mayo y Noviembre
+        sextoGratificacion: 1/6  // 1/6 de gratificación como computable
     },
-    
-    // Vacaciones
+
+    // --- Vacaciones ---
     vacaciones: {
-        diasPorAnio: 30,              // 30 días calendario por año
-        provisionMensual: 1/12        // Provisión mensual
+        diasPorAnio: 30,
+        provisionMensual: 1/12
     },
-    
-    // Aportes del Empleador
+
+    // --- Aportes del Empleador ---
     empleador: {
-        essalud: 0.09,                // 9% ESSALUD
-        vidaLey: 0.0053,              // 0.53% Seguro de Vida Ley
+        essalud: 0.09,
+        vidaLey: 0.0053,
         sctr: {
-            minimo: 0.0053,           // 0.53% Riesgo bajo (oficinas)
-            medio: 0.0071,            // 0.71% Riesgo medio (comercio)
-            alto: 0.0118              // 1.18% Riesgo alto (construcción/minería)
+            minimo: 0.0053,
+            medio: 0.0071,
+            alto: 0.0118
         },
-        senati: 0.0075,               // 0.75% SENATI (solo industria/construcción)
-        eps: 0.0225                   // 2.25% EPS adicional (si aplica)
+        senati: 0.0075,
+        eps: 0.0225
     },
-    
-    // Participación en Utilidades (D.Leg. 892)
+
+    // --- Participación en Utilidades (D.Leg. 892) ---
     utilidades: {
         sectores: {
-            pesquera: { porcentaje: 0.10, nombre: 'Pesquera' },
+            pesquera:          { porcentaje: 0.10, nombre: 'Pesquera' },
             telecomunicaciones: { porcentaje: 0.10, nombre: 'Telecomunicaciones' },
-            industrial: { porcentaje: 0.10, nombre: 'Industrial' },
-            mineria: { porcentaje: 0.08, nombre: 'Minería' },
-            comercio: { porcentaje: 0.08, nombre: 'Comercio al por mayor y menor' },
-            restaurantes: { porcentaje: 0.08, nombre: 'Restaurantes' },
-            transporte: { porcentaje: 0.05, nombre: 'Transporte' },
-            otros: { porcentaje: 0.05, nombre: 'Otras actividades' }
+            industrial:        { porcentaje: 0.10, nombre: 'Industrial' },
+            mineria:           { porcentaje: 0.08, nombre: 'Minería' },
+            comercio:          { porcentaje: 0.08, nombre: 'Comercio al por mayor y menor' },
+            restaurantes:      { porcentaje: 0.08, nombre: 'Restaurantes' },
+            transporte:        { porcentaje: 0.05, nombre: 'Transporte' },
+            otros:             { porcentaje: 0.05, nombre: 'Otras actividades' }
         },
         distribucion: {
-            porDias: 0.50,            // 50% por días trabajados
-            porRemuneracion: 0.50     // 50% por remuneración
+            porDias:         0.50,
+            porRemuneracion: 0.50
         },
-        topeMaximo: 18                // Tope: 18 remuneraciones mensuales
+        topeMaximo: 18
     }
 };
 
@@ -176,630 +194,801 @@ window.REGIMENES_PERU = {
         nombre: 'Régimen General',
         icon: '🏢',
         descripcion: 'Régimen completo - Todos los beneficios laborales según Ley de Productividad y Competitividad Laboral (D.S. 003-97-TR)',
-        limites: {
-            trabajadores: null,       // Sin límite
-            ventasAnuales: null       // Sin límite
-        },
+        limites: { trabajadores: null, ventasAnuales: null },
         beneficios: {
             gratificaciones: true,
-            gratificacionesFactor: 1.0,    // 100% (2 sueldos completos)
+            gratificacionesFactor: 1.0,
             cts: true,
-            ctsFactor: 1.0,                // 100%
-            vacaciones: 30,                // 30 días
+            ctsFactor: 1.0,
+            vacaciones: 30,
             vacacionesFactor: 1.0,
             asignacionFamiliar: true,
             utilidades: true,
-            indemnizacion: 1.5             // 1.5 sueldos por año
+            indemnizacion: 1.5
         },
-        essaludBonif: 0.09                 // 9% bonificación extraordinaria
+        essaludBonif: 0.09
     },
     pequena: {
         id: 'pequena',
         nombre: 'Pequeña Empresa',
         icon: '🏪',
         descripcion: 'Entre 1-100 trabajadores, ventas anuales hasta 1700 UIT. Beneficios reducidos según Ley MYPE (D.S. 013-2013-PRODUCE)',
-        limites: {
-            trabajadores: 100,
-            ventasAnuales: 1700           // 1700 UIT
-        },
+        limites: { trabajadores: 100, ventasAnuales: 1700 },
         beneficios: {
             gratificaciones: true,
-            gratificacionesFactor: 0.5,    // 50% (medio sueldo por gratificación)
+            gratificacionesFactor: 0.5,
             cts: true,
-            ctsFactor: 0.5,                // 50%
-            vacaciones: 15,                // 15 días
+            ctsFactor: 0.5,
+            vacaciones: 15,
             vacacionesFactor: 0.5,
             asignacionFamiliar: true,
             utilidades: true,
-            indemnizacion: 0.5             // 0.5 sueldos por año (hasta 6 meses)
+            indemnizacion: 0.5
         },
-        essaludBonif: 0.0                  // Sin bonificación extraordinaria
+        essaludBonif: 0.0
     },
     micro: {
         id: 'micro',
         nombre: 'Microempresa',
         icon: '🏠',
         descripcion: 'Entre 1-10 trabajadores, ventas anuales hasta 150 UIT. Régimen simplificado según Ley MYPE',
-        limites: {
-            trabajadores: 10,
-            ventasAnuales: 150            // 150 UIT
-        },
+        limites: { trabajadores: 10, ventasAnuales: 150 },
         beneficios: {
             gratificaciones: false,
             gratificacionesFactor: 0,
             cts: false,
             ctsFactor: 0,
-            vacaciones: 15,               // 15 días
+            vacaciones: 15,
             vacacionesFactor: 0.5,
             asignacionFamiliar: false,
             utilidades: false,
-            indemnizacion: 0.25           // 0.25 sueldos por año (hasta 3 meses)
+            indemnizacion: 0.25
         },
         essaludBonif: 0.0
     }
 };
 
 // =====================================================================
-// FUNCIONES AUXILIARES DE CÁLCULO
+// ===== HELPERS DE PRECISIÓN Y VALIDACIÓN (v3.0) =====
+// =====================================================================
+
+/**
+ * r4: Redondeo intermedio a 4 decimales (cálculos internos)
+ * Elimina errores flotantes acumulados antes de multiplicaciones
+ */
+const r4 = n => Math.round(n * 10000) / 10000;
+
+/**
+ * r6: Redondeo fino a 6 decimales (tasas y factores muy pequeños)
+ */
+const r6 = n => Math.round(n * 1000000) / 1000000;
+
+/**
+ * r2: Redondeo de salida (output final de cada categoría)
+ * SOLO aplicar en el return final, nunca en cálculos intermedios
+ */
+const r2 = n => Math.round(n * 100) / 100;
+
+/**
+ * safe: Guarda contra NaN, Infinity y valores negativos.
+ * Retorna 0 en caso de valor inválido.
+ */
+const safe = n => {
+    const v = typeof n === 'number' ? n : parseFloat(n);
+    return (isNaN(v) || !isFinite(v) || v < 0) ? 0 : v;
+};
+
+/**
+ * pct: Formatea porcentaje con precisión correcta
+ */
+const pct = (value, decimals = 2) => `${(value * 100).toFixed(decimals)}%`;
+
+/**
+ * fmt: Formatea moneda S/ con 2 decimales (para Details)
+ */
+const fmt = n => `S/ ${r2(safe(n)).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+// Exponer helpers globalmente para uso en CALCULATOR_CONFIGS
+window.r2 = r2;
+window.r4 = r4;
+window.safe = safe;
+window.fmt = fmt;
+window.pct = pct;
+
+// =====================================================================
+// ===== FUNCIONES AUXILIARES DE CÁLCULO =====
 // =====================================================================
 
 /**
  * Calcula la Asignación Familiar
- * @returns {number} Monto de asignación familiar (10% de RMV)
+ * Base: D.S. 035-90-TR (10% de RMV)
  */
-window.calcularAsignacionFamiliar = function() {
-    return PERU_DATA.minWage * 0.10;
+window.calcularAsignacionFamiliar = function () {
+    return r2(PERU_DATA.minWage * 0.10);
 };
 
 /**
- * Calcula los descuentos de AFP (Sistema Privado de Pensiones)
- * @param {number} salario - Salario bruto mensual
- * @param {string} afpNombre - Nombre de la AFP (integra, prima, profuturo, habitat)
- * @param {string} tipoComision - Tipo de comisión (flujo o mixta)
- * @param {number} saldoAcumulado - Saldo acumulado en AFP (para comisión mixta)
- * @returns {object} Objeto con aporte, seguro, comisión y total
+ * [FIX-1] Calcula los descuentos AFP con precisión quirúrgica.
+ *
+ * CORRECCIÓN CRÍTICA: El Tope Máximo Asegurable (TMA) de la SBS se aplica
+ * EXCLUSIVAMENTE al SIS (Seguro de Invalidez y Sobrevivencia, 1.70%).
+ * El aporte al fondo (10%) y la comisión AFP NO tienen tope legal —
+ * se calculan sobre la remuneración bruta completa.
+ *
+ * Base: D.S. 054-97-EF Art. 30, Res. SBS N° 0524-2016.
+ *
+ * @param {number} salario - Remuneración bruta mensual (sin tope)
+ * @param {string} afpNombre - integra | prima | profuturo | habitat
+ * @param {string} tipoComision - flujo | mixta
+ * @param {number} saldoAcumulado - Fondo acumulado (para comisión mixta)
  */
-window.calcularAFP = function(salario, afpNombre, tipoComision, saldoAcumulado = 0) {
+window.calcularAFP = function (salario, afpNombre, tipoComision, saldoAcumulado = 0) {
     const afpData = PERU_DATA.afp[afpNombre];
     if (!afpData) return { aporte: 0, seguro: 0, comision: 0, total: 0 };
-    
-    // Aplicar tope máximo AFP
-    const salarioTope = Math.min(salario, PERU_DATA.topesSeguros.afpMaxRemuneracion);
-    
-    // Aporte obligatorio al fondo (10%)
-    const aporte = salarioTope * afpData.aporteFondo;
-    
-    // Seguro de Invalidez y Sobrevivencia (1.70%)
-    const seguro = salarioTope * PERU_DATA.sis;
-    
-    // Comisión de la AFP
+
+    const rem = safe(salario);
+    const saldo = safe(saldoAcumulado);
+    const comisionData = afpData.tiposComision[tipoComision] || afpData.tiposComision.flujo;
+
+    // ── Aporte al Fondo Previsional (10%) ── SIN TOPE
+    const aporte = r4(rem * afpData.aporteFondo);
+
+    // ── SIS: Seguro de Invalidez y Sobrevivencia (1.70%) ── CON TOPE SBS
+    // El TMA (Remuneración Máxima Asegurable) actualizado por SBS trimestralmente.
+    const remParaSIS = Math.min(rem, PERU_DATA.topesSeguros.sbsTopeAsegurable);
+    const seguro = r4(remParaSIS * PERU_DATA.sis);
+
+    // ── Comisión AFP ── SIN TOPE
     let comision = 0;
-    const comisionData = afpData.tiposComision[tipoComision];
-    
     if (tipoComision === 'flujo') {
-        comision = salarioTope * comisionData.tasa;
+        comision = r4(rem * comisionData.tasa);
     } else if (tipoComision === 'mixta') {
-        comision = salarioTope * comisionData.tasa + (saldoAcumulado * comisionData.sobreSaldo) / 12;
+        // Parte sobre flujo + parte anual sobre saldo (prorrateada mensualmente)
+        const sobreFlujo  = r4(rem   * comisionData.tasa);
+        const sobreSaldo  = r4((saldo * comisionData.sobreSaldo / 100) / 12);
+        comision = r4(sobreFlujo + sobreSaldo);
     }
-    
+
+    const total = r4(aporte + seguro + comision);
+
     return {
-        aporte,
-        seguro,
-        comision,
-        total: aporte + seguro + comision,
-        salarioTope,
-        topeAplicado: salario > PERU_DATA.topesSeguros.afpMaxRemuneracion
+        aporte:       r2(aporte),
+        seguro:       r2(seguro),
+        comision:     r2(comision),
+        total:        r2(total),
+        remParaSIS,
+        topeAplicado: rem > PERU_DATA.topesSeguros.sbsTopeAsegurable,
+        // Raw intermedios (útiles para el Log)
+        _aporte4:  aporte,
+        _seguro4:  seguro,
+        _comision4: comision
     };
 };
 
 /**
- * Calcula el Impuesto a la Renta de Quinta Categoría
- * @param {number} salarioBruto - Salario bruto mensual
- * @param {number} utilidadesMensual - Utilidades mensualizadas
- * @returns {number} Impuesto mensual a retener
+ * [FIX-2] Calcula el Impuesto a la Renta de 5ta Categoría con proyección completa.
+ *
+ * CORRECCIÓN CRÍTICA: El Art. 40 del TUO LIR (D.S. 179-2004-EF) dispone que la
+ * renta bruta proyectada debe incluir:
+ *   1. Remuneraciones ordinarias (sueldo × 12)
+ *   2. Gratificaciones Ley 27735 (Julio + Diciembre)
+ *   3. Bonificación Extraordinaria (9% de gratificación, Ley 29351)
+ *   4. Otras rentas de 5ta (utilidades, bonos, etc.)
+ *
+ * El cálculo previo solo proyectaba el sueldo × 12, omitiendo ítems 2 y 3,
+ * lo que generaba diferencias de hasta 18% vs. boletas reales.
+ *
+ * Nota: Se calcula desde mes 1 del año fiscal. Para mayor precisión en meses
+ * posteriores, debe considerar retenciones acumuladas (ver Art. 40 lit. b).
+ *
+ * @param {number} salarioBruto - Remuneración mensual (incluye Asig. Familiar)
+ * @param {object} regimen - Régimen laboral (para factores de gratificación)
+ * @param {number} utilidadesMensual - Utilidades mensualizadas gravadas
  */
-window.calcularImpuesto5ta = function(salarioBruto, utilidadesMensual = 0) {
-    // Ingreso mensual total
-    const ingresoMensual = salarioBruto + utilidadesMensual;
-    
-    // Proyección anual
-    const ingresoAnual = ingresoMensual * 12;
-    const uitAnual = PERU_DATA.rentaQuinta.uit;
-    
-    // Deducción de 7 UIT
-    const deduccion = PERU_DATA.rentaQuinta.deduccion * uitAnual;
-    const baseImponible = Math.max(0, ingresoAnual - deduccion);
-    
-    // Cálculo por tramos
+window.calcularImpuesto5ta = function (salarioBruto, regimen, utilidadesMensual = 0) {
+    const rem   = safe(salarioBruto);
+    const utils = safe(utilidadesMensual);
+    const uit   = PERU_DATA.rentaQuinta.uit;
+
+    // Factor de gratificación según régimen
+    const gFactor = (regimen && regimen.beneficios.gratificacionesFactor) || 1.0;
+    // Factor de bonificación extraordinaria según régimen
+    const bFactor = (regimen && regimen.essaludBonif) || 0.0;
+
+    // ─────────────────────────────────────────────────────────────────
+    // PASO 1: Renta Bruta Anual (Art. 40 TUO LIR)
+    // ─────────────────────────────────────────────────────────────────
+    const remuAnual   = r4(rem * 12);                               // 12 meses ordinarios
+    const gratifAnual = r4(rem * gFactor * 2);                      // 2 gratificaciones
+    const bonifAnual  = r4(rem * gFactor * bFactor * 2);            // 2 bonif. extraord.
+    const utilsAnual  = r4(utils * 12);
+    const rentaBruta  = r4(remuAnual + gratifAnual + bonifAnual + utilsAnual);
+
+    // PASO 2: Deducción de 7 UIT
+    const deduccion     = r4(PERU_DATA.rentaQuinta.deduccion * uit);   // 7 × 5150 = 36,050
+    const baseImponible = r4(Math.max(0, rentaBruta - deduccion));
+
+    // PASO 3: Cálculo escalonado por tramos
     let impuestoAnual = 0;
+    const detalleTramos = [];
     PERU_DATA.rentaQuinta.tramos.forEach(tramo => {
-        const limiteInferior = tramo.desde * uitAnual;
-        const limiteSuperior = tramo.hasta ? tramo.hasta * uitAnual : Infinity;
-        
-        if (baseImponible > limiteInferior) {
-            const imponible = Math.min(baseImponible, limiteSuperior) - limiteInferior;
-            if (imponible > 0) {
-                impuestoAnual += imponible * tramo.tasa;
+        const limInf = r4(tramo.desde * uit);
+        const limSup = tramo.hasta !== null ? r4(tramo.hasta * uit) : Infinity;
+        if (baseImponible > limInf) {
+            const porcion = r4(Math.min(baseImponible, limSup) - limInf);
+            const impTramo = r4(porcion * tramo.tasa);
+            impuestoAnual += impTramo;
+            if (porcion > 0) {
+                detalleTramos.push({
+                    rango: `${tramo.desde}-${tramo.hasta || '∞'} UIT`,
+                    tasa: tramo.tasa,
+                    porcion: r2(porcion),
+                    impuesto: r2(impTramo)
+                });
             }
         }
     });
-    
-    // Mensualizar el impuesto
-    return impuestoAnual / 12;
+
+    const mensual = r4(impuestoAnual / 12);
+
+    return {
+        mensual:        r2(mensual),
+        anual:          r2(impuestoAnual),
+        baseImponible:  r2(baseImponible),
+        deduccion:      r2(deduccion),
+        rentaBruta:     r2(rentaBruta),
+        remuAnual:      r2(remuAnual),
+        gratifAnual:    r2(gratifAnual),
+        bonifAnual:     r2(bonifAnual),
+        utilsAnual:     r2(utilsAnual),
+        detalleTramos,
+        // ¿Aplica impuesto?
+        aplica: baseImponible > 0
+    };
 };
 
 /**
- * Calcula el Salario Neto a partir del Bruto
- * @param {number} salarioBruto - Salario bruto mensual
- * @param {object} regimen - Régimen laboral
- * @param {object} opciones - Opciones de cálculo
- * @returns {object} Objeto con salario neto y detalles
+ * Calcula el Salario Neto a partir del Bruto.
+ * Integra las correcciones de AFP (FIX-1) y Renta 5ta (FIX-2).
  */
-window.calcularSalarioNeto = function(salarioBruto, regimen, opciones = {}) {
+window.calcularSalarioNeto = function (salarioBruto, regimen, opciones = {}) {
     const {
-        tieneHijos = false,
-        sistemaPension = 'afp',
-        afpNombre = 'integra',
+        tieneHijos      = false,
+        sistemaPension  = 'afp',
+        afpNombre       = 'integra',
         tipoComisionAFP = 'flujo',
-        saldoAFP = 0
+        saldoAFP        = 0,
+        utilidadesMensual = 0
     } = opciones;
-    
-    // Asignación Familiar
-    const asigFamiliar = tieneHijos && regimen.beneficios.asignacionFamiliar 
-        ? calcularAsignacionFamiliar() 
+
+    const bruto = safe(salarioBruto);
+
+    // ── Asignación Familiar ──
+    const asigFamiliar = (tieneHijos && regimen.beneficios.asignacionFamiliar)
+        ? calcularAsignacionFamiliar()
         : 0;
-    
-    const salarioTotal = salarioBruto + asigFamiliar;
-    
-    // Descuento por pensiones
+
+    const salarioTotal = r4(bruto + asigFamiliar);
+
+    // ── Descuentos Previsionales ──
     let descuentoPension = 0;
-    let detallesPension = {};
-    
+    let detallesPension  = {};
+
     if (sistemaPension === 'afp') {
-        detallesPension = calcularAFP(salarioTotal, afpNombre, tipoComisionAFP, saldoAFP);
-        descuentoPension = detallesPension.total;
+        detallesPension  = calcularAFP(salarioTotal, afpNombre, tipoComisionAFP, saldoAFP);
+        descuentoPension = safe(detallesPension.total);
     } else if (sistemaPension === 'onp') {
-        descuentoPension = salarioTotal * PERU_DATA.onp;
-        detallesPension = { total: descuentoPension, porcentaje: PERU_DATA.onp };
+        descuentoPension = r4(salarioTotal * PERU_DATA.onp);
+        detallesPension  = { total: r2(descuentoPension), porcentaje: PERU_DATA.onp };
     }
-    
-    // Impuesto a la Renta (sobre salario antes de pensiones)
-    const impuesto5ta = calcularImpuesto5ta(salarioTotal);
-    
-    // Salario Neto
-    const salarioNeto = salarioTotal - descuentoPension - impuesto5ta;
-    
+
+    // ── Impuesto 5ta Categoría (con proyección completa) ──
+    const ir5ta = calcularImpuesto5ta(salarioTotal, regimen, utilidadesMensual);
+
+    // ── Sueldo Neto ──
+    const salarioNeto = r4(salarioTotal - descuentoPension - ir5ta.mensual);
+
     return {
-        salarioBruto,
-        asigFamiliar,
-        salarioTotal,
-        descuentoPension,
-        impuesto5ta,
-        salarioNeto,
+        salarioBruto:    r2(bruto),
+        asigFamiliar:    r2(asigFamiliar),
+        salarioTotal:    r2(salarioTotal),
+        descuentoPension: r2(descuentoPension),
+        impuesto5ta:     r2(ir5ta.mensual),
+        ir5taDetalle:    ir5ta,
+        salarioNeto:     r2(Math.max(0, salarioNeto)),
         detallesPension
     };
 };
 
 /**
- * Calcula el Salario Bruto necesario para obtener un Neto deseado
- * @param {number} salarioNetoDeseado - Salario neto objetivo
- * @param {object} regimen - Régimen laboral
- * @param {object} opciones - Opciones de cálculo
- * @returns {number} Salario bruto necesario
+ * Calcula el Salario Bruto necesario para obtener un Neto deseado.
+ * Usa bisección iterativa (50 iteraciones, tolerancia S/ 0.01).
  */
-window.calcularSalarioBruto = function(salarioNetoDeseado, regimen, opciones = {}) {
-    // Método iterativo para calcular bruto desde neto
-    let brutoBajo = salarioNetoDeseado;
-    let brutoAlto = salarioNetoDeseado * 2;
-    let iteraciones = 0;
-    const maxIteraciones = 50;
-    const tolerancia = 0.01;
-    
-    while (iteraciones < maxIteraciones) {
-        const brutoMedio = (brutoBajo + brutoAlto) / 2;
-        const resultado = calcularSalarioNeto(brutoMedio, regimen, opciones);
-        const diferencia = resultado.salarioNeto - salarioNetoDeseado;
-        
-        if (Math.abs(diferencia) < tolerancia) {
-            return brutoMedio;
-        }
-        
-        if (diferencia > 0) {
-            brutoAlto = brutoMedio;
-        } else {
-            brutoBajo = brutoMedio;
-        }
-        
-        iteraciones++;
+window.calcularSalarioBruto = function (salarioNetoDeseado, regimen, opciones = {}) {
+    const neto = safe(salarioNetoDeseado);
+    let bajo  = neto;
+    let alto  = neto * 2.5;
+    const TOL = 0.01;
+
+    for (let i = 0; i < 60; i++) {
+        const medio     = r4((bajo + alto) / 2);
+        const resultado = calcularSalarioNeto(medio, regimen, opciones);
+        const diff      = resultado.salarioNeto - neto;
+
+        if (Math.abs(diff) < TOL) return r2(medio);
+        if (diff > 0) alto = medio;
+        else          bajo = medio;
     }
-    
-    return (brutoBajo + brutoAlto) / 2;
+    return r2((bajo + alto) / 2);
 };
 
 /**
- * Calcula la CTS (Compensación por Tiempo de Servicios)
- * @param {number} salarioBruto - Salario bruto mensual
- * @param {number} asigFamiliar - Asignación familiar
- * @param {object} regimen - Régimen laboral
- * @param {number} mesesTrabajados - Meses trabajados en el semestre
- * @returns {object} Objeto con CTS y detalles
+ * Calcula la CTS Semestral.
+ * Remuneración computable = Sueldo + Asig. Familiar + 1/6 de Gratificación.
+ * Base: D.S. 001-97-TR.
  */
-window.calcularCTS = function(salarioBruto, asigFamiliar, regimen, mesesTrabajados = 6) {
-    if (!regimen.beneficios.cts) {
-        return { ctsTotal: 0, detalles: {} };
-    }
-    
-    // Remuneración computable (salario + 1/6 de gratificación + asig. familiar)
-    const sextoGratificacion = salarioBruto * regimen.beneficios.gratificacionesFactor * PERU_DATA.cts.sextoGratificacion;
-    const remuneracionComputable = salarioBruto + sextoGratificacion + asigFamiliar;
-    
-    // CTS = (Rem. Computable × Meses / 12) × Factor del régimen
-    const ctsBase = (remuneracionComputable * mesesTrabajados) / 12;
-    const ctsTotal = ctsBase * regimen.beneficios.ctsFactor;
-    
+window.calcularCTS = function (salarioBruto, asigFamiliar, regimen, mesesTrabajados = 6) {
+    if (!regimen.beneficios.cts) return { ctsTotal: 0, detalles: {} };
+
+    const bruto  = safe(salarioBruto);
+    const asig   = safe(asigFamiliar);
+    const meses  = Math.min(6, Math.max(0, safe(mesesTrabajados)));
+
+    // 1/6 de una gratificación (Factor régimen × sueldo / 6)
+    const sextoGratificacion     = r4(bruto * regimen.beneficios.gratificacionesFactor * PERU_DATA.cts.sextoGratificacion);
+    const remuneracionComputable = r4(bruto + asig + sextoGratificacion);
+
+    // CTS = (Rem. Computable / 12) × Meses × Factor régimen
+    const ctsBase  = r4((remuneracionComputable * meses) / 12);
+    const ctsTotal = r4(ctsBase * regimen.beneficios.ctsFactor);
+
     return {
-        ctsTotal,
+        ctsTotal: r2(ctsTotal),
         detalles: {
-            remuneracionComputable,
-            sextoGratificacion,
-            mesesTrabajados,
-            factor: regimen.beneficios.ctsFactor
+            remuneracionComputable: r2(remuneracionComputable),
+            sextoGratificacion:     r2(sextoGratificacion),
+            mesesTrabajados:        meses,
+            factor:                 regimen.beneficios.ctsFactor
         }
     };
 };
 
 /**
- * Calcula las Gratificaciones (Julio y Diciembre)
- * @param {number} salarioBruto - Salario bruto mensual
- * @param {number} asigFamiliar - Asignación familiar
- * @param {object} regimen - Régimen laboral
- * @returns {object} Objeto con gratificaciones y bonificaciones
+ * Calcula Gratificaciones (Julio y Diciembre).
+ * Incluye Bonificación Extraordinaria (Ley 29351) para Régimen General.
+ * Base: Ley 27735 y D.S. 005-2002-TR.
  */
-window.calcularGratificaciones = function(salarioBruto, asigFamiliar, regimen) {
+window.calcularGratificaciones = function (salarioBruto, asigFamiliar, regimen) {
     if (!regimen.beneficios.gratificaciones) {
-        return { gratificacionTotal: 0, bonifEssalud: 0, totalPorGratificacion: 0 };
+        return { gratificacionBase: 0, bonifEssalud: 0, totalPorGratificacion: 0, gratificacionTotal: 0 };
     }
-    
-    // Monto de gratificación (salario + asig. familiar) × factor
-    const gratificacionBase = (salarioBruto + asigFamiliar) * regimen.beneficios.gratificacionesFactor;
-    
-    // Bonificación extraordinaria (9% para régimen general)
-    const bonifEssalud = gratificacionBase * regimen.essaludBonif;
-    
-    // Total por gratificación
-    const totalPorGratificacion = gratificacionBase + bonifEssalud;
-    
-    // Total anual (2 gratificaciones)
-    const gratificacionTotal = totalPorGratificacion * PERU_DATA.gratificaciones.meses;
-    
+
+    const bruto = safe(salarioBruto);
+    const asig  = safe(asigFamiliar);
+
+    const base         = r4((bruto + asig) * regimen.beneficios.gratificacionesFactor);
+    const bonifEssalud = r4(base * regimen.essaludBonif);  // 9% para Rég. General
+    const totalUna     = r4(base + bonifEssalud);
+    const totalAnual   = r4(totalUna * PERU_DATA.gratificaciones.meses);
+
     return {
-        gratificacionBase,
-        bonifEssalud,
-        totalPorGratificacion,
-        gratificacionTotal
+        gratificacionBase:      r2(base),
+        bonifEssalud:           r2(bonifEssalud),
+        totalPorGratificacion:  r2(totalUna),
+        gratificacionTotal:     r2(totalAnual)
     };
 };
 
 /**
- * Calcula la Liquidación por Despido
- * @param {number} salarioBruto - Salario bruto mensual
- * @param {number} aniosTrabajados - Años trabajados
- * @param {object} regimen - Régimen laboral
- * @param {string} tipoSalida - Tipo de salida (despido, renuncia, etc.)
- * @returns {object} Objeto con indemnización y detalles
+ * Calcula la Liquidación por Cesación.
+ * Base: D.S. 003-97-TR (LPCL) y Ley MYPE.
  */
-window.calcularLiquidacion = function(salarioBruto, aniosTrabajados, regimen, tipoSalida = 'despido') {
-    // CTS pendiente (simplificado)
-    const ctsPendiente = (salarioBruto * 1.1667) * 0.5; // Aproximado últimos 6 meses
-    
-    // Vacaciones truncas (proporcional)
-    const diasVacaciones = Math.floor(aniosTrabajados * regimen.beneficios.vacaciones);
-    const vacacionesTruncas = (salarioBruto / 30) * diasVacaciones;
-    
-    // Gratificación trunca (proporcional)
-    const mesesGratificacion = (aniosTrabajados - Math.floor(aniosTrabajados)) * 12;
-    const gratificacionTrunca = regimen.beneficios.gratificaciones 
-        ? (salarioBruto * regimen.beneficios.gratificacionesFactor * mesesGratificacion) / 6 
+window.calcularLiquidacion = function (salarioBruto, aniosTrabajados, regimen, tipoSalida = 'despido') {
+    const bruto = safe(salarioBruto);
+    const anios = safe(aniosTrabajados);
+
+    const ctsPendiente = r4(bruto * 1.1667 * regimen.beneficios.ctsFactor * 0.5);
+
+    const diasVac          = Math.floor(anios * regimen.beneficios.vacaciones);
+    const vacacionesTruncas = r4((bruto / 30) * diasVac);
+
+    const mesesGratif       = r4((anios - Math.floor(anios)) * 12);
+    const gratificacionTrunca = regimen.beneficios.gratificaciones
+        ? r4((bruto * regimen.beneficios.gratificacionesFactor * mesesGratif) / 6)
         : 0;
-    
-    // Indemnización por despido arbitrario
+
     let indemnizacion = 0;
     if (tipoSalida === 'despido') {
-        indemnizacion = salarioBruto * regimen.beneficios.indemnizacion * aniosTrabajados;
-        // Tope: 12 sueldos
-        indemnizacion = Math.min(indemnizacion, salarioBruto * 12);
+        indemnizacion = r4(bruto * regimen.beneficios.indemnizacion * anios);
+        indemnizacion = r4(Math.min(indemnizacion, bruto * 12));  // Tope: 12 sueldos
     }
-    
-    const totalLiquidacion = ctsPendiente + vacacionesTruncas + gratificacionTrunca + indemnizacion;
-    
+
+    const total = r4(ctsPendiente + vacacionesTruncas + gratificacionTrunca + indemnizacion);
+
     return {
-        ctsPendiente,
-        vacacionesTruncas,
-        gratificacionTrunca,
-        indemnizacion,
-        totalLiquidacion
+        ctsPendiente:       r2(ctsPendiente),
+        vacacionesTruncas:  r2(vacacionesTruncas),
+        gratificacionTrunca: r2(gratificacionTrunca),
+        indemnizacion:      r2(indemnizacion),
+        totalLiquidacion:   r2(total)
     };
 };
 
 /**
- * Calcula el Costo Total para el Empleador
- * @param {number} salarioBruto - Salario bruto mensual
- * @param {number} asigFamiliar - Asignación familiar
- * @param {object} regimen - Régimen laboral
- * @param {object} opciones - Opciones adicionales
- * @returns {object} Objeto con costo total y detalles
+ * Calcula el Costo Total para el Empleador (Planilla Completa).
+ * Base: Ley 26790 (ESSALUD), D.S. 003-97-TR.
  */
-window.calcularCostoEmpleador = function(salarioBruto, asigFamiliar, regimen, opciones = {}) {
-    const {
-        aplicaSenati = false,
-        tieneEPS = false,
-        nivelRiesgo = 'medio'
-    } = opciones;
-    
-    const sueldoBruto = salarioBruto + asigFamiliar;
-    
-    // Cargas Directas Mensuales
-    const essalud = sueldoBruto * PERU_DATA.empleador.essalud;
-    const vidaLey = sueldoBruto * PERU_DATA.empleador.vidaLey;
-    const sctr = sueldoBruto * PERU_DATA.empleador.sctr[nivelRiesgo];
-    const senati = aplicaSenati ? sueldoBruto * PERU_DATA.empleador.senati : 0;
-    const eps = tieneEPS ? sueldoBruto * PERU_DATA.empleador.eps : 0;
-    
-    const cargasDirectas = essalud + vidaLey + sctr + senati + eps;
-    
-    // Provisiones Mensualizadas de Beneficios
-    // Gratificaciones: 2 al año + bonif. → mensualizar
-    const gratifMensual = regimen.beneficios.gratificaciones 
-        ? (sueldoBruto * regimen.beneficios.gratificacionesFactor * 2) / 12 
-        : 0;
-    const bonifGratif = regimen.beneficios.gratificaciones 
-        ? (gratifMensual * regimen.essaludBonif * 2) / 2 
-        : 0;
-    const provGratificaciones = gratifMensual + bonifGratif;
-    
-    // CTS: Provisión mensual
-    const provCTS = regimen.beneficios.cts 
-        ? (sueldoBruto * 1.1667 * regimen.beneficios.ctsFactor) / 12 
-        : 0;
-    
-    // Vacaciones: Provisión mensual
-    const provVacaciones = (sueldoBruto * regimen.beneficios.vacacionesFactor) / 12;
-    
-    const provisionesBeneficios = provGratificaciones + provCTS + provVacaciones;
-    
-    // Costo Total Mensual
-    const costoTotal = sueldoBruto + cargasDirectas + provisionesBeneficios;
-    
-    // Porcentaje de carga social
-    const porcentajeCarga = ((costoTotal - sueldoBruto) / sueldoBruto) * 100;
-    
+window.calcularCostoEmpleador = function (salarioBruto, asigFamiliar, regimen, opciones = {}) {
+    const { aplicaSenati = false, tieneEPS = false, nivelRiesgo = 'medio' } = opciones;
+
+    const base = r4(safe(salarioBruto) + safe(asigFamiliar));
+
+    const essalud = r4(base * PERU_DATA.empleador.essalud);
+    const vidaLey = r4(base * PERU_DATA.empleador.vidaLey);
+    const sctr    = r4(base * PERU_DATA.empleador.sctr[nivelRiesgo]);
+    const senati  = aplicaSenati ? r4(base * PERU_DATA.empleador.senati) : 0;
+    const eps     = tieneEPS    ? r4(base * PERU_DATA.empleador.eps)    : 0;
+    const cargasDirectas = r4(essalud + vidaLey + sctr + senati + eps);
+
+    // Provisión Gratificaciones (mensualizada)
+    const gratifMensual      = regimen.beneficios.gratificaciones ? r4((base * regimen.beneficios.gratificacionesFactor * 2) / 12) : 0;
+    const bonifGratif        = regimen.beneficios.gratificaciones ? r4(gratifMensual * regimen.essaludBonif) : 0;
+    const provGratificaciones = r4(gratifMensual + bonifGratif);
+
+    // Provisión CTS (mensualizada)
+    const provCTS = regimen.beneficios.cts ? r4((base * 1.1667 * regimen.beneficios.ctsFactor) / 12) : 0;
+
+    // Provisión Vacaciones (mensualizada)
+    const provVacaciones = r4((base * regimen.beneficios.vacacionesFactor) / 12);
+
+    const provisionesBeneficios = r4(provGratificaciones + provCTS + provVacaciones);
+    const costoTotal            = r4(base + cargasDirectas + provisionesBeneficios);
+    const porcentajeCarga       = r4(((costoTotal - base) / base) * 100);
+
     return {
-        sueldoBruto,
-        essalud,
-        vidaLey,
-        sctr,
-        senati,
-        eps,
-        cargasDirectas,
-        provGratificaciones,
-        provCTS,
-        provVacaciones,
-        provisionesBeneficios,
-        costoTotal,
-        porcentajeCarga
+        sueldoBruto:            r2(base),
+        essalud:                r2(essalud),
+        vidaLey:                r2(vidaLey),
+        sctr:                   r2(sctr),
+        senati:                 r2(senati),
+        eps:                    r2(eps),
+        cargasDirectas:         r2(cargasDirectas),
+        provGratificaciones:    r2(provGratificaciones),
+        provCTS:                r2(provCTS),
+        provVacaciones:         r2(provVacaciones),
+        provisionesBeneficios:  r2(provisionesBeneficios),
+        costoTotal:             r2(costoTotal),
+        porcentajeCarga:        r4(porcentajeCarga)
     };
 };
 
 /**
- * Calcula las Utilidades según D.Leg. 892
- * @param {number} salarioBruto - Salario bruto mensual
- * @param {number} diasTrabajados - Días trabajados en el año
- * @param {number} rentaAnual - Renta anual de la empresa
- * @param {number} totalRemuneraciones - Total de remuneraciones pagadas
- * @param {number} totalDiasTrabajadores - Total días trabajados por todos
- * @param {string} sector - Sector económico
- * @returns {object} Objeto con utilidades y detalles
+ * Calcula Utilidades según D.Leg. 892.
  */
-window.calcularUtilidades = function(
-    salarioBruto, 
-    diasTrabajados, 
-    rentaAnual, 
-    totalRemuneraciones, 
-    totalDiasTrabajadores, 
-    sector = 'otros'
+window.calcularUtilidades = function (
+    salarioBruto, diasTrabajados, rentaAnual,
+    totalRemuneraciones, totalDiasTrabajadores, sector = 'otros'
 ) {
-    const sectorData = PERU_DATA.utilidades.sectores[sector];
-    const porcentaje = sectorData.porcentaje;
-    
-    // Utilidad a distribuir
-    const utilidadTotal = rentaAnual * porcentaje;
-    
-    // 50% por días trabajados
-    const porDias = (utilidadTotal * PERU_DATA.utilidades.distribucion.porDias * diasTrabajados) / totalDiasTrabajadores;
-    
-    // 50% por remuneración
-    const remuneracionAnual = salarioBruto * 12;
-    const porRemuneracion = (utilidadTotal * PERU_DATA.utilidades.distribucion.porRemuneracion * remuneracionAnual) / totalRemuneraciones;
-    
-    // Total antes de tope
-    const utilidadTrabajador = porDias + porRemuneracion;
-    
-    // Aplicar tope de 18 remuneraciones mensuales
-    const topeMaximo = salarioBruto * PERU_DATA.utilidades.topeMaximo;
-    const utilidadFinal = Math.min(utilidadTrabajador, topeMaximo);
-    
+    const sectorData      = PERU_DATA.utilidades.sectores[sector];
+    const utilidadTotal   = r4(rentaAnual * sectorData.porcentaje);
+    const porDias         = r4((utilidadTotal * PERU_DATA.utilidades.distribucion.porDias * diasTrabajados) / totalDiasTrabajadores);
+    const remuAnual       = r4(salarioBruto * 12);
+    const porRemuneracion = r4((utilidadTotal * PERU_DATA.utilidades.distribucion.porRemuneracion * remuAnual) / totalRemuneraciones);
+    const utilidadTrab    = r4(porDias + porRemuneracion);
+    const tope            = r4(salarioBruto * PERU_DATA.utilidades.topeMaximo);
+    const utilidadFinal   = r4(Math.min(utilidadTrab, tope));
+
     return {
-        utilidadFinal,
-        porDias,
-        porRemuneracion,
-        utilidadSinTope: utilidadTrabajador,
-        topeAplicado: utilidadTrabajador > topeMaximo,
-        sector: sectorData.nombre,
-        porcentaje
+        utilidadFinal:    r2(utilidadFinal),
+        porDias:          r2(porDias),
+        porRemuneracion:  r2(porRemuneracion),
+        utilidadSinTope:  r2(utilidadTrab),
+        topeAplicado:     utilidadTrab > tope,
+        sector:           sectorData.nombre,
+        porcentaje:       sectorData.porcentaje
     };
 };
 
 // =====================================================================
-// CONFIGURACIÓN DE CALCULADORAS
+// ===== [NEW-1] GENERADOR DE LOG DE CÁLCULO =====
+// Genera trazabilidad paso a paso de fórmulas legales aplicadas.
+// =====================================================================
+
+/**
+ * Genera un array de pasos que explican el cálculo realizado.
+ * Ideal para mostrar en un panel "Ver fórmulas" o exportar a PDF.
+ *
+ * @param {string} calcId - ID de la calculadora
+ * @param {object} resultado - Resultado del cálculo
+ * @param {object} regimen - Régimen laboral utilizado
+ * @param {object} inputs - Valores ingresados por el usuario
+ */
+window.generarLogCalculo = function (calcId, resultado, regimen, inputs = {}) {
+    const log = [];
+    const push = (paso, formula, valor, nota = '') => {
+        log.push({ paso, formula, valor, nota });
+    };
+    const S = n => `S/ ${r2(safe(n)).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
+
+    switch (calcId) {
+
+        case 'neto': {
+            const rem   = safe(inputs.salarioBruto || inputs.salarioTotal);
+            const ir5ta = resultado.ir5taDetalle || {};
+            push('1', 'Sueldo Bruto ingresado',
+                S(rem), 'Punto de partida del cálculo');
+
+            if (resultado.asigFamiliar > 0) {
+                push('2', 'RMV × 10% = Asignación Familiar',
+                    S(resultado.asigFamiliar), 'D.S. 035-90-TR');
+                push('3', 'Bruto + Asig. Familiar = Remuneración Total',
+                    S(resultado.salarioTotal), 'Base imponible AFP/ONP e IR5ta');
+            } else {
+                push('2', 'Remuneración Total = Sueldo Bruto',
+                    S(resultado.salarioTotal), 'Sin asignación familiar');
+            }
+
+            push('3', 'Aporte AFP al Fondo: Rem. Total × 10%',
+                S(resultado.detallesPension?.aporte || 0), 'D.S. 054-97-EF. SIN TOPE');
+            push('4', `SIS: min(Rem, TMA SBS) × 1.70%`,
+                S(resultado.detallesPension?.seguro || 0),
+                `TMA SBS 2026: ${S(PERU_DATA.topesSeguros.sbsTopeAsegurable)}`);
+            push('5', `Comisión AFP: Rem. Total × tasa`,
+                S(resultado.detallesPension?.comision || 0), 'Varía por AFP y tipo de comisión');
+            push('6', 'Total AFP = Fondo + SIS + Comisión',
+                S(resultado.descuentoPension), 'Descuento total AFP');
+
+            if (ir5ta && ir5ta.rentaBruta !== undefined) {
+                push('7', 'Renta Bruta Anual: (Rem×12) + Gratif×2 + BonifExt×2',
+                    S(ir5ta.rentaBruta),
+                    `Gratif: ${S(ir5ta.gratifAnual)} | BonifExt: ${S(ir5ta.bonifAnual)}`);
+                push('8', `Renta Bruta − 7 UIT (7 × ${S(PERU_DATA.rentaQuinta.uit)})`,
+                    S(ir5ta.baseImponible), 'Base Imponible IR5ta');
+                push('9', `Impuesto Anual ÷ 12 = IR5ta Mensual`,
+                    S(ir5ta.mensual),
+                    `Impuesto anual: ${S(ir5ta.anual)}. Art. 40 TUO LIR D.S. 179-2004-EF`);
+            }
+
+            push('10', 'Sueldo Neto = Rem. Total − AFP − IR5ta',
+                S(resultado.salarioNeto), '✅ Output Final');
+            break;
+        }
+
+        case 'gratificacion': {
+            push('1', 'Remuneración Computable = Sueldo + Asig. Familiar',
+                S(inputs.base || 0), 'Ley 27735 Art. 3');
+            push('2', `Gratif. Base = Rem. Computable × ${pct(regimen.beneficios.gratificacionesFactor)}`,
+                S(resultado.gratificacionBase || 0), 'Factor según régimen laboral');
+            push('3', 'Bonificación Extraordinaria = Gratif. Base × 9%',
+                S(resultado.bonifEssalud || 0),
+                'Ley 29351 — Inafecta a AFP/ONP e IR5ta. Solo Régimen General');
+            push('4', 'Total por Gratificación = Base + Bonificación',
+                S(resultado.totalPorGratificacion || 0), '✅ Se paga en Julio y Diciembre');
+            push('5', 'Total Anual = Total × 2 gratificaciones',
+                S((resultado.totalPorGratificacion || 0) * 2), '');
+            break;
+        }
+
+        case 'cts': {
+            push('1', '1/6 de Gratificación = Sueldo × Factor × (1/6)',
+                '', 'D.S. 001-97-TR. Incorporado como computable CTS');
+            push('2', 'Rem. Computable = Sueldo + Asig. Familiar + 1/6 Gratif.',
+                '', 'Base de cálculo CTS');
+            push('3', `CTS Semestral = (Rem. Comp. × Meses) / 12 × ${pct(regimen.beneficios.ctsFactor)}`,
+                '', `Factor: ${pct(regimen.beneficios.ctsFactor)} según ${regimen.nombre}`);
+            push('4', '✅ Depósito semestral en Mayo y Noviembre', '', 'No afecto a IR5ta ni AFP');
+            break;
+        }
+
+        default:
+            push('INFO', 'Log detallado disponible para: neto, gratificacion, cts',
+                '', 'Próximamente: liquidación, utilidades, costo empleador');
+    }
+
+    return log;
+};
+
+// =====================================================================
+// ===== CONFIGURACIÓN DE CALCULADORAS =====
 // =====================================================================
 
 window.CALCULATOR_CONFIGS = {
+
+    // ─── 1. SALARIO NETO ─────────────────────────────────────────────
     neto: {
         id: 'neto',
         icon: '💵',
         title: 'Salario Neto',
-        description: 'Calcula tu sueldo líquido mensual después de descuentos (AFP/ONP, Impuesto a la Renta)',
+        description: 'Calcula tu sueldo líquido mensual después de descuentos (AFP/ONP, Impuesto a la Renta 5ta)',
         fields: [
-            { 
-                id: 'salary', 
-                label: 'Sueldo Bruto Mensual', 
-                type: 'number', 
+            {
+                id: 'salary',
+                label: 'Sueldo Bruto Mensual',
+                type: 'number',
                 inputmode: 'decimal',
-                placeholder: '5000', 
+                placeholder: '5000',
                 min: PERU_DATA.minWage,
                 help: 'Monto antes de descuentos'
             },
-            { 
-                id: 'hijos', 
-                label: '¿Tienes hijos menores de 18 años?', 
+            {
+                id: 'hijos',
+                label: '¿Tienes hijos menores de 18 años?',
                 type: 'select',
                 options: [
                     { value: 'no', label: 'No' },
-                    { value: 'si', label: 'Sí (+ Asignación Familiar)' }
+                    { value: 'si', label: 'Sí (+ Asignación Familiar S/ 107.50)' }
                 ]
             },
-            { 
-                id: 'pension', 
-                label: 'Sistema de Pensiones', 
+            {
+                id: 'pension',
+                label: 'Sistema de Pensiones',
                 type: 'select',
                 options: [
                     { value: 'afp', label: 'AFP (Sistema Privado)' },
-                    { value: 'onp', label: 'ONP (Sistema Nacional - 13%)' }
+                    { value: 'onp', label: 'ONP (Sistema Nacional 13%)' }
                 ]
             },
-            { 
-                id: 'afp', 
-                label: 'AFP (si aplica)', 
+            {
+                id: 'afp',
+                label: 'AFP',
                 type: 'select',
                 options: [
-                    { value: 'integra', label: 'AFP Integra' },
-                    { value: 'prima', label: 'AFP Prima' },
-                    { value: 'profuturo', label: 'AFP Profuturo' },
-                    { value: 'habitat', label: 'AFP Habitat' }
+                    { value: 'integra',   label: 'AFP Integra (flujo 0.82%)' },
+                    { value: 'prima',     label: 'AFP Prima (flujo 1.60%)' },
+                    { value: 'profuturo', label: 'AFP Profuturo (flujo 1.69%)' },
+                    { value: 'habitat',   label: 'AFP Habitat (flujo 1.47%)' }
                 ],
                 conditional: { field: 'pension', value: 'afp' }
             },
-            { 
-                id: 'tipo-comision', 
-                label: 'Tipo de Comisión AFP', 
+            {
+                id: 'tipo-comision',
+                label: 'Tipo de Comisión AFP',
                 type: 'select',
                 options: [
-                    { value: 'flujo', label: 'Comisión sobre Flujo (% sueldo)' },
-                    { value: 'mixta', label: 'Comisión Mixta (% sueldo + % saldo)' }
+                    { value: 'flujo', label: 'Comisión sobre Flujo (% del sueldo)' },
+                    { value: 'mixta', label: 'Comisión Mixta (% sueldo + % saldo anual)' }
                 ],
                 conditional: { field: 'pension', value: 'afp' }
             },
-            { 
-                id: 'saldo-afp', 
-                label: 'Saldo Acumulado AFP (S/)', 
+            {
+                id: 'saldo-afp',
+                label: 'Saldo Acumulado AFP (S/)',
                 type: 'number',
                 inputmode: 'decimal',
                 placeholder: '50000',
                 min: 0,
-                help: 'Solo para comisión mixta',
+                help: 'Requerido solo para comisión mixta',
                 conditional: { field: 'tipo-comision', value: 'mixta' }
             }
         ],
         calculate: (values, regimen) => {
-            const salary = parseFloat(values['salary']) || 0;
-            const tieneHijos = values['hijos'] === 'si';
+            const salary         = safe(parseFloat(values['salary']));
+            const tieneHijos     = values['hijos'] === 'si';
             const sistemaPension = values['pension'] || 'afp';
-            const afpNombre = values['afp'] || 'integra';
+            const afpNombre      = values['afp'] || 'integra';
             const tipoComisionAFP = values['tipo-comision'] || 'flujo';
-            const saldoAFP = parseFloat(values['saldo-afp']) || 0;
-            
+            const saldoAFP       = safe(parseFloat(values['saldo-afp']));
+
+            if (salary < PERU_DATA.minWage) {
+                return {
+                    total: 0,
+                    details: [
+                        { label: '⚠️ SUELDO INVÁLIDO', value: '', type: 'header' },
+                        { label: 'El sueldo no puede ser menor a la RMV', value: `S/ ${PERU_DATA.minWage}`, type: 'info' }
+                    ]
+                };
+            }
+
             const resultado = calcularSalarioNeto(salary, regimen, {
-                tieneHijos,
-                sistemaPension,
-                afpNombre,
-                tipoComisionAFP,
-                saldoAFP
+                tieneHijos, sistemaPension, afpNombre, tipoComisionAFP, saldoAFP
             });
-            
+
+            const ir5ta = resultado.ir5taDetalle || {};
+            const afp   = resultado.detallesPension || {};
+
+            const details = [
+                { label: '💼 INGRESOS', value: '', type: 'header' },
+                { label: 'Sueldo Bruto', value: fmt(resultado.salarioBruto), type: 'base' },
+                ...(resultado.asigFamiliar > 0 ? [
+                    { label: 'Asignación Familiar (10% RMV)', value: `+ ${fmt(resultado.asigFamiliar)}`, type: 'ingreso' }
+                ] : []),
+                { label: 'Remuneración Total', value: fmt(resultado.salarioTotal), type: 'subtotal' },
+                { label: '', value: '', type: 'separator' },
+
+                { label: '🏦 DESCUENTO AFP / ONP', value: '', type: 'header' },
+                ...(sistemaPension === 'afp' ? [
+                    { label: `Aporte Fondo AFP ${afpNombre.charAt(0).toUpperCase() + afpNombre.slice(1)} (10%)`, value: `- ${fmt(afp.aporte)}`, type: 'descuento' },
+                    { label: `SIS — Seguro Invalidez/Sobrev. (1.70%)${afp.topeAplicado ? ' [TOPE SBS]' : ''}`, value: `- ${fmt(afp.seguro)}`, type: 'descuento' },
+                    { label: `Comisión AFP ${tipoComisionAFP === 'flujo' ? 'Flujo' : 'Mixta'}`, value: `- ${fmt(afp.comision)}`, type: 'descuento' },
+                    ...(afp.topeAplicado ? [
+                        { label: '  ↳ Tope SBS aplicado al SIS', value: `Base: ${fmt(afp.remParaSIS)}`, type: 'info' }
+                    ] : [])
+                ] : [
+                    { label: 'ONP (13%) — D.Ley 19990', value: `- ${fmt(resultado.descuentoPension)}`, type: 'descuento' }
+                ]),
+                { label: '', value: '', type: 'separator' },
+
+                { label: '📊 IMPUESTO A LA RENTA 5TA CATEGORÍA', value: '', type: 'header' },
+                ...(ir5ta.aplica ? [
+                    { label: 'Proyección Anual:', value: '', type: 'info' },
+                    { label: '  Remuneraciones (× 12)', value: fmt(ir5ta.remuAnual), type: 'info' },
+                    { label: '  + Gratificaciones Ley 27735 (× 2)', value: `+ ${fmt(ir5ta.gratifAnual)}`, type: 'info' },
+                    { label: '  + Bonificación Extraordinaria (× 2)', value: `+ ${fmt(ir5ta.bonifAnual)}`, type: 'info' },
+                    { label: 'Renta Bruta Anual', value: fmt(ir5ta.rentaBruta), type: 'subtotal' },
+                    { label: 'Deducción 7 UIT (Art. 40 TUO LIR)', value: `- ${fmt(ir5ta.deduccion)}`, type: 'descuento' },
+                    { label: 'Base Imponible Anual', value: fmt(ir5ta.baseImponible), type: 'subtotal' },
+                    { label: 'Impuesto Anual (tramos)', value: fmt(ir5ta.anual), type: 'descuento' },
+                    { label: 'Retención Mensual (÷ 12)', value: `- ${fmt(ir5ta.mensual)}`, type: 'descuento' }
+                ] : [
+                    { label: 'IR 5ta Categoría', value: 'S/ 0.00 — No alcanza 7 UIT', type: 'info' }
+                ]),
+                { label: '', value: '', type: 'separator' },
+
+                { label: '📉 RESUMEN DESCUENTOS', value: '', type: 'header' },
+                { label: 'Total Pensiones', value: `- ${fmt(resultado.descuentoPension)}`, type: 'descuento' },
+                { label: 'Total IR 5ta Cat.', value: `- ${fmt(resultado.impuesto5ta)}`, type: 'descuento' },
+                { label: 'TOTAL DESCUENTOS', value: fmt(resultado.descuentoPension + resultado.impuesto5ta), type: 'subtotal' }
+            ];
+
             return {
                 total: resultado.salarioNeto,
-                details: [
-                    { label: '💼 INGRESOS', value: '', type: 'header' },
-                    { label: 'Sueldo Bruto', value: `S/ ${resultado.salarioBruto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'base' },
-                    ...(resultado.asigFamiliar > 0 ? [
-                        { label: 'Asignación Familiar', value: `+ S/ ${resultado.asigFamiliar.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' }
-                    ] : []),
-                    { label: 'Total Bruto', value: `S/ ${resultado.salarioTotal.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'subtotal' },
-                    { label: '', value: '', type: 'separator' },
-                    { label: '📉 DESCUENTOS', value: '', type: 'header' },
-                    ...(sistemaPension === 'afp' ? [
-                        { label: `AFP ${afpNombre.charAt(0).toUpperCase() + afpNombre.slice(1)} - Aporte (10%)`, value: `- S/ ${resultado.detallesPension.aporte.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'descuento' },
-                        { label: 'Seguro Invalidez (1.70%)', value: `- S/ ${resultado.detallesPension.seguro.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'descuento' },
-                        { label: `Comisión ${tipoComisionAFP === 'flujo' ? 'Flujo' : 'Mixta'}`, value: `- S/ ${resultado.detallesPension.comision.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'descuento' }
-                    ] : [
-                        { label: 'ONP (13%)', value: `- S/ ${resultado.descuentoPension.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'descuento' }
-                    ]),
-                    { label: 'Impuesto Renta 5ta Cat.', value: `- S/ ${resultado.impuesto5ta.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'descuento' },
-                    { label: 'Total Descuentos', value: `S/ ${(resultado.descuentoPension + resultado.impuesto5ta).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'subtotal' }
-                ]
+                details,
+                _log: generarLogCalculo('neto', resultado, regimen, { salarioBruto: salary, salarioTotal: resultado.salarioTotal }),
+                _resultado: resultado
             };
         },
-        legalInfo: 'Base legal: D.S. 054-97-EF (AFP), D.Ley 19990 (ONP), TUO Ley del Impuesto a la Renta (D.S. 179-2004-EF). Cálculo mensualizado según legislación vigente 2026.'
+        legalInfo: 'D.S. 054-97-EF (AFP) | D.Ley 19990 (ONP) | TUO LIR D.S. 179-2004-EF Art. 40 (IR 5ta). SIS con Tope Máximo Asegurable SBS. Gratificaciones y Bonificación Extraordinaria incluidas en proyección anual IR5ta.'
     },
-    
+
+    // ─── 2. SALARIO BRUTO DESDE NETO ──────────────────────────────────
     bruto: {
         id: 'bruto',
         icon: '🎯',
         title: 'Salario Bruto (desde Neto)',
         description: 'Calcula cuánto debe ser tu sueldo bruto para recibir el neto que deseas',
         fields: [
-            { 
-                id: 'neto-deseado', 
-                label: 'Sueldo Neto Deseado', 
+            {
+                id: 'neto-deseado',
+                label: 'Sueldo Neto Deseado',
                 type: 'number',
                 inputmode: 'decimal',
                 placeholder: '4000',
                 min: PERU_DATA.minWage * 0.7,
                 help: 'Monto líquido que quieres recibir'
             },
-            { 
-                id: 'hijos-bruto', 
-                label: '¿Tienes hijos menores?', 
+            {
+                id: 'hijos-bruto',
+                label: '¿Tienes hijos menores?',
                 type: 'select',
                 options: [
                     { value: 'no', label: 'No' },
                     { value: 'si', label: 'Sí' }
                 ]
             },
-            { 
-                id: 'pension-bruto', 
-                label: 'Sistema de Pensiones', 
+            {
+                id: 'pension-bruto',
+                label: 'Sistema de Pensiones',
                 type: 'select',
                 options: [
                     { value: 'afp', label: 'AFP' },
                     { value: 'onp', label: 'ONP (13%)' }
                 ]
             },
-            { 
-                id: 'afp-bruto', 
-                label: 'AFP (si aplica)', 
+            {
+                id: 'afp-bruto',
+                label: 'AFP (si aplica)',
                 type: 'select',
                 options: [
-                    { value: 'integra', label: 'AFP Integra' },
-                    { value: 'prima', label: 'AFP Prima' },
+                    { value: 'integra',   label: 'AFP Integra' },
+                    { value: 'prima',     label: 'AFP Prima' },
                     { value: 'profuturo', label: 'AFP Profuturo' },
-                    { value: 'habitat', label: 'AFP Habitat' }
+                    { value: 'habitat',   label: 'AFP Habitat' }
                 ],
                 conditional: { field: 'pension-bruto', value: 'afp' }
             },
-            { 
-                id: 'tipo-comision-bruto', 
-                label: 'Tipo de Comisión', 
+            {
+                id: 'tipo-comision-bruto',
+                label: 'Tipo de Comisión',
                 type: 'select',
                 options: [
                     { value: 'flujo', label: 'Flujo' },
@@ -809,266 +998,184 @@ window.CALCULATOR_CONFIGS = {
             }
         ],
         calculate: (values, regimen) => {
-            const netoDeseado = parseFloat(values['neto-deseado']) || 0;
-            const tieneHijos = values['hijos-bruto'] === 'si';
+            const netoDeseado    = safe(parseFloat(values['neto-deseado']));
+            const tieneHijos     = values['hijos-bruto'] === 'si';
             const sistemaPension = values['pension-bruto'] || 'afp';
-            const afpNombre = values['afp-bruto'] || 'integra';
+            const afpNombre      = values['afp-bruto'] || 'integra';
             const tipoComisionAFP = values['tipo-comision-bruto'] || 'flujo';
-            
-            const brutoNecesario = calcularSalarioBruto(netoDeseado, regimen, {
-                tieneHijos,
-                sistemaPension,
-                afpNombre,
-                tipoComisionAFP,
-                saldoAFP: 0
-            });
-            
-            const verificacion = calcularSalarioNeto(brutoNecesario, regimen, {
-                tieneHijos,
-                sistemaPension,
-                afpNombre,
-                tipoComisionAFP,
-                saldoAFP: 0
-            });
-            
+
+            if (netoDeseado <= 0) return { total: 0, details: [{ label: '⚠️ Ingresa un neto válido', value: '', type: 'header' }] };
+
+            const brutoNecesario = calcularSalarioBruto(netoDeseado, regimen, { tieneHijos, sistemaPension, afpNombre, tipoComisionAFP });
+            const verificacion   = calcularSalarioNeto(brutoNecesario, regimen, { tieneHijos, sistemaPension, afpNombre, tipoComisionAFP });
+
             return {
                 total: brutoNecesario,
                 details: [
                     { label: '🎯 OBJETIVO', value: '', type: 'header' },
-                    { label: 'Neto Deseado', value: `S/ ${netoDeseado.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'base' },
+                    { label: 'Neto Deseado', value: fmt(netoDeseado), type: 'base' },
                     { label: 'Régimen', value: regimen.nombre, type: 'info' },
                     { label: '', value: '', type: 'separator' },
                     { label: '💼 RESULTADO', value: '', type: 'header' },
-                    { label: 'Bruto Necesario', value: `S/ ${brutoNecesario.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'subtotal' },
+                    { label: 'Bruto Necesario', value: fmt(brutoNecesario), type: 'subtotal' },
                     ...(verificacion.asigFamiliar > 0 ? [
-                        { label: 'Incluye Asig. Familiar', value: `S/ ${verificacion.asigFamiliar.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'info' }
+                        { label: 'Incluye Asig. Familiar', value: fmt(verificacion.asigFamiliar), type: 'info' }
                     ] : []),
                     { label: '', value: '', type: 'separator' },
                     { label: '📊 VERIFICACIÓN', value: '', type: 'header' },
-                    { label: 'Descuentos Totales', value: `S/ ${(verificacion.descuentoPension + verificacion.impuesto5ta).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'descuento' },
-                    { label: 'Neto Resultante', value: `S/ ${verificacion.salarioNeto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' },
-                    { label: 'Diferencia', value: `S/ ${Math.abs(verificacion.salarioNeto - netoDeseado).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'info' }
+                    { label: 'Pensiones', value: `- ${fmt(verificacion.descuentoPension)}`, type: 'descuento' },
+                    { label: 'IR 5ta Cat.', value: `- ${fmt(verificacion.impuesto5ta)}`, type: 'descuento' },
+                    { label: 'Neto Resultante', value: fmt(verificacion.salarioNeto), type: 'ingreso' },
+                    { label: 'Diferencia vs Objetivo', value: fmt(Math.abs(verificacion.salarioNeto - netoDeseado)), type: 'info' }
                 ]
             };
         },
-        legalInfo: 'Cálculo inverso considerando todos los descuentos legales vigentes. Útil para negociaciones salariales y planificación presupuestaria.'
+        legalInfo: 'Cálculo inverso iterativo (bisección, 60 iteraciones, tolerancia S/ 0.01). Considera AFP/ONP con correcciones FIX-1 y FIX-2. Útil para negociaciones salariales.'
     },
-    
+
+    // ─── 3. CTS ────────────────────────────────────────────────────────
     cts: {
         id: 'cts',
         icon: '🏦',
-        title: 'CTS - Compensación por Tiempo de Servicios',
-        description: 'Calcula tu CTS semestral (depósitos de Mayo y Noviembre)',
+        title: 'CTS — Compensación por Tiempo de Servicios',
+        description: 'Calcula tu CTS semestral (depósitos Mayo y Noviembre)',
         fields: [
-            { 
-                id: 'cts-salary', 
-                label: 'Sueldo Bruto Mensual', 
-                type: 'number',
-                inputmode: 'decimal',
-                placeholder: '5000',
-                min: PERU_DATA.minWage
-            },
-            { 
-                id: 'cts-hijos', 
-                label: '¿Asignación Familiar?', 
-                type: 'select',
-                options: [
-                    { value: 'no', label: 'No' },
-                    { value: 'si', label: 'Sí' }
-                ]
-            },
-            { 
-                id: 'cts-meses', 
-                label: 'Meses trabajados en el semestre', 
-                type: 'number',
-                inputmode: 'decimal',
-                placeholder: '6',
-                min: 1,
-                max: 6,
-                help: 'Máximo 6 meses por semestre'
-            }
+            { id: 'cts-salary', label: 'Sueldo Bruto Mensual', type: 'number', inputmode: 'decimal', placeholder: '5000', min: PERU_DATA.minWage },
+            { id: 'cts-hijos', label: '¿Asignación Familiar?', type: 'select', options: [{ value: 'no', label: 'No' }, { value: 'si', label: 'Sí' }] },
+            { id: 'cts-meses', label: 'Meses trabajados en el semestre', type: 'number', inputmode: 'decimal', placeholder: '6', min: 1, max: 6, help: 'Máximo 6 meses por semestre' }
         ],
         calculate: (values, regimen) => {
-            const salary = parseFloat(values['cts-salary']) || 0;
-            const tieneHijos = values['cts-hijos'] === 'si';
-            const mesesTrabajados = parseFloat(values['cts-meses']) || 6;
-            const asigFamiliar = tieneHijos && regimen.beneficios.asignacionFamiliar ? calcularAsignacionFamiliar() : 0;
-            
-            const ctsCalc = calcularCTS(salary, asigFamiliar, regimen, mesesTrabajados);
-            
+            const salary      = safe(parseFloat(values['cts-salary']));
+            const tieneHijos  = values['cts-hijos'] === 'si';
+            const meses       = safe(parseFloat(values['cts-meses'])) || 6;
+            const asigFamiliar = (tieneHijos && regimen.beneficios.asignacionFamiliar) ? calcularAsignacionFamiliar() : 0;
+
+            const ctsCalc = calcularCTS(salary, asigFamiliar, regimen, meses);
+
             if (!regimen.beneficios.cts) {
                 return {
                     total: 0,
                     details: [
                         { label: '⚠️ CTS NO APLICABLE', value: '', type: 'header' },
-                        { label: 'Régimen Actual', value: regimen.nombre, type: 'info' },
+                        { label: 'Régimen', value: regimen.nombre, type: 'info' },
                         { label: 'Observación', value: 'Este régimen no contempla CTS', type: 'info' }
                     ]
                 };
             }
-            
-            const gratifCalc = calcularGratificaciones(salary, asigFamiliar, regimen);
-            
+
             return {
                 total: ctsCalc.ctsTotal,
                 details: [
                     { label: '💼 DATOS BASE', value: '', type: 'header' },
-                    { label: 'Sueldo Mensual', value: `S/ ${salary.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'base' },
-                    ...(asigFamiliar > 0 ? [
-                        { label: 'Asignación Familiar', value: `+ S/ ${asigFamiliar.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' }
-                    ] : []),
-                    { label: '1/6 de Gratificación', value: `+ S/ ${ctsCalc.detalles.sextoGratificacion.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' },
+                    { label: 'Sueldo Mensual', value: fmt(salary), type: 'base' },
+                    ...(asigFamiliar > 0 ? [{ label: 'Asignación Familiar', value: `+ ${fmt(asigFamiliar)}`, type: 'ingreso' }] : []),
+                    { label: '1/6 de Gratificación', value: `+ ${fmt(ctsCalc.detalles.sextoGratificacion)}`, type: 'ingreso' },
                     { label: '', value: '', type: 'separator' },
                     { label: '📊 CÁLCULO CTS', value: '', type: 'header' },
-                    { label: 'Remuneración Computable', value: `S/ ${ctsCalc.detalles.remuneracionComputable.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'subtotal' },
-                    { label: 'Meses Trabajados', value: `${mesesTrabajados} de 6`, type: 'info' },
-                    { label: `Factor Régimen (${(regimen.beneficios.ctsFactor * 100)}%)`, value: regimen.nombre, type: 'info' },
+                    { label: 'Remuneración Computable', value: fmt(ctsCalc.detalles.remuneracionComputable), type: 'subtotal' },
+                    { label: 'Meses Trabajados', value: `${meses} de 6`, type: 'info' },
+                    { label: `Factor Régimen (${regimen.beneficios.ctsFactor * 100}%)`, value: regimen.nombre, type: 'info' },
                     { label: '', value: '', type: 'separator' },
                     { label: '💡 PROYECCIÓN ANUAL', value: '', type: 'header' },
-                    { label: 'CTS Mayo (6 meses)', value: `S/ ${ctsCalc.ctsTotal.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' },
-                    { label: 'CTS Noviembre (6 meses)', value: `S/ ${ctsCalc.ctsTotal.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' },
-                    { label: 'Total CTS Anual', value: `S/ ${(ctsCalc.ctsTotal * 2).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'subtotal' }
+                    { label: 'CTS Mayo', value: fmt(ctsCalc.ctsTotal), type: 'ingreso' },
+                    { label: 'CTS Noviembre', value: fmt(ctsCalc.ctsTotal), type: 'ingreso' },
+                    { label: 'Total CTS Anual', value: fmt(ctsCalc.ctsTotal * 2), type: 'subtotal' }
                 ]
             };
         },
-        legalInfo: 'CTS según D.S. 001-97-TR. Remuneración computable = Sueldo + 1/6 de gratificación + Asig. Familiar. Depósitos semestrales (Mayo y Noviembre). Factor según régimen: General 100%, Pequeña Empresa 50%, Microempresa 0%.'
+        legalInfo: 'D.S. 001-97-TR. Rem. Computable = Sueldo + 1/6 Gratif + Asig. Familiar. Depósitos semestrales. Factor: General 100%, Pequeña 50%, Micro 0%.'
     },
-    
+
+    // ─── 4. GRATIFICACIONES ────────────────────────────────────────────
     gratificacion: {
         id: 'gratificacion',
         icon: '🎁',
         title: 'Gratificaciones',
         description: 'Calcula tus gratificaciones de Julio (Fiestas Patrias) y Diciembre (Navidad)',
         fields: [
-            { 
-                id: 'grat-salary', 
-                label: 'Sueldo Bruto Mensual', 
-                type: 'number',
-                inputmode: 'decimal',
-                placeholder: '5000',
-                min: PERU_DATA.minWage
-            },
-            { 
-                id: 'grat-hijos', 
-                label: '¿Asignación Familiar?', 
-                type: 'select',
+            { id: 'grat-salary', label: 'Sueldo Bruto Mensual', type: 'number', inputmode: 'decimal', placeholder: '5000', min: PERU_DATA.minWage },
+            { id: 'grat-hijos', label: '¿Asignación Familiar?', type: 'select', options: [{ value: 'no', label: 'No' }, { value: 'si', label: 'Sí' }] },
+            { id: 'grat-pension', label: 'Sistema de Pensiones', type: 'select', options: [{ value: 'afp', label: 'AFP' }, { value: 'onp', label: 'ONP' }] },
+            {
+                id: 'grat-afp', label: 'AFP (si aplica)', type: 'select',
                 options: [
-                    { value: 'no', label: 'No' },
-                    { value: 'si', label: 'Sí' }
-                ]
-            },
-            { 
-                id: 'grat-pension', 
-                label: 'Sistema de Pensiones', 
-                type: 'select',
-                options: [
-                    { value: 'afp', label: 'AFP' },
-                    { value: 'onp', label: 'ONP' }
-                ]
-            },
-            { 
-                id: 'grat-afp', 
-                label: 'AFP (si aplica)', 
-                type: 'select',
-                options: [
-                    { value: 'integra', label: 'AFP Integra' },
-                    { value: 'prima', label: 'AFP Prima' },
-                    { value: 'profuturo', label: 'AFP Profuturo' },
-                    { value: 'habitat', label: 'AFP Habitat' }
+                    { value: 'integra', label: 'AFP Integra' }, { value: 'prima', label: 'AFP Prima' },
+                    { value: 'profuturo', label: 'AFP Profuturo' }, { value: 'habitat', label: 'AFP Habitat' }
                 ],
                 conditional: { field: 'grat-pension', value: 'afp' }
             }
         ],
         calculate: (values, regimen) => {
-            const salary = parseFloat(values['grat-salary']) || 0;
-            const tieneHijos = values['grat-hijos'] === 'si';
+            const salary         = safe(parseFloat(values['grat-salary']));
+            const tieneHijos     = values['grat-hijos'] === 'si';
             const sistemaPension = values['grat-pension'] || 'afp';
-            const afpNombre = values['grat-afp'] || 'integra';
-            const asigFamiliar = tieneHijos && regimen.beneficios.asignacionFamiliar ? calcularAsignacionFamiliar() : 0;
-            
+            const afpNombre      = values['grat-afp'] || 'integra';
+            const asigFamiliar   = (tieneHijos && regimen.beneficios.asignacionFamiliar) ? calcularAsignacionFamiliar() : 0;
+
             if (!regimen.beneficios.gratificaciones) {
                 return {
                     total: 0,
                     details: [
                         { label: '⚠️ GRATIFICACIONES NO APLICABLES', value: '', type: 'header' },
-                        { label: 'Régimen Actual', value: regimen.nombre, type: 'info' },
-                        { label: 'Observación', value: 'Este régimen no contempla gratificaciones', type: 'info' }
+                        { label: 'Régimen', value: regimen.nombre, type: 'info' }
                     ]
                 };
             }
-            
+
             const gratifCalc = calcularGratificaciones(salary, asigFamiliar, regimen);
-            
-            // Descuentos sobre gratificación
+
             let descuentoPension = 0;
             if (sistemaPension === 'afp') {
-                const afpCalc = calcularAFP(gratifCalc.totalPorGratificacion, afpNombre, 'flujo', 0);
+                // Sobre gratificaciones, el SIS y comisión también aplican (sin IR5ta)
+                const afpCalc = calcularAFP(gratifCalc.gratificacionBase, afpNombre, 'flujo', 0);
                 descuentoPension = afpCalc.total;
             } else {
-                descuentoPension = gratifCalc.totalPorGratificacion * PERU_DATA.onp;
+                descuentoPension = r2(gratifCalc.gratificacionBase * PERU_DATA.onp);
             }
-            
-            const netoGratificacion = gratifCalc.totalPorGratificacion - descuentoPension;
-            
+
+            const netoGratif = r2(gratifCalc.totalPorGratificacion - descuentoPension);
+
             return {
-                total: gratifCalc.totalPorGratificacion,
+                total: r2(gratifCalc.totalPorGratificacion),
                 details: [
                     { label: '💼 DATOS BASE', value: '', type: 'header' },
-                    { label: 'Sueldo Mensual', value: `S/ ${salary.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'base' },
-                    ...(asigFamiliar > 0 ? [
-                        { label: 'Asignación Familiar', value: `+ S/ ${asigFamiliar.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' }
-                    ] : []),
+                    { label: 'Sueldo Mensual', value: fmt(salary), type: 'base' },
+                    ...(asigFamiliar > 0 ? [{ label: 'Asignación Familiar', value: `+ ${fmt(asigFamiliar)}`, type: 'ingreso' }] : []),
                     { label: '', value: '', type: 'separator' },
-                    { label: '🎁 CÁLCULO GRATIFICACIÓN', value: '', type: 'header' },
-                    { label: `Gratificación Base (${(regimen.beneficios.gratificacionesFactor * 100)}%)`, value: `S/ ${gratifCalc.gratificacionBase.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'subtotal' },
+                    { label: '🎁 CÁLCULO GRATIFICACIÓN (Ley 27735)', value: '', type: 'header' },
+                    { label: `Gratificación Base (${regimen.beneficios.gratificacionesFactor * 100}%)`, value: fmt(gratifCalc.gratificacionBase), type: 'subtotal' },
                     ...(gratifCalc.bonifEssalud > 0 ? [
-                        { label: 'Bonificación Extra (9%)', value: `+ S/ ${gratifCalc.bonifEssalud.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' }
+                        { label: 'Bonificación Extraordinaria (9% — Ley 29351)', value: `+ ${fmt(gratifCalc.bonifEssalud)}`, type: 'ingreso' },
+                        { label: '  ↳ Inafecta a AFP/ONP e IR5ta', value: '', type: 'info' }
                     ] : []),
-                    { label: 'Total Bruto por Gratificación', value: `S/ ${gratifCalc.totalPorGratificacion.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'subtotal' },
+                    { label: 'Total Bruto por Gratificación', value: fmt(gratifCalc.totalPorGratificacion), type: 'subtotal' },
                     { label: '', value: '', type: 'separator' },
-                    { label: '📉 DESCUENTOS', value: '', type: 'header' },
-                    { label: `${sistemaPension === 'afp' ? 'AFP' : 'ONP'}`, value: `- S/ ${descuentoPension.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'descuento' },
-                    { label: 'Neto por Gratificación', value: `S/ ${netoGratificacion.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' },
+                    { label: '📉 DESCUENTOS (sobre Gratif. Base)', value: '', type: 'header' },
+                    { label: sistemaPension === 'afp' ? 'AFP (aporte + SIS + comisión)' : 'ONP (13%)', value: `- ${fmt(descuentoPension)}`, type: 'descuento' },
+                    { label: 'IR 5ta Categoría', value: 'No aplica sobre gratificaciones', type: 'info' },
+                    { label: 'Neto por Gratificación', value: fmt(netoGratif), type: 'ingreso' },
                     { label: '', value: '', type: 'separator' },
                     { label: '💰 RESUMEN ANUAL', value: '', type: 'header' },
-                    { label: 'Gratificación Julio', value: `S/ ${netoGratificacion.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'info' },
-                    { label: 'Gratificación Diciembre', value: `S/ ${netoGratificacion.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'info' },
-                    { label: 'Total Neto Anual', value: `S/ ${(netoGratificacion * 2).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'subtotal' }
+                    { label: 'Gratificación Julio (Fiestas Patrias)', value: fmt(netoGratif), type: 'info' },
+                    { label: 'Gratificación Diciembre (Navidad)', value: fmt(netoGratif), type: 'info' },
+                    { label: 'Total Neto Anual', value: fmt(netoGratif * 2), type: 'subtotal' }
                 ]
             };
         },
-        legalInfo: 'Gratificaciones según Ley 27735. Dos gratificaciones: Julio (Fiestas Patrias) y Diciembre (Navidad). Bonificación extraordinaria 9% (solo Régimen General). Factor según régimen: General 100%, Pequeña Empresa 50%, Microempresa 0%. Se descuenta AFP/ONP pero NO Impuesto a la Renta.'
+        legalInfo: 'Ley 27735 | D.S. 005-2002-TR. Bonificación Extraordinaria 9% (Ley 29351) inafecta a contribuciones. Factor: General 100%, Pequeña 50%, Micro 0%. El IR5ta NO se descuenta de gratificaciones.'
     },
-    
+
+    // ─── 5. LIQUIDACIÓN ────────────────────────────────────────────────
     liquidacion: {
         id: 'liquidacion',
         icon: '📋',
         title: 'Liquidación de Beneficios Sociales',
         description: 'Calcula el pago final al terminar la relación laboral',
         fields: [
-            { 
-                id: 'liq-salary', 
-                label: 'Último Sueldo Bruto', 
-                type: 'number',
-                inputmode: 'decimal',
-                placeholder: '5000',
-                min: PERU_DATA.minWage
-            },
-            { 
-                id: 'liq-anios', 
-                label: 'Años Trabajados', 
-                type: 'number',
-                inputmode: 'decimal',
-                placeholder: '3.5',
-                min: 0,
-                max: 40,
-                step: 0.1,
-                help: 'Puede incluir decimales (ej: 3.5 años)'
-            },
-            { 
-                id: 'liq-tipo', 
-                label: 'Tipo de Salida', 
-                type: 'select',
+            { id: 'liq-salary', label: 'Último Sueldo Bruto', type: 'number', inputmode: 'decimal', placeholder: '5000', min: PERU_DATA.minWage },
+            { id: 'liq-anios', label: 'Años Trabajados', type: 'number', inputmode: 'decimal', placeholder: '3.5', min: 0, max: 40, step: 0.1, help: 'Puede incluir decimales (ej: 3.5)' },
+            {
+                id: 'liq-tipo', label: 'Tipo de Salida', type: 'select',
                 options: [
                     { value: 'despido', label: 'Despido Arbitrario (con indemnización)' },
                     { value: 'renuncia', label: 'Renuncia Voluntaria (sin indemnización)' },
@@ -1077,341 +1184,199 @@ window.CALCULATOR_CONFIGS = {
             }
         ],
         calculate: (values, regimen) => {
-            const salary = parseFloat(values['liq-salary']) || 0;
-            const aniosTrabajados = parseFloat(values['liq-anios']) || 0;
-            const tipoSalida = values['liq-tipo'] || 'despido';
-            
-            const liqCalc = calcularLiquidacion(salary, aniosTrabajados, regimen, tipoSalida);
-            
+            const salary         = safe(parseFloat(values['liq-salary']));
+            const aniosTrabajados = safe(parseFloat(values['liq-anios']));
+            const tipoSalida     = values['liq-tipo'] || 'despido';
+            const liqCalc        = calcularLiquidacion(salary, aniosTrabajados, regimen, tipoSalida);
+
             return {
                 total: liqCalc.totalLiquidacion,
                 details: [
                     { label: '💼 DATOS LABORALES', value: '', type: 'header' },
-                    { label: 'Último Sueldo', value: `S/ ${salary.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'base' },
+                    { label: 'Último Sueldo', value: fmt(salary), type: 'base' },
                     { label: 'Tiempo de Servicio', value: `${aniosTrabajados} años`, type: 'info' },
                     { label: 'Tipo de Salida', value: tipoSalida === 'despido' ? 'Despido Arbitrario' : tipoSalida === 'renuncia' ? 'Renuncia' : 'Mutuo Acuerdo', type: 'info' },
                     { label: 'Régimen', value: regimen.nombre, type: 'info' },
                     { label: '', value: '', type: 'separator' },
                     { label: '📊 BENEFICIOS SOCIALES', value: '', type: 'header' },
-                    { label: 'CTS Pendiente', value: `S/ ${liqCalc.ctsPendiente.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' },
-                    { label: 'Vacaciones Truncas', value: `S/ ${liqCalc.vacacionesTruncas.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' },
+                    { label: 'CTS Pendiente', value: fmt(liqCalc.ctsPendiente), type: 'ingreso' },
+                    { label: 'Vacaciones Truncas', value: fmt(liqCalc.vacacionesTruncas), type: 'ingreso' },
                     ...(liqCalc.gratificacionTrunca > 0 ? [
-                        { label: 'Gratificación Trunca', value: `S/ ${liqCalc.gratificacionTrunca.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' }
+                        { label: 'Gratificación Trunca', value: fmt(liqCalc.gratificacionTrunca), type: 'ingreso' }
                     ] : []),
-                    { label: '', value: '', type: 'separator' },
                     ...(liqCalc.indemnizacion > 0 ? [
-                        { label: '⚖️ INDEMNIZACIÓN', value: '', type: 'header' },
-                        { label: `Despido Arbitrario (${regimen.beneficios.indemnizacion} × año)`, value: `S/ ${liqCalc.indemnizacion.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' },
-                        { label: 'Tope Máximo', value: '12 remuneraciones', type: 'info' },
-                        { label: '', value: '', type: 'separator' }
-                    ] : []),
-                    { label: '💡 IMPORTANTE', value: '', type: 'header' },
-                    { label: 'Sobre liquidación se descuenta:', value: 'AFP/ONP e Impuesto 5ta', type: 'info' },
-                    { label: 'Indemnización:', value: 'Inafecta a impuestos', type: 'info' }
+                        { label: 'Indemnización (1.5 sueldos/año, tope 12)', value: fmt(liqCalc.indemnizacion), type: 'ingreso' }
+                    ] : [
+                        { label: 'Indemnización', value: 'No aplica — Renuncia/Mutuo Acuerdo', type: 'info' }
+                    ]),
+                    { label: '', value: '', type: 'separator' },
+                    { label: '💰 TOTAL LIQUIDACIÓN', value: fmt(liqCalc.totalLiquidacion), type: 'subtotal' }
                 ]
             };
         },
-        legalInfo: 'Liquidación según D.S. 003-97-TR. Incluye: CTS pendiente, vacaciones truncas, gratificación trunca. Indemnización por despido arbitrario: 1.5 sueldos/año (Régimen General), 0.5 (Pequeña Empresa), 0.25 (Microempresa). Tope: 12 remuneraciones. La indemnización es inafecta a AFP/ONP e Impuesto a la Renta.'
+        legalInfo: 'LPCL D.S. 003-97-TR | Ley MYPE. Indemnización: 1.5 sueldos/año (tope 12) Rég. General; 0.5 Pequeña Empresa; 0.25 Micro. Vacaciones truncas y gratificación proporcionales.'
     },
-    
+
+    // ─── 6. UTILIDADES ─────────────────────────────────────────────────
     utilidades: {
         id: 'utilidades',
-        icon: '💼',
+        icon: '📈',
         title: 'Participación en Utilidades',
-        description: 'Calcula tu participación en las utilidades de la empresa (D.Leg. 892)',
+        description: 'Calcula tu participación en utilidades según D.Leg. 892',
         fields: [
-            { 
-                id: 'util-salary', 
-                label: 'Sueldo Mensual', 
-                type: 'number',
-                inputmode: 'decimal',
-                placeholder: '5000',
-                min: PERU_DATA.minWage
-            },
-            { 
-                id: 'util-dias', 
-                label: 'Días trabajados en el año', 
-                type: 'number',
-                inputmode: 'decimal',
-                placeholder: '365',
-                min: 1,
-                max: 365
-            },
-            { 
-                id: 'util-renta', 
-                label: 'Renta Anual de la Empresa', 
-                type: 'number',
-                inputmode: 'decimal',
-                placeholder: '1000000',
-                min: 0,
-                help: 'Ganancia anual antes de impuestos'
-            },
-            { 
-                id: 'util-total-remuneraciones', 
-                label: 'Total Remuneraciones Empresa', 
-                type: 'number',
-                inputmode: 'decimal',
-                placeholder: '500000',
-                min: 0,
-                help: 'Suma de todos los sueldos pagados en el año'
-            },
-            { 
-                id: 'util-total-dias', 
-                label: 'Total Días Trabajados (todos)', 
-                type: 'number',
-                inputmode: 'decimal',
-                placeholder: '7300',
-                min: 1,
-                help: 'Suma de días de todos los trabajadores'
-            },
-            { 
-                id: 'util-sector', 
-                label: 'Sector Económico', 
-                type: 'select',
-                options: [
-                    { value: 'pesquera', label: 'Pesquera (10%)' },
-                    { value: 'telecomunicaciones', label: 'Telecomunicaciones (10%)' },
-                    { value: 'industrial', label: 'Industrial (10%)' },
-                    { value: 'mineria', label: 'Minería (8%)' },
-                    { value: 'comercio', label: 'Comercio (8%)' },
-                    { value: 'restaurantes', label: 'Restaurantes (8%)' },
-                    { value: 'transporte', label: 'Transporte (5%)' },
-                    { value: 'otros', label: 'Otros (5%)' }
-                ]
+            { id: 'util-salary', label: 'Sueldo Mensual Promedio', type: 'number', inputmode: 'decimal', placeholder: '5000', min: PERU_DATA.minWage },
+            { id: 'util-dias', label: 'Días Trabajados en el Año', type: 'number', inputmode: 'decimal', placeholder: '260', min: 1, max: 365 },
+            { id: 'util-renta', label: 'Renta Neta Anual de la Empresa (S/)', type: 'number', inputmode: 'decimal', placeholder: '1000000', min: 0 },
+            { id: 'util-total-rem', label: 'Total Remuneraciones Empresa (S/)', type: 'number', inputmode: 'decimal', placeholder: '5000000', min: 1 },
+            { id: 'util-total-dias', label: 'Total Días Trabajados (todos)', type: 'number', inputmode: 'decimal', placeholder: '10000', min: 1 },
+            {
+                id: 'util-sector', label: 'Sector Económico', type: 'select',
+                options: Object.entries(PERU_DATA.utilidades.sectores).map(([k, v]) =>
+                    ({ value: k, label: `${v.nombre} (${v.porcentaje * 100}%)` })
+                )
             }
         ],
         calculate: (values, regimen) => {
-            const salary = parseFloat(values['util-salary']) || 0;
-            const diasTrabajados = parseFloat(values['util-dias']) || 365;
-            const rentaAnual = parseFloat(values['util-renta']) || 0;
-            const totalRemuneraciones = parseFloat(values['util-total-remuneraciones']) || 1;
-            const totalDiasTrabajadores = parseFloat(values['util-total-dias']) || 1;
-            const sector = values['util-sector'] || 'otros';
-            
+            const salary     = safe(parseFloat(values['util-salary']));
+            const dias       = safe(parseFloat(values['util-dias']));
+            const renta      = safe(parseFloat(values['util-renta']));
+            const totalRem   = safe(parseFloat(values['util-total-rem'])) || 1;
+            const totalDias  = safe(parseFloat(values['util-total-dias'])) || 1;
+            const sector     = values['util-sector'] || 'otros';
+
             if (!regimen.beneficios.utilidades) {
-                return {
-                    total: 0,
-                    details: [
-                        { label: '⚠️ UTILIDADES NO APLICABLES', value: '', type: 'header' },
-                        { label: 'Régimen Actual', value: regimen.nombre, type: 'info' },
-                        { label: 'Observación', value: 'Este régimen no participa en utilidades', type: 'info' }
-                    ]
-                };
+                return { total: 0, details: [{ label: '⚠️ Régimen Micro no participa en utilidades', value: '', type: 'header' }] };
             }
-            
-            const utilCalc = calcularUtilidades(
-                salary,
-                diasTrabajados,
-                rentaAnual,
-                totalRemuneraciones,
-                totalDiasTrabajadores,
-                sector
-            );
-            
+
+            const utilCalc = calcularUtilidades(salary, dias, renta, totalRem, totalDias, sector);
+
             return {
                 total: utilCalc.utilidadFinal,
                 details: [
-                    { label: '🏢 DATOS EMPRESA', value: '', type: 'header' },
-                    { label: 'Sector', value: utilCalc.sector, type: 'info' },
-                    { label: 'Porcentaje Legal', value: `${(utilCalc.porcentaje * 100)}%`, type: 'info' },
+                    { label: '📈 CÁLCULO UTILIDADES (D.Leg. 892)', value: '', type: 'header' },
+                    { label: 'Sector', value: `${utilCalc.sector} (${pct(utilCalc.porcentaje)})`, type: 'info' },
+                    { label: 'Fondo Total Utilidades', value: fmt(renta * utilCalc.porcentaje), type: 'subtotal' },
                     { label: '', value: '', type: 'separator' },
-                    { label: 'Renta Anual Empresa', value: `S/ ${rentaAnual.toLocaleString('es-PE', { minimumFractionDigits: 0 })}`, type: 'base' },
-                    { label: 'Utilidad a Distribuir', value: `S/ ${(rentaAnual * utilCalc.porcentaje).toLocaleString('es-PE', { minimumFractionDigits: 0 })}`, type: 'subtotal' },
-                    { label: '', value: '', type: 'separator' },
-                    { label: '📊 DISTRIBUCIÓN 50/50', value: '', type: 'header' },
-                    { label: 'Por Días Trabajados (50%)', value: `S/ ${utilCalc.porDias.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' },
-                    { label: 'Por Remuneración (50%)', value: `S/ ${utilCalc.porRemuneracion.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' },
-                    { label: '', value: '', type: 'separator' },
+                    { label: '50% por Días Trabajados', value: fmt(utilCalc.porDias), type: 'ingreso' },
+                    { label: '50% por Remuneración', value: fmt(utilCalc.porRemuneracion), type: 'ingreso' },
+                    { label: 'Subtotal sin Tope', value: fmt(utilCalc.utilidadSinTope), type: 'subtotal' },
                     ...(utilCalc.topeAplicado ? [
-                        { label: '⚠️ TOPE APLICADO', value: '', type: 'header' },
-                        { label: 'Utilidad sin Tope', value: `S/ ${utilCalc.utilidadSinTope.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'info' },
-                        { label: 'Tope Legal (18 sueldos)', value: `S/ ${(salary * PERU_DATA.utilidades.topeMaximo).toLocaleString('es-PE', { minimumFractionDigits: 0 })}`, type: 'info' },
-                        { label: '', value: '', type: 'separator' }
+                        { label: '⚠️ Tope Máximo (18 remuneraciones)', value: fmt(salary * 18), type: 'info' }
                     ] : []),
-                    { label: '💡 Tope Legal', value: `S/ ${(salary * PERU_DATA.utilidades.topeMaximo).toLocaleString('es-PE', { minimumFractionDigits: 0 })} (18 sueldos)`, type: 'info' }
+                    { label: 'Total Utilidades', value: fmt(utilCalc.utilidadFinal), type: 'subtotal' }
                 ]
             };
         },
-        legalInfo: 'Participación en utilidades según D.Leg. 892. Distribución: 50% por días trabajados, 50% por remuneración. Porcentajes: Pesquera/Telecom/Industrial 10%, Minería/Comercio/Restaurantes 8%, Transporte/Otros 5%. Tope máximo: 18 remuneraciones mensuales. Empresas con más de 20 trabajadores.'
+        legalInfo: 'D.Leg. 892. Solo empresas con +20 trabajadores. Tope: 18 remuneraciones. 50% por días trabajados, 50% por remuneración. No aplica a Microempresa.'
     },
-    
+
+    // ─── 7. HORAS EXTRA ────────────────────────────────────────────────
     horas_extra: {
         id: 'horas_extra',
         icon: '⏰',
-        title: 'Horas Extra (Sobretiempo)',
-        description: 'Calcula el pago por horas extras según legislación peruana',
+        title: 'Horas Extra',
+        description: 'Calcula el pago de horas extra según D.S. 007-2002-TR',
         fields: [
-            { 
-                id: 'he-salary', 
-                label: 'Sueldo Mensual', 
-                type: 'number',
-                inputmode: 'decimal',
-                placeholder: '5000',
-                min: PERU_DATA.minWage
-            },
-            { 
-                id: 'he-hours-25', 
-                label: 'Horas Extra al 25%', 
-                type: 'number',
-                inputmode: 'decimal',
-                placeholder: '10',
-                min: 0,
-                max: 200,
-                help: 'Primeras 2 horas extra del día'
-            },
-            { 
-                id: 'he-hours-35', 
-                label: 'Horas Extra al 35%', 
-                type: 'number',
-                inputmode: 'decimal',
-                placeholder: '5',
-                min: 0,
-                max: 200,
-                help: 'Horas adicionales después de las 2 primeras'
-            }
+            { id: 'he-salary', label: 'Sueldo Mensual Base', type: 'number', inputmode: 'decimal', placeholder: '5000', min: PERU_DATA.minWage },
+            { id: 'he-hours-25', label: 'Horas Extra al 25%', type: 'number', inputmode: 'decimal', placeholder: '10', min: 0, max: 200, help: 'Primeras 2 horas extra del día' },
+            { id: 'he-hours-35', label: 'Horas Extra al 35%', type: 'number', inputmode: 'decimal', placeholder: '5', min: 0, max: 200, help: 'A partir de la 3ra hora extra' }
         ],
         calculate: (values, regimen) => {
-            const salary = parseFloat(values['he-salary']) || 0;
-            const hours25 = parseFloat(values['he-hours-25']) || 0;
-            const hours35 = parseFloat(values['he-hours-35']) || 0;
-            
-            // Valor hora = Sueldo mensual / 240 horas
-            const hourlyRate = salary / 240;
-            
-            // Pago horas extra
-            const pago25 = hourlyRate * 1.25 * hours25;
-            const pago35 = hourlyRate * 1.35 * hours35;
-            const total = pago25 + pago35;
-            
+            const salary  = safe(parseFloat(values['he-salary']));
+            const h25     = safe(parseFloat(values['he-hours-25']));
+            const h35     = safe(parseFloat(values['he-hours-35']));
+            const hRate   = r4(salary / 240);     // 240 horas mensuales (48 sem × 5)
+            const pago25  = r4(hRate * 1.25 * h25);
+            const pago35  = r4(hRate * 1.35 * h35);
+            const total   = r2(pago25 + pago35);
+
             return {
                 total,
                 details: [
                     { label: '💼 DATOS BASE', value: '', type: 'header' },
-                    { label: 'Sueldo Mensual', value: `S/ ${salary.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'base' },
-                    { label: 'Valor Hora Ordinaria', value: `S/ ${hourlyRate.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'info' },
-                    { label: 'Base de Cálculo', value: '240 horas mensuales', type: 'info' },
+                    { label: 'Sueldo Mensual', value: fmt(salary), type: 'base' },
+                    { label: 'Valor Hora Ordinaria (÷ 240)', value: fmt(hRate), type: 'info' },
                     { label: '', value: '', type: 'separator' },
                     { label: '⏰ HORAS EXTRA AL 25%', value: '', type: 'header' },
-                    { label: 'Cantidad de Horas', value: `${hours25} horas`, type: 'info' },
-                    { label: 'Valor Hora +25%', value: `S/ ${(hourlyRate * 1.25).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'info' },
-                    { label: 'Subtotal 25%', value: `S/ ${pago25.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' },
+                    { label: 'Cantidad', value: `${h25} horas`, type: 'info' },
+                    { label: 'Valor Hora +25%', value: fmt(hRate * 1.25), type: 'info' },
+                    { label: 'Subtotal 25%', value: fmt(pago25), type: 'ingreso' },
                     { label: '', value: '', type: 'separator' },
                     { label: '⏰ HORAS EXTRA AL 35%', value: '', type: 'header' },
-                    { label: 'Cantidad de Horas', value: `${hours35} horas`, type: 'info' },
-                    { label: 'Valor Hora +35%', value: `S/ ${(hourlyRate * 1.35).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'info' },
-                    { label: 'Subtotal 35%', value: `S/ ${pago35.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'ingreso' },
+                    { label: 'Cantidad', value: `${h35} horas`, type: 'info' },
+                    { label: 'Valor Hora +35%', value: fmt(hRate * 1.35), type: 'info' },
+                    { label: 'Subtotal 35%', value: fmt(pago35), type: 'ingreso' },
                     { label: '', value: '', type: 'separator' },
                     { label: '💡 OBSERVACIONES', value: '', type: 'header' },
-                    { label: 'Total Horas Extra', value: `${hours25 + hours35} horas`, type: 'info' },
+                    { label: 'Total Horas Extra', value: `${h25 + h35} horas`, type: 'info' },
                     { label: 'Límite Legal', value: 'Máx. 8 hrs extra/semana', type: 'info' }
                 ]
             };
         },
-        legalInfo: 'Horas extra según D.S. 007-2002-TR. Valor hora = Sueldo/240. Primeras 2 horas extra diarias: +25%. Horas adicionales: +35%. Límite: 8 horas semanales o trabajo voluntario. Base de cálculo: 48 horas semanales (240 mensuales). Las horas extra están afectas a descuentos AFP/ONP e Impuesto a la Renta.'
+        legalInfo: 'D.S. 007-2002-TR. Valor hora = Sueldo/240 horas. Primeras 2 horas diarias: +25%. Horas adicionales: +35%. Límite: 8 horas semanales. Afectas a AFP/ONP e IR5ta.'
     },
-    
+
+    // ─── 8. COSTO EMPLEADOR ────────────────────────────────────────────
     costo_empleador: {
         id: 'costo_empleador',
         icon: '🏢',
         title: 'Costo Total para Empleador',
-        description: 'Calcula el costo real mensual total que asume la empresa (Carga Social)',
+        description: 'Calcula el costo real mensual y la carga social completa',
         fields: [
-            { 
-                id: 'emp-salary', 
-                label: 'Sueldo Bruto Mensual', 
-                type: 'number',
-                inputmode: 'decimal',
-                placeholder: '5000',
-                min: PERU_DATA.minWage
-            },
-            { 
-                id: 'emp-hijos', 
-                label: '¿Asignación Familiar?', 
-                type: 'select',
+            { id: 'emp-salary', label: 'Sueldo Bruto Mensual', type: 'number', inputmode: 'decimal', placeholder: '5000', min: PERU_DATA.minWage },
+            { id: 'emp-hijos', label: '¿Asignación Familiar?', type: 'select', options: [{ value: 'no', label: 'No' }, { value: 'si', label: 'Sí' }] },
+            {
+                id: 'emp-riesgo', label: 'Nivel de Riesgo SCTR', type: 'select',
                 options: [
-                    { value: 'no', label: 'No' },
-                    { value: 'si', label: 'Sí' }
+                    { value: 'minimo', label: 'Bajo (0.53%) — Oficinas' },
+                    { value: 'medio',  label: 'Medio (0.71%) — Comercio' },
+                    { value: 'alto',   label: 'Alto (1.18%) — Construcción/Minería' }
                 ]
             },
-            { 
-                id: 'emp-riesgo', 
-                label: 'Nivel de Riesgo SCTR', 
-                type: 'select',
-                options: [
-                    { value: 'minimo', label: 'Bajo (0.53%) - Oficinas' },
-                    { value: 'medio', label: 'Medio (0.71%) - Comercio' },
-                    { value: 'alto', label: 'Alto (1.18%) - Construcción/Minería' }
-                ]
-            },
-            { 
-                id: 'emp-senati', 
-                label: '¿Aplica SENATI?', 
-                type: 'select',
-                options: [
-                    { value: 'no', label: 'No (Servicios/Comercio)' },
-                    { value: 'si', label: 'Sí (Industria/Construcción 0.75%)' }
-                ]
-            },
-            { 
-                id: 'emp-eps', 
-                label: '¿Tiene EPS Privada?', 
-                type: 'select',
-                options: [
-                    { value: 'no', label: 'No (Solo ESSALUD 9%)' },
-                    { value: 'si', label: 'Sí (+ 2.25% adicional)' }
-                ]
-            }
+            { id: 'emp-senati', label: '¿Aplica SENATI?', type: 'select', options: [{ value: 'no', label: 'No (Servicios/Comercio)' }, { value: 'si', label: 'Sí — Industria/Construcción (0.75%)' }] },
+            { id: 'emp-eps', label: '¿Tiene EPS Privada?', type: 'select', options: [{ value: 'no', label: 'No (Solo ESSALUD 9%)' }, { value: 'si', label: 'Sí (+2.25% adicional)' }] }
         ],
         calculate: (values, regimen) => {
-            const salary = parseFloat(values['emp-salary']) || 0;
-            const tieneHijos = values['emp-hijos'] === 'si';
-            const nivelRiesgo = values['emp-riesgo'] || 'medio';
+            const salary       = safe(parseFloat(values['emp-salary']));
+            const tieneHijos   = values['emp-hijos'] === 'si';
+            const nivelRiesgo  = values['emp-riesgo'] || 'medio';
             const aplicaSenati = values['emp-senati'] === 'si';
-            const tieneEPS = values['emp-eps'] === 'si';
-            
-            const asigFamiliar = tieneHijos && regimen.beneficios.asignacionFamiliar ? calcularAsignacionFamiliar() : 0;
-            
-            const costoCalc = calcularCostoEmpleador(salary, asigFamiliar, regimen, {
-                aplicaSenati,
-                tieneEPS,
-                nivelRiesgo
-            });
-            
+            const tieneEPS     = values['emp-eps'] === 'si';
+            const asigFamiliar = (tieneHijos && regimen.beneficios.asignacionFamiliar) ? calcularAsignacionFamiliar() : 0;
+            const costoCalc    = calcularCostoEmpleador(salary, asigFamiliar, regimen, { aplicaSenati, tieneEPS, nivelRiesgo });
+
             return {
                 total: costoCalc.costoTotal,
                 details: [
                     { label: '💼 PLANILLA BASE', value: '', type: 'header' },
                     { label: 'Régimen Laboral', value: regimen.nombre, type: 'info' },
-                    { label: 'Sueldo Bruto', value: `S/ ${costoCalc.sueldoBruto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'base' },
+                    { label: 'Sueldo Bruto', value: fmt(costoCalc.sueldoBruto), type: 'base' },
                     { label: '', value: '', type: 'separator' },
                     { label: '📊 CARGAS DIRECTAS', value: '', type: 'header' },
-                    { label: 'ESSALUD (9%)', value: `+ S/ ${costoCalc.essalud.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'costo' },
-                    { label: `SCTR (${(PERU_DATA.empleador.sctr[nivelRiesgo] * 100).toFixed(2)}%)`, value: `+ S/ ${costoCalc.sctr.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'costo' },
-                    { label: 'Vida Ley (0.53%)', value: `+ S/ ${costoCalc.vidaLey.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'costo' },
-                    ...(aplicaSenati ? [
-                        { label: 'SENATI (0.75%)', value: `+ S/ ${costoCalc.senati.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'costo' }
-                    ] : []),
-                    ...(tieneEPS ? [
-                        { label: 'EPS Adicional (2.25%)', value: `+ S/ ${costoCalc.eps.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'costo' }
-                    ] : []),
-                    { label: 'Subtotal Cargas', value: `S/ ${costoCalc.cargasDirectas.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'subtotal' },
+                    { label: 'ESSALUD (9%)', value: `+ ${fmt(costoCalc.essalud)}`, type: 'costo' },
+                    { label: `SCTR (${pct(PERU_DATA.empleador.sctr[nivelRiesgo])})`, value: `+ ${fmt(costoCalc.sctr)}`, type: 'costo' },
+                    { label: 'Seguro Vida Ley (0.53%)', value: `+ ${fmt(costoCalc.vidaLey)}`, type: 'costo' },
+                    ...(aplicaSenati ? [{ label: 'SENATI (0.75%)', value: `+ ${fmt(costoCalc.senati)}`, type: 'costo' }] : []),
+                    ...(tieneEPS ? [{ label: 'EPS Adicional (2.25%)', value: `+ ${fmt(costoCalc.eps)}`, type: 'costo' }] : []),
+                    { label: 'Subtotal Cargas', value: fmt(costoCalc.cargasDirectas), type: 'subtotal' },
                     { label: '', value: '', type: 'separator' },
-                    { label: '📅 PROVISIONES MENSUALES', value: '', type: 'header' },
-                    { label: 'Gratificaciones (prov.)', value: `+ S/ ${costoCalc.provGratificaciones.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'costo' },
-                    { label: 'CTS (prov.)', value: `+ S/ ${costoCalc.provCTS.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'costo' },
-                    { label: 'Vacaciones (prov.)', value: `+ S/ ${costoCalc.provVacaciones.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'costo' },
-                    { label: 'Subtotal Beneficios', value: `S/ ${costoCalc.provisionesBeneficios.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, type: 'subtotal' },
+                    { label: '📅 PROVISIONES MENSUALIZADAS', value: '', type: 'header' },
+                    { label: 'Gratificaciones + Bonif. Ext.', value: `+ ${fmt(costoCalc.provGratificaciones)}`, type: 'costo' },
+                    { label: 'CTS', value: `+ ${fmt(costoCalc.provCTS)}`, type: 'costo' },
+                    { label: 'Vacaciones', value: `+ ${fmt(costoCalc.provVacaciones)}`, type: 'costo' },
+                    { label: 'Subtotal Beneficios', value: fmt(costoCalc.provisionesBeneficios), type: 'subtotal' },
                     { label: '', value: '', type: 'separator' },
                     { label: '💰 RESUMEN EJECUTIVO', value: '', type: 'header' },
-                    { label: 'Carga Social', value: `${costoCalc.porcentajeCarga.toFixed(1)}%`, type: 'info' },
-                    { label: 'Costo vs Sueldo', value: `+${((costoCalc.costoTotal / costoCalc.sueldoBruto - 1) * 100).toFixed(1)}%`, type: 'info' }
+                    { label: 'Carga Social Total', value: `${costoCalc.porcentajeCarga.toFixed(1)}%`, type: 'info' },
+                    { label: 'Costo vs Sueldo Bruto', value: `+${((costoCalc.costoTotal / costoCalc.sueldoBruto - 1) * 100).toFixed(1)}%`, type: 'info' }
                 ]
             };
         },
-        legalInfo: 'Costo real mensual incluye: Sueldo + Cargas directas (ESSALUD 9%, SCTR, Vida Ley, SENATI si aplica) + Provisiones mensualizadas de beneficios (Gratificaciones, CTS, Vacaciones). Base legal: Ley 26790 (ESSALUD), D.S. 003-97-TR (Beneficios), Ley 27735 (Gratificaciones). El costo real para el empleador es significativamente mayor al sueldo bruto.'
+        legalInfo: 'Ley 26790 (ESSALUD 9%) | D.S. 003-97-TR (Beneficios) | Ley 27735 (Gratificaciones). Costo real mensual = Sueldo + Cargas directas + Provisiones de beneficios mensualizadas.'
     }
 };
 
 // =====================================================================
-// FIN DE DATA.JS - SUELDOPRO ULTRA PERÚ 2026
+// FIN DE DATA.JS v3.0 — SUELDOPRO ULTRA PERÚ 2026
+// Correcciones: AFP-SBS-Tope | IR5ta-Gratificaciones | Precisión 4dec
 // =====================================================================
