@@ -1,913 +1,1316 @@
-'use strict';
+/* ============================================
+   PayCalc Pro - Application Logic
+   Silicon Valley Quality Standards
+   ============================================ */
 
-// =====================================================================
-// SUELDOPRO ULTRA PERÚ 2026 — MAIN APPLICATION SCRIPT v3.0
-// Arquitectura: CalculationEngine | UIController | State Manager
-// =====================================================================
-// CAMBIOS v3.0:
-//  [ARCH-1] Separación de capas: CalculationEngine (lógica pura, sin DOM)
-//           vs UIController (solo DOM, sin lógica de negocio).
-//  [ARCH-2] Validaciones robustas: NaN, negativo, < RMV — bloquean render.
-//  [ARCH-3] Panel de Log de Cálculo: muestra fórmulas paso a paso.
-//  [ARCH-4] Sticky Result Panel: resultado siempre visible.
-//  [ARCH-5] Recálculo automático en cambio de régimen.
-// =====================================================================
+// ===== INITIALIZATION =====
+document.addEventListener('DOMContentLoaded', () => {
+    initLoader();
+    initTheme();
+    initNavbar();
+    initParticles();
+    initTabs();
+    initFAQ();
+    initCounters();
+    initDates();
+});
 
-// =====================================================================
-// ─── CAPA 1: STATE (fuente única de verdad) ───────────────────────────
-// =====================================================================
-const AppState = {
-    currentCalculator: 'neto',
-    currentSection:    'calculators',
-    currentRegimen:    localStorage.getItem('sueldopro_regimen') || 'general',
-    charts:            {},
-    savedCalculations: JSON.parse(localStorage.getItem('sueldopro_saved_calcs') || '[]'),
-    lastPayload:       null,   // { result, calc, regimen, log }
-    formValues:        {},
-    showLog:           false
-};
+// ===== LOADER =====
+function initLoader() {
+    const loader = document.getElementById('loader');
+    setTimeout(() => {
+        loader.classList.add('hidden');
+        setTimeout(() => loader.remove(), 500);
+    }, 1800);
+}
 
-// =====================================================================
-// ─── CAPA 2: CALCULATION ENGINE (lógica pura — cero DOM) ─────────────
-// =====================================================================
-const CalculationEngine = {
+// ===== THEME =====
+function initTheme() {
+    const toggle = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('paycalc-theme');
 
-    /**
-     * Valida un valor numérico. Devuelve {ok, value, error}.
-     * @param {*} raw - Valor crudo del input
-     * @param {object} opts - { min, max, label }
-     */
-    validate(raw, opts = {}) {
-        const n = parseFloat(raw);
-        if (raw === '' || raw === null || raw === undefined) {
-            return { ok: false, value: 0, error: `${opts.label || 'Campo'} es requerido.` };
-        }
-        if (isNaN(n) || !isFinite(n)) {
-            return { ok: false, value: 0, error: `${opts.label || 'Valor'} inválido (NaN).` };
-        }
-        if (n < 0) {
-            return { ok: false, value: 0, error: `${opts.label || 'Valor'} no puede ser negativo.` };
-        }
-        if (opts.min !== undefined && n < opts.min) {
-            return { ok: false, value: 0, error: `${opts.label || 'Valor'} mínimo: ${opts.min}.` };
-        }
-        if (opts.max !== undefined && n > opts.max) {
-            return { ok: false, value: 0, error: `${opts.label || 'Valor'} máximo: ${opts.max}.` };
-        }
-        return { ok: true, value: n, error: null };
-    },
+    if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        toggle.innerHTML = '<i class="fas fa-sun"></i>';
+    }
 
-    /**
-     * Valida todos los campos numéricos de un formulario.
-     * Devuelve lista de errores (vacía si todo OK).
-     */
-    validateForm(calc, values) {
-        const errors = [];
-        let hasAtLeastOneNumber = false;
+    toggle.addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        toggle.innerHTML = isDark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+        localStorage.setItem('paycalc-theme', isDark ? 'light' : 'dark');
+    });
+}
 
-        calc.fields.forEach(field => {
-            if (field.type !== 'number') return;
+// ===== NAVBAR =====
+function initNavbar() {
+    const navbar = document.getElementById('navbar');
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('navLinks');
 
-            // Si el campo tiene conditional, verificar si está activo
-            if (field.conditional) {
-                const depValue = values[field.conditional.field];
-                if (depValue !== field.conditional.value) return;
-            }
+    // Scroll effect
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
 
-            const raw = values[field.id];
-            if (raw === '' || raw === undefined) return; // Opcional si no tiene min obligatorio
+    // Mobile menu
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navLinks.classList.toggle('active');
+    });
 
-            const result = this.validate(raw, {
-                min:   field.min,
-                max:   field.max,
-                label: field.label
-            });
+    // Active link tracking
+    const sections = document.querySelectorAll('section[id], .hero[id]');
+    const navLinkElements = document.querySelectorAll('.nav-link');
 
-            if (!result.ok) {
-                errors.push(result.error);
-            } else {
-                hasAtLeastOneNumber = true;
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop - 100;
+            if (window.scrollY >= sectionTop) {
+                current = section.getAttribute('id');
             }
         });
+        navLinkElements.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('data-section') === current);
+        });
+    });
 
-        if (!hasAtLeastOneNumber) {
-            errors.push('Ingresa al menos un valor numérico para calcular.');
-        }
+    // Close mobile menu on link click
+    navLinkElements.forEach(link => {
+        link.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            navLinks.classList.remove('active');
+        });
+    });
+}
 
-        return errors;
-    },
+// ===== PARTICLES =====
+function initParticles() {
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animationFrame;
 
-    /**
-     * Ejecuta el cálculo de forma segura.
-     * Retorna { success, payload, errors }
-     */
-    run(calcId, values, regimenId) {
-        const calc    = CALCULATOR_CONFIGS[calcId];
-        const regimen = REGIMENES_PERU[regimenId];
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
 
-        if (!calc || !regimen) {
-            return { success: false, payload: null, errors: ['Calculadora o régimen no encontrado.'] };
-        }
-
-        // Validar formulario
-        const errors = this.validateForm(calc, values);
-        if (errors.length > 0) {
-            return { success: false, payload: null, errors };
-        }
-
-        // Ejecutar con try-catch
-        try {
-            const result = calc.calculate(values, regimen);
-
-            // Guardia final: el total no puede ser NaN ni negativo
-            if (isNaN(result.total) || !isFinite(result.total)) {
-                console.warn('[CalculationEngine] total NaN — forzando a 0', { calcId, values });
-                result.total = 0;
-            }
-            if (result.total < 0) {
-                result.total = 0;
-            }
-
-            // Sanear cada línea de details
-            if (Array.isArray(result.details)) {
-                result.details = result.details.map(d => ({
-                    ...d,
-                    label: d.label || '',
-                    value: d.value || ''
-                }));
-            }
-
-            // Generar log de cálculo
-            const log = (typeof generarLogCalculo === 'function')
-                ? generarLogCalculo(calcId, result._resultado || result, regimen, values)
-                : [];
-
-            return {
-                success: true,
-                payload: { result, calc, regimen, log },
-                errors: []
-            };
-
-        } catch (err) {
-            console.error('[CalculationEngine] Error en cálculo:', err);
-            return {
-                success: false,
-                payload: null,
-                errors: [`Error interno: ${err.message}. Verifica los datos ingresados.`]
-            };
+    function createParticles() {
+        particles = [];
+        const count = Math.floor((canvas.width * canvas.height) / 15000);
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3,
+                size: Math.random() * 2 + 0.5,
+                opacity: Math.random() * 0.5 + 0.1
+            });
         }
     }
-};
 
-// =====================================================================
-// ─── CAPA 3: UI CONTROLLER (solo DOM — cero lógica de negocio) ────────
-// =====================================================================
-const UIController = {
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    /**
-     * Renderiza el resultado principal en el panel sticky.
-     */
-    renderResult(payload) {
-        const { result, calc, regimen } = payload;
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const color = isDark ? '148, 163, 184' : '99, 102, 241';
 
-        const resultContainer = document.getElementById('result-container');
-        const mainResult      = document.getElementById('main-result');
-        const detailsContainer = document.getElementById('details-container');
-        const logContainer    = document.getElementById('log-container');
+        particles.forEach((p, i) => {
+            p.x += p.vx;
+            p.y += p.vy;
 
-        if (!resultContainer || !mainResult || !detailsContainer) return;
+            if (p.x < 0) p.x = canvas.width;
+            if (p.x > canvas.width) p.x = 0;
+            if (p.y < 0) p.y = canvas.height;
+            if (p.y > canvas.height) p.y = 0;
 
-        resultContainer.classList.remove('hidden');
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${color}, ${p.opacity})`;
+            ctx.fill();
 
-        // ── Panel Resultado Principal ──
-        const totalFmt = r2(result.total).toLocaleString('es-PE', { minimumFractionDigits: 2 });
-        mainResult.innerHTML = `
-            <div class="result-hero text-center">
-                <div class="text-5xl lg:text-6xl mb-3">${calc.icon}</div>
-                <div class="result-label">${calc.title}</div>
-                <div class="result-amount" id="animated-total">
-                    S/ <span id="result-number">${totalFmt}</span>
-                </div>
-                <div class="result-regime">
-                    ${regimen.icon} ${regimen.nombre}
-                </div>
-                ${result._resultado?.ir5taDetalle?.aplica
-                    ? `<div class="ir5ta-badge">⚠️ IR 5ta Cat.: S/ ${r2(result._resultado.ir5taDetalle.mensual).toLocaleString('es-PE',{minimumFractionDigits:2})}/mes</div>`
-                    : ''
+            // Connect nearby particles
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = p.x - particles[j].x;
+                const dy = p.y - particles[j].y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 120) {
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = `rgba(${color}, ${0.06 * (1 - dist / 120)})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
                 }
-            </div>
-        `;
-
-        // ── Panel Detalles ──
-        let detailsHTML = '';
-        (result.details || []).forEach(detail => {
-            if (detail.type === 'header') {
-                detailsHTML += `<div class="detail-header"><h4>${detail.label}</h4></div>`;
-            } else if (detail.type === 'separator') {
-                detailsHTML += `<div class="detail-separator"></div>`;
-            } else if (detail.type === 'info' && !detail.label && !detail.value) {
-                // skip empty
-            } else {
-                const cls = {
-                    base:     'detail-base',
-                    ingreso:  'detail-ingreso',
-                    descuento:'detail-descuento',
-                    subtotal: 'detail-subtotal',
-                    costo:    'detail-costo',
-                    info:     'detail-info'
-                }[detail.type] || 'detail-info';
-
-                detailsHTML += `
-                    <div class="detail-row ${cls}">
-                        <span class="detail-label">${detail.label}</span>
-                        <span class="detail-value">${detail.value}</span>
-                    </div>
-                `;
             }
         });
-        detailsContainer.innerHTML = detailsHTML;
 
-        // ── Panel Log de Cálculo ──
-        if (logContainer) {
-            this.renderLog(logContainer, payload.log || []);
+        animationFrame = requestAnimationFrame(animate);
+    }
+
+    resize();
+    createParticles();
+    animate();
+
+    window.addEventListener('resize', () => {
+        resize();
+        createParticles();
+    });
+}
+
+// ===== TABS =====
+function initTabs() {
+    const tabs = document.querySelectorAll('.calc-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const calcId = tab.getAttribute('data-calc');
+            activateCalc(calcId);
+        });
+    });
+}
+
+function activateCalc(calcId) {
+    // Update tabs
+    document.querySelectorAll('.calc-tab').forEach(t => t.classList.remove('active'));
+    const activeTab = document.querySelector(`.calc-tab[data-calc="${calcId}"]`);
+    if (activeTab) activeTab.classList.add('active');
+
+    // Update panels
+    document.querySelectorAll('.calc-panel').forEach(p => p.classList.remove('active'));
+    const panel = document.getElementById(`panel-${calcId}`);
+    if (panel) panel.classList.add('active');
+
+    // Scroll to calculators section
+    scrollToSection('calculadoras');
+}
+
+// ===== FAQ =====
+function initFAQ() {
+    const faqList = document.getElementById('faqList');
+
+    DATA.FAQ.forEach((item, index) => {
+        const faqItem = document.createElement('div');
+        faqItem.className = 'faq-item';
+        faqItem.innerHTML = `
+            <button class="faq-question" onclick="toggleFAQ(this)">
+                <span>${item.pregunta}</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-inner">${item.respuesta}</div>
+            </div>
+        `;
+        faqList.appendChild(faqItem);
+    });
+}
+
+function toggleFAQ(btn) {
+    const item = btn.closest('.faq-item');
+    const isActive = item.classList.contains('active');
+
+    // Close all
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+
+    // Open clicked if wasn't active
+    if (!isActive) item.classList.add('active');
+}
+
+// ===== COUNTERS =====
+function initCounters() {
+    const counters = document.querySelectorAll('.stat-number[data-count]');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateCounter(entry.target);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    counters.forEach(c => observer.observe(c));
+}
+
+function animateCounter(el) {
+    const target = parseInt(el.getAttribute('data-count'));
+    const duration = 2000;
+    const start = performance.now();
+
+    function update(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.floor(eased * target);
+
+        el.textContent = current.toLocaleString();
+
+        if (progress < 1) requestAnimationFrame(update);
+        else el.textContent = target.toLocaleString();
+    }
+
+    requestAnimationFrame(update);
+}
+
+// ===== DATES =====
+function initDates() {
+    const today = new Date().toISOString().split('T')[0];
+    const ceseInput = document.getElementById('liq-fecha-cese');
+    if (ceseInput) ceseInput.value = today;
+
+    const ingresoInput = document.getElementById('liq-fecha-ingreso');
+    if (ingresoInput) {
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+        ingresoInput.value = oneYearAgo.toISOString().split('T')[0];
+    }
+}
+
+// ===== UTILITY FUNCTIONS =====
+function scrollToSection(id) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const icons = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-exclamation-circle',
+        info: 'fas fa-info-circle'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `<i class="${icons[type]}"></i><span>${message}</span>`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('toast-out');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+function validateInput(value, fieldName) {
+    if (value === '' || value === null || value === undefined || isNaN(value)) {
+        showToast(`Por favor ingresa un valor válido para: ${fieldName}`, 'error');
+        return false;
+    }
+    if (parseFloat(value) < 0) {
+        showToast(`El valor de ${fieldName} no puede ser negativo`, 'error');
+        return false;
+    }
+    return true;
+}
+
+function fmt(amount) {
+    return DATA.formatMoney(amount);
+}
+
+function generateResultHTML(config) {
+    const { heroLabel, heroAmount, heroSub, sections, barChart } = config;
+
+    let html = `
+        <div class="result-card">
+            <div class="result-hero">
+                <div class="result-hero-label">${heroLabel}</div>
+                <div class="result-hero-amount">S/ ${fmt(heroAmount)}</div>
+                ${heroSub ? `<div class="result-hero-sub">${heroSub}</div>` : ''}
+            </div>
+            <div class="result-body">
+    `;
+
+    sections.forEach(section => {
+        html += `<div class="result-section">`;
+        if (section.title) {
+            html += `<div class="result-section-title">${section.title}</div>`;
         }
-
-        // Animar número
-        this._animateNumber('result-number', result.total);
-    },
-
-    /**
-     * Renderiza el Log de Cálculo paso a paso.
-     */
-    renderLog(container, log) {
-        if (!log || log.length === 0) {
-            container.innerHTML = `<p class="log-empty">Log no disponible para esta calculadora.</p>`;
-            return;
-        }
-
-        let html = `<div class="log-header">
-            <span class="log-icon">🔬</span>
-            <span>Fórmulas Legales Aplicadas</span>
-        </div>`;
-
-        log.forEach(step => {
+        section.rows.forEach(row => {
+            const valueClass = row.class || '';
+            const isTotal = row.total ? ' total' : '';
             html += `
-                <div class="log-step">
-                    <div class="log-step-num">${step.paso}</div>
-                    <div class="log-step-body">
-                        <div class="log-formula">${step.formula}</div>
-                        ${step.valor ? `<div class="log-value">${step.valor}</div>` : ''}
-                        ${step.nota ? `<div class="log-nota">${step.nota}</div>` : ''}
+                <div class="result-row${isTotal}">
+                    <span class="result-row-label">
+                        ${row.icon ? `<i class="${row.icon}"></i>` : ''}
+                        ${row.label}
+                    </span>
+                    <span class="result-row-value ${valueClass}">${row.value}</span>
+                </div>
+            `;
+        });
+        html += `</div>`;
+    });
+
+    if (barChart && barChart.length > 0) {
+        html += `<div class="result-section"><div class="result-section-title">Distribución Visual</div><div class="result-bar-chart">`;
+        barChart.forEach(item => {
+            html += `
+                <div class="bar-chart-item">
+                    <div class="bar-chart-label">
+                        <span>${item.label}</span>
+                        <span>S/ ${fmt(item.value)}</span>
+                    </div>
+                    <div class="bar-chart-track">
+                        <div class="bar-chart-fill" style="width:${item.percent}%;background:${item.color}"></div>
                     </div>
                 </div>
             `;
         });
-
-        container.innerHTML = html;
-    },
-
-    /**
-     * Muestra un error de validación en el UI.
-     */
-    renderError(errors) {
-        const resultContainer = document.getElementById('result-container');
-        const mainResult      = document.getElementById('main-result');
-
-        if (!resultContainer || !mainResult) return;
-        resultContainer.classList.remove('hidden');
-
-        mainResult.innerHTML = `
-            <div class="error-panel">
-                <div class="error-icon">⚠️</div>
-                <div class="error-title">Datos inválidos</div>
-                <ul class="error-list">
-                    ${errors.map(e => `<li>${e}</li>`).join('')}
-                </ul>
-            </div>
-        `;
-
-        const detailsContainer = document.getElementById('details-container');
-        if (detailsContainer) detailsContainer.innerHTML = '';
-    },
-
-    /**
-     * Muestra el spinner de cálculo.
-     */
-    showSpinner() {
-        const btn = document.getElementById('calculate-btn');
-        if (btn) {
-            btn.disabled   = true;
-            btn.innerHTML  = `<span class="calc-spinner"></span> Calculando...`;
-        }
-    },
-
-    /**
-     * Oculta el spinner.
-     */
-    hideSpinner() {
-        const btn = document.getElementById('calculate-btn');
-        if (btn) {
-            btn.disabled  = false;
-            btn.innerHTML = `⚡ CALCULAR AHORA`;
-        }
-    },
-
-    /**
-     * Anima el número resultado con efecto count-up.
-     */
-    _animateNumber(elemId, target) {
-        const el = document.getElementById(elemId);
-        if (!el) return;
-        const duration = 600;
-        const start    = performance.now();
-        const from     = 0;
-
-        const tick = (now) => {
-            const elapsed  = now - start;
-            const progress = Math.min(elapsed / duration, 1);
-            const ease     = 1 - Math.pow(1 - progress, 3);  // cubic ease-out
-            const current  = from + (target - from) * ease;
-            el.textContent = r2(current).toLocaleString('es-PE', { minimumFractionDigits: 2 });
-            if (progress < 1) requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
-    },
-
-    /**
-     * Toggle del panel Log de Cálculo.
-     */
-    toggleLog() {
-        AppState.showLog = !AppState.showLog;
-        const logPanel = document.getElementById('log-panel');
-        const logBtn   = document.getElementById('toggle-log-btn');
-        if (logPanel) {
-            logPanel.classList.toggle('hidden', !AppState.showLog);
-        }
-        if (logBtn) {
-            logBtn.textContent = AppState.showLog ? '🔒 Ocultar Fórmulas' : '🔬 Ver Fórmulas';
-            logBtn.classList.toggle('active', AppState.showLog);
-        }
-    },
-
-    /**
-     * Renderiza los detalles de régimen laboral.
-     */
-    renderRegimenInfo(regimen) {
-        const infoDiv = document.getElementById('regimen-info');
-        if (!infoDiv || !regimen) return;
-
-        infoDiv.innerHTML = `
-            <div class="regimen-card">
-                <div class="regimen-card-icon">${regimen.icon}</div>
-                <div class="regimen-card-body">
-                    <h4>${regimen.nombre}</h4>
-                    <p>${regimen.descripcion}</p>
-                    <div class="regimen-grid">
-                        <div class="regimen-item">
-                            <span class="r-label">Gratificaciones</span>
-                            <span class="r-value">${regimen.beneficios.gratificaciones ? (regimen.beneficios.gratificacionesFactor * 100) + '%' : 'No'}</span>
-                        </div>
-                        <div class="regimen-item">
-                            <span class="r-label">CTS</span>
-                            <span class="r-value">${regimen.beneficios.cts ? (regimen.beneficios.ctsFactor * 100) + '%' : 'No'}</span>
-                        </div>
-                        <div class="regimen-item">
-                            <span class="r-label">Vacaciones</span>
-                            <span class="r-value">${regimen.beneficios.vacaciones} días</span>
-                        </div>
-                        <div class="regimen-item">
-                            <span class="r-label">Asig. Familiar</span>
-                            <span class="r-value">${regimen.beneficios.asignacionFamiliar ? 'Sí' : 'No'}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        html += `</div></div>`;
     }
-};
 
-// =====================================================================
-// ─── CAPA 4: ORQUESTADOR (conecta State + Engine + UI) ────────────────
-// =====================================================================
-
-/**
- * Orquesta todo el flujo: recopila valores → valida → calcula → renderiza.
- */
-function executeCalculation() {
-    const calc = CALCULATOR_CONFIGS[AppState.currentCalculator];
-    if (!calc) return;
-
-    // 1. Recopilar valores del formulario
-    const values = {};
-    calc.fields.forEach(field => {
-        const el = document.getElementById(field.id);
-        if (el) {
-            values[field.id]             = el.value;
-            AppState.formValues[field.id] = el.value;
-        }
-    });
-
-    // 2. Mostrar spinner
-    UIController.showSpinner();
-
-    // 3. Delegar al motor de cálculo (microtask para no bloquear UI)
-    setTimeout(() => {
-        const { success, payload, errors } = CalculationEngine.run(
-            AppState.currentCalculator,
-            values,
-            AppState.currentRegimen
-        );
-
-        UIController.hideSpinner();
-
-        if (!success) {
-            UIController.renderError(errors);
-            return;
-        }
-
-        // 4. Guardar en state y renderizar
-        AppState.lastPayload = payload;
-        UIController.renderResult(payload);
-
-        // 5. Scroll suave hacia el resultado (mobile)
-        const resultEl = document.getElementById('result-container');
-        if (resultEl && window.innerWidth < 1024) {
-            resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        // 6. Sincronizar con Pentágono Bridge
-        syncToLiquidezForce({
-            calculator: payload.calc.id,
-            regimen:    payload.regimen.id,
-            result:     payload.result.total,
-            timestamp:  new Date().toISOString()
-        });
-
-    }, 50);
-}
-
-// =====================================================================
-// ─── INICIALIZACIÓN ───────────────────────────────────────────────────
-// =====================================================================
-
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 SueldoPro Ultra v3.0 — Iniciando...');
-
-    renderPentagonLinks();
-    renderRegimenSelect();
-    renderNavigation();
-    renderCalculatorTabs();
-    setupEventListeners();
-    selectCalculator('neto');
-    showWelcomeMessage();
-
-    console.log('✅ SueldoPro Ultra v3.0 — Listo. Engine: CalculationEngine + UIController');
-});
-
-// ===== MENSAJE DE BIENVENIDA =====
-function showWelcomeMessage() {
-    if (!localStorage.getItem('sueldopro_visited')) {
-        setTimeout(() => {
-            alert(`¡Bienvenido a SueldoPro Ultra Perú 2026! 🚀\n\n` +
-                `✅ Motor de precisión 4-6 decimales\n` +
-                `✅ AFP: Tope SBS solo en SIS (corregido)\n` +
-                `✅ IR 5ta: Gratificaciones + Bonif. Extra (corregido)\n` +
-                `✅ Log de fórmulas legales paso a paso\n` +
-                `✅ 8 calculadoras | 3 regímenes | UIT S/ 5,150\n\n` +
-                `🇵🇪 100% Legislación Peruana — Boleta-precision™`);
-            localStorage.setItem('sueldopro_visited', 'true');
-        }, 800);
-    }
-}
-
-// ===== RENDERIZADO DE ENLACES DEL PENTÁGONO =====
-function renderPentagonLinks() {
-    const desktop = document.getElementById('pentagon-desktop');
-    const mobile  = document.getElementById('pentagon-mobile');
-    const footer  = document.getElementById('footer-pentagon-links');
-    if (!desktop || !mobile || !footer) return;
-
-    // Limpiar antes de renderizar
-    desktop.innerHTML = mobile.innerHTML = footer.innerHTML = '';
-
-    Object.values(PENTAGON_LINKS).forEach(link => {
-        const isCurrent = link.url.includes(window.location.hostname);
-        const target    = isCurrent ? '_self' : '_blank';
-
-        desktop.innerHTML += `
-            <a href="${link.url}" target="${target}" rel="noopener noreferrer"
-               class="px-4 py-2 rounded-xl bg-gradient-to-r ${link.color} text-white font-bold text-xs hover:scale-105 transition"
-               title="${link.description}">
-                ${link.icon} ${link.name}
-            </a>`;
-
-        mobile.innerHTML += `
-            <a href="${link.url}" target="${target}" rel="noopener noreferrer"
-               class="block p-4 rounded-xl bg-gradient-to-r ${link.color} text-white hover:scale-105 transition">
-                <div class="text-2xl mb-2">${link.icon}</div>
-                <div class="font-black text-sm">${link.name}</div>
-                <div class="text-xs opacity-80 mt-1">${link.description}</div>
-            </a>`;
-
-        footer.innerHTML += `
-            <a href="${link.url}" target="${target}" rel="noopener noreferrer"
-               class="text-sm text-slate-400 hover:text-indigo-400 transition">
-                ${link.icon} ${link.name}
-            </a>`;
-    });
-}
-
-// ===== SELECTOR DE RÉGIMEN =====
-function renderRegimenSelect() {
-    const select       = document.getElementById('regimen-select');
-    const mobileSelect = document.getElementById('mobile-regimen-select');
-    if (!select || !mobileSelect) return;
-
-    const options = Object.values(REGIMENES_PERU)
-        .map(r => `<option value="${r.id}">${r.icon} ${r.nombre}</option>`)
-        .join('');
-
-    select.innerHTML = mobileSelect.innerHTML = options;
-    select.value = mobileSelect.value = AppState.currentRegimen;
-
-    updateRegimenInfo();
-}
-
-function updateRegimenInfo() {
-    const regimen = REGIMENES_PERU[AppState.currentRegimen];
-    UIController.renderRegimenInfo(regimen);
-}
-
-// ===== NAVEGACIÓN =====
-function renderNavigation() {
-    const nav       = document.getElementById('nav-buttons');
-    const mobileNav = document.getElementById('mobile-nav-buttons');
-    if (!nav || !mobileNav) return;
-
-    const sections = [
-        { id: 'calculators', icon: '🔢', name: 'Calculadoras' },
-        { id: 'truecost',    icon: '💎', name: 'Costo Real' },
-        { id: 'comparison',  icon: '📊', name: 'Comparador' }
-    ];
-
-    nav.innerHTML = mobileNav.innerHTML = '';
-
-    sections.forEach(section => {
-        const isActive = section.id === 'calculators';
-        const btnHTML = `
-            <button data-nav="${section.id}"
-                    class="nav-btn w-full p-3 rounded-xl font-bold text-sm flex items-center gap-2
-                           ${isActive ? 'active' : 'bg-slate-900 text-slate-400'}">
-                ${section.icon} ${section.name}
-            </button>`;
-        nav.innerHTML       += btnHTML;
-        mobileNav.innerHTML += btnHTML;
-    });
-}
-
-function navigate(sectionId) {
-    AppState.currentSection = sectionId;
-
-    document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
-    const target = document.getElementById(`sec-${sectionId}`);
-    if (target) target.classList.add('active');
-
-    document.querySelectorAll('[data-nav]').forEach(b => {
-        b.classList.remove('active', 'bg-gradient-to-r', 'from-indigo-600', 'to-indigo-700', 'text-white');
-        b.classList.add('bg-slate-900', 'text-slate-400');
-    });
-    document.querySelectorAll(`[data-nav="${sectionId}"]`).forEach(b => {
-        b.classList.add('active', 'bg-gradient-to-r', 'from-indigo-600', 'to-indigo-700', 'text-white');
-        b.classList.remove('bg-slate-900', 'text-slate-400');
-    });
-
-    const calcTabsContainer = document.getElementById('calc-tabs-container');
-    if (calcTabsContainer) calcTabsContainer.classList.toggle('hidden', sectionId !== 'calculators');
-
-    const mobileNavEl = document.getElementById('mobile-nav');
-    if (mobileNavEl) mobileNavEl.classList.add('-translate-x-full');
-}
-
-// ===== CALCULADORA TABS =====
-function renderCalculatorTabs() {
-    const tabs         = document.getElementById('calc-tabs');
-    const mobileSelect = document.getElementById('mobile-calc-select');
-    if (!tabs || !mobileSelect) return;
-
-    tabs.innerHTML = mobileSelect.innerHTML = '';
-
-    Object.values(CALCULATOR_CONFIGS).forEach(calc => {
-        const isActive = calc.id === 'neto';
-
-        tabs.innerHTML += `
-            <button data-calc="${calc.id}"
-                    class="calc-tab w-full p-3 rounded-xl font-bold text-sm flex items-center gap-2 border-2
-                           ${isActive ? 'border-indigo-500 bg-indigo-500/10' : 'border-slate-700 text-slate-400'}">
-                ${calc.icon} ${calc.title}
-            </button>`;
-
-        mobileSelect.innerHTML += `<option value="${calc.id}">${calc.icon} ${calc.title}</option>`;
-    });
-}
-
-function selectCalculator(calcId) {
-    AppState.currentCalculator = calcId;
-    const calc = CALCULATOR_CONFIGS[calcId];
-    if (!calc) return;
-
-    // Actualizar tabs
-    document.querySelectorAll('[data-calc]').forEach(b => {
-        b.classList.remove('active', 'border-indigo-500', 'bg-indigo-500/10');
-        b.classList.add('border-slate-700', 'text-slate-400');
-    });
-    document.querySelectorAll(`[data-calc="${calcId}"]`).forEach(t => {
-        t.classList.add('active', 'border-indigo-500', 'bg-indigo-500/10');
-        t.classList.remove('border-slate-700', 'text-slate-400');
-    });
-
-    const mobileSelect = document.getElementById('mobile-calc-select');
-    if (mobileSelect) mobileSelect.value = calcId;
-
-    renderCalculatorForm(calc);
-}
-
-// ===== FORMULARIO DINÁMICO =====
-function renderCalculatorForm(calc) {
-    const formContainer = document.getElementById('calculator-form');
-    if (!formContainer) return;
-
-    let html = `
-        <div class="calc-header mb-6">
-            <div class="flex items-center gap-3 mb-2">
-                <div class="text-3xl">${calc.icon}</div>
-                <h3 class="text-xl lg:text-2xl font-black text-white">${calc.title}</h3>
-            </div>
-            <p class="text-sm text-slate-400">${calc.description}</p>
-        </div>`;
-
-    calc.fields.forEach(field => {
-        const saved = AppState.formValues[field.id] || '';
-        const conditionalAttr = field.conditional
-            ? `data-conditional-field="${field.conditional.field}" data-conditional-value="${field.conditional.value}"`
-            : '';
-
-        html += `
-            <div class="form-group mb-4" data-field-id="${field.id}" ${conditionalAttr}>
-                <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">
-                    ${field.label}
-                </label>`;
-
-        if (field.type === 'number') {
-            html += `
-                <input type="number"
-                       id="${field.id}"
-                       inputmode="${field.inputmode || 'decimal'}"
-                       class="calc-input"
-                       placeholder="${field.placeholder || ''}"
-                       ${field.min !== undefined ? `min="${field.min}"` : ''}
-                       ${field.max !== undefined ? `max="${field.max}"` : ''}
-                       ${field.step !== undefined ? `step="${field.step}"` : ''}
-                       value="${saved}">`;
-        } else if (field.type === 'select') {
-            html += `<select id="${field.id}" class="calc-select">`;
-            field.options.forEach(opt => {
-                html += `<option value="${opt.value}" ${saved === opt.value ? 'selected' : ''}>${opt.label}</option>`;
-            });
-            html += `</select>`;
-        }
-
-        if (field.help) {
-            html += `<p class="text-xs text-slate-500 mt-1">${field.help}</p>`;
-        }
-        html += `</div>`;
-    });
-
-    // Botones acción
     html += `
-        <button id="calculate-btn" class="calc-btn-primary w-full">
-            ⚡ CALCULAR AHORA
-        </button>
-        <div class="flex gap-2 mt-3">
-            <button id="toggle-log-btn" class="calc-btn-secondary flex-1">
-                🔬 Ver Fórmulas
-            </button>
-            <button id="save-inline-btn" class="calc-btn-secondary flex-1">
-                💾 Guardar
-            </button>
+            </div>
+            <div class="result-actions">
+                <button class="btn-result-action btn-result-primary" onclick="window.print()">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+                <button class="btn-result-action btn-result-secondary" onclick="copyResult(this)">
+                    <i class="fas fa-copy"></i> Copiar
+                </button>
+            </div>
         </div>
     `;
 
-    formContainer.innerHTML = html;
+    return html;
+}
 
-    // Event listeners del formulario
-    const calcBtn = document.getElementById('calculate-btn');
-    if (calcBtn) calcBtn.addEventListener('click', executeCalculation);
+function copyResult(btn) {
+    const card = btn.closest('.result-card');
+    const text = card.querySelector('.result-body').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('Resultado copiado al portapapeles', 'success');
+    }).catch(() => {
+        showToast('No se pudo copiar', 'error');
+    });
+}
 
-    const logBtn = document.getElementById('toggle-log-btn');
-    if (logBtn) logBtn.addEventListener('click', () => UIController.toggleLog());
+// ===== CALCULADORA: SUELDO NETO =====
+function calcularSueldoNeto() {
+    const sueldoBruto = parseFloat(document.getElementById('sn-sueldo-bruto').value);
+    if (!validateInput(sueldoBruto, 'Remuneración Bruta')) return;
 
-    const saveInlineBtn = document.getElementById('save-inline-btn');
-    if (saveInlineBtn) saveInlineBtn.addEventListener('click', saveCalculation);
+    const regimen = document.getElementById('sn-regimen').value;
+    const pensionTipo = document.getElementById('sn-pension').value;
+    const tieneAsigFamiliar = document.getElementById('sn-asig-familiar').checked;
+    const meses = parseInt(document.getElementById('sn-meses').value) || 12;
 
-    // Auto-guardar valores en AppState
-    calc.fields.forEach(field => {
-        const el = document.getElementById(field.id);
-        if (el) {
-            el.addEventListener('input', e => {
-                AppState.formValues[field.id] = e.target.value;
-            });
+    const asigFamiliar = tieneAsigFamiliar ? DATA.getAsignacionFamiliar() : 0;
+    const remuneracionTotal = sueldoBruto + asigFamiliar;
+
+    // Pensiones
+    const pension = DATA.PENSIONES[pensionTipo];
+    let descuentoPension = 0;
+    let detallePension = [];
+
+    if (pensionTipo === 'onp') {
+        descuentoPension = remuneracionTotal * pension.aporte;
+        detallePension = [
+            { label: 'ONP (13%)', value: descuentoPension }
+        ];
+    } else {
+        const aporteObligatorio = remuneracionTotal * pension.aporte;
+        const comision = remuneracionTotal * pension.comision;
+        const seguro = remuneracionTotal * pension.seguro;
+        descuentoPension = aporteObligatorio + comision + seguro;
+        detallePension = [
+            { label: `Fondo obligatorio (${(pension.aporte * 100).toFixed(0)}%)`, value: aporteObligatorio },
+            { label: `Comisión (${(pension.comision * 100).toFixed(2)}%)`, value: comision },
+            { label: `Prima seguro (${(pension.seguro * 100).toFixed(2)}%)`, value: seguro }
+        ];
+    }
+
+    // IR 5ta categoría (proyección anual simplificada)
+    const rentaBrutaAnual = remuneracionTotal * 14; // 12 + 2 gratificaciones
+    const deduccion7UIT = DATA.getDeduccion7UIT();
+    const rentaNetaAnual = Math.max(0, rentaBrutaAnual - deduccion7UIT);
+    const { impuesto: irAnual } = DATA.calcularIRAnual(rentaNetaAnual);
+    const irMensual = irAnual / 12;
+
+    const totalDescuentos = descuentoPension + irMensual;
+    const sueldoNeto = remuneracionTotal - totalDescuentos;
+
+    // Bar chart data
+    const maxVal = remuneracionTotal;
+    const barChart = [
+        { label: 'Sueldo Neto', value: sueldoNeto, percent: (sueldoNeto / maxVal * 100).toFixed(1), color: '#10b981' },
+        { label: 'Pensión', value: descuentoPension, percent: (descuentoPension / maxVal * 100).toFixed(1), color: '#6366f1' },
+        { label: 'IR 5ta Cat.', value: irMensual, percent: Math.max(1, (irMensual / maxVal * 100)).toFixed(1), color: '#ef4444' }
+    ];
+
+    const sections = [
+        {
+            title: 'Ingresos',
+            rows: [
+                { icon: 'fas fa-coins', label: 'Sueldo Bruto', value: `S/ ${fmt(sueldoBruto)}`, class: 'positive' },
+                ...(tieneAsigFamiliar ? [{ icon: 'fas fa-people-roof', label: 'Asignación Familiar', value: `S/ ${fmt(asigFamiliar)}`, class: 'positive' }] : []),
+                { icon: 'fas fa-plus-circle', label: 'Remuneración Total', value: `S/ ${fmt(remuneracionTotal)}`, class: 'positive', total: true }
+            ]
+        },
+        {
+            title: 'Descuentos',
+            rows: [
+                ...detallePension.map(d => ({
+                    icon: 'fas fa-minus-circle',
+                    label: d.label,
+                    value: `- S/ ${fmt(d.value)}`,
+                    class: 'negative'
+                })),
+                {
+                    icon: 'fas fa-landmark',
+                    label: `IR 5ta Cat. (mensual)`,
+                    value: irMensual > 0 ? `- S/ ${fmt(irMensual)}` : 'S/ 0.00',
+                    class: irMensual > 0 ? 'negative' : ''
+                },
+                {
+                    icon: 'fas fa-minus-circle',
+                    label: 'Total Descuentos',
+                    value: `- S/ ${fmt(totalDescuentos)}`,
+                    class: 'negative',
+                    total: true
+                }
+            ]
+        },
+        {
+            title: 'Información Adicional',
+            rows: [
+                { icon: 'fas fa-briefcase', label: 'Régimen', value: DATA.REGIMENES[regimen].nombre },
+                { icon: 'fas fa-id-card', label: 'Sistema Pensiones', value: pension.nombre },
+                { icon: 'fas fa-percent', label: '% Descuento Total', value: `${((totalDescuentos / remuneracionTotal) * 100).toFixed(2)}%` },
+                { icon: 'fas fa-calendar', label: 'Sueldo Neto Anual (est.)', value: `S/ ${fmt(sueldoNeto * meses)}` }
+            ]
         }
+    ];
+
+    const resultArea = document.getElementById('result-sueldo-neto');
+    resultArea.innerHTML = generateResultHTML({
+        heroLabel: 'Tu Sueldo Neto Mensual',
+        heroAmount: sueldoNeto,
+        heroSub: `De un bruto de S/ ${fmt(remuneracionTotal)}`,
+        sections,
+        barChart
     });
 
-    setupConditionalFields();
+    showToast('Sueldo neto calculado correctamente', 'success');
 }
 
-// ===== CAMPOS CONDICIONALES =====
-function setupConditionalFields() {
-    document.querySelectorAll('[data-conditional-field]').forEach(fieldEl => {
-        const depField = fieldEl.dataset.conditionalField;
-        const depValue = fieldEl.dataset.conditionalValue;
-        const trigger  = document.getElementById(depField);
+// ===== CALCULADORA: GRATIFICACIÓN =====
+function calcularGratificacion() {
+    const sueldo = parseFloat(document.getElementById('grat-sueldo').value);
+    if (!validateInput(sueldo, 'Remuneración')) return;
 
-        if (!trigger) return;
+    const periodo = document.getElementById('grat-periodo').value;
+    const mesesTrabajados = parseInt(document.getElementById('grat-meses').value) || 6;
+    const tieneAsigFamiliar = document.getElementById('grat-asig-familiar').checked;
+    const tieneBonif = document.getElementById('grat-bonif').checked;
 
-        const toggle = () => {
-            const show = trigger.value === depValue;
-            fieldEl.style.display = show ? 'block' : 'none';
-        };
+    const asigFamiliar = tieneAsigFamiliar ? DATA.getAsignacionFamiliar() : 0;
+    const remuComputable = sueldo + asigFamiliar;
 
-        trigger.addEventListener('change', toggle);
-        toggle(); // estado inicial
+    // Gratificación proporcional
+    const gratificacion = (remuComputable / 6) * Math.min(mesesTrabajados, 6);
+
+    // Bonificación extraordinaria (9% = EsSalud que no se paga)
+    const bonifExtraordinaria = tieneBonif ? gratificacion * DATA.GRATIFICACION.bonificacion_extraordinaria : 0;
+
+    const totalGratificacion = gratificacion + bonifExtraordinaria;
+
+    const periodoInfo = DATA.GRATIFICACION.periodos[periodo];
+
+    const sections = [
+        {
+            title: 'Cálculo de Gratificación',
+            rows: [
+                { icon: 'fas fa-coins', label: 'Remuneración Base', value: `S/ ${fmt(sueldo)}` },
+                ...(tieneAsigFamiliar ? [{ icon: 'fas fa-people-roof', label: 'Asignación Familiar', value: `S/ ${fmt(asigFamiliar)}` }] : []),
+                { icon: 'fas fa-calculator', label: 'Remuneración Computable', value: `S/ ${fmt(remuComputable)}` },
+                { icon: 'fas fa-calendar', label: 'Meses trabajados en semestre', value: `${mesesTrabajados} / 6 meses` },
+                { icon: 'fas fa-gift', label: 'Gratificación', value: `S/ ${fmt(gratificacion)}`, class: 'positive' }
+            ]
+        },
+        {
+            title: 'Bonificación Extraordinaria (Ley 30334)',
+            rows: [
+                { icon: 'fas fa-percent', label: 'Tasa (9% de EsSalud)', value: '9%' },
+                { icon: 'fas fa-plus-circle', label: 'Bonificación Extraordinaria', value: `S/ ${fmt(bonifExtraordinaria)}`, class: 'positive' },
+                { icon: 'fas fa-money-bill-wave', label: 'TOTAL A RECIBIR', value: `S/ ${fmt(totalGratificacion)}`, class: 'positive', total: true }
+            ]
+        },
+        {
+            title: 'Información del Período',
+            rows: [
+                { icon: 'fas fa-calendar-alt', label: 'Período', value: periodoInfo.nombre },
+                { icon: 'fas fa-calendar-check', label: 'Semestre computable', value: `Mes ${periodoInfo.semestre_inicio} al ${periodoInfo.semestre_fin}` },
+                { icon: 'fas fa-info-circle', label: 'Nota', value: 'No sujeta a descuentos' }
+            ]
+        }
+    ];
+
+    const barChart = [
+        { label: 'Gratificación Base', value: gratificacion, percent: ((gratificacion / totalGratificacion) * 100).toFixed(1), color: '#10b981' },
+        { label: 'Bonif. Extraordinaria', value: bonifExtraordinaria, percent: ((bonifExtraordinaria / totalGratificacion) * 100).toFixed(1), color: '#6366f1' }
+    ];
+
+    document.getElementById('result-gratificacion').innerHTML = generateResultHTML({
+        heroLabel: `Gratificación ${periodoInfo.nombre}`,
+        heroAmount: totalGratificacion,
+        heroSub: `${mesesTrabajados} meses trabajados en el semestre`,
+        sections,
+        barChart
     });
+
+    showToast('Gratificación calculada correctamente', 'success');
 }
 
-// ===== EVENT LISTENERS GLOBALES =====
-function setupEventListeners() {
-    // Mobile menu
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const closeMobileNav = document.getElementById('close-mobile-nav');
-    const mobileNav     = document.getElementById('mobile-nav');
+// ===== CALCULADORA: CTS =====
+function calcularCTS() {
+    const sueldo = parseFloat(document.getElementById('cts-sueldo').value);
+    if (!validateInput(sueldo, 'Remuneración')) return;
 
-    if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', () => mobileNav?.classList.remove('-translate-x-full'));
-    if (closeMobileNav) closeMobileNav.addEventListener('click', () => mobileNav?.classList.add('-translate-x-full'));
+    const meses = parseInt(document.getElementById('cts-meses').value) || 0;
+    const dias = parseInt(document.getElementById('cts-dias').value) || 0;
+    const tieneAsigFamiliar = document.getElementById('cts-asig-familiar').checked;
+    const gratificacion = parseFloat(document.getElementById('cts-gratificacion').value) || 0;
 
-    // Régimen selectors (sincronizados + recálculo auto)
-    const regimenSelectors = ['regimen-select', 'mobile-regimen-select'];
-    regimenSelectors.forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.addEventListener('change', e => {
-            AppState.currentRegimen = e.target.value;
-            localStorage.setItem('sueldopro_regimen', AppState.currentRegimen);
-            // Sincronizar el otro select
-            regimenSelectors.forEach(otherId => {
-                const other = document.getElementById(otherId);
-                if (other && other.id !== id) other.value = AppState.currentRegimen;
-            });
-            updateRegimenInfo();
-            // Recalcular automáticamente si hay resultado previo
-            if (AppState.lastPayload) executeCalculation();
-        });
+    const asigFamiliar = tieneAsigFamiliar ? DATA.getAsignacionFamiliar() : 0;
+    const sextoGratificacion = gratificacion * DATA.CTS.factor_sexto_gratificacion;
+    const remuComputable = sueldo + asigFamiliar + sextoGratificacion;
+
+    // CTS = (Remu computable / 360) * (meses * 30 + días)
+    const totalDias = (meses * 30) + dias;
+    const cts = (remuComputable / 360) * totalDias;
+
+    const sections = [
+        {
+            title: 'Remuneración Computable',
+            rows: [
+                { icon: 'fas fa-coins', label: 'Sueldo Base', value: `S/ ${fmt(sueldo)}` },
+                ...(tieneAsigFamiliar ? [{ icon: 'fas fa-people-roof', label: 'Asignación Familiar', value: `S/ ${fmt(asigFamiliar)}` }] : []),
+                { icon: 'fas fa-gift', label: '1/6 Última Gratificación', value: `S/ ${fmt(sextoGratificacion)}` },
+                { icon: 'fas fa-calculator', label: 'Remu. Computable Total', value: `S/ ${fmt(remuComputable)}`, total: true }
+            ]
+        },
+        {
+            title: 'Cálculo CTS',
+            rows: [
+                { icon: 'fas fa-calendar', label: 'Meses completos', value: `${meses} meses` },
+                { icon: 'fas fa-calendar-day', label: 'Días adicionales', value: `${dias} días` },
+                { icon: 'fas fa-hashtag', label: 'Total días computables', value: `${totalDias} días` },
+                { icon: 'fas fa-divide', label: 'Valor diario', value: `S/ ${fmt(remuComputable / 360)}` },
+                { icon: 'fas fa-piggy-bank', label: 'CTS a Depositar', value: `S/ ${fmt(cts)}`, class: 'positive', total: true }
+            ]
+        },
+        {
+            title: 'Base Legal',
+            rows: [
+                { icon: 'fas fa-gavel', label: 'Norma', value: 'D.S. N° 001-97-TR' },
+                { icon: 'fas fa-calendar-alt', label: 'Depósitos', value: 'Mayo y Noviembre' },
+                { icon: 'fas fa-info-circle', label: 'Fórmula', value: '(Remu / 360) × días' }
+            ]
+        }
+    ];
+
+    document.getElementById('result-cts').innerHTML = generateResultHTML({
+        heroLabel: 'CTS a Depositar',
+        heroAmount: cts,
+        heroSub: `Por ${meses} meses y ${dias} días`,
+        sections
     });
 
-    // Navegación
-    document.addEventListener('click', e => {
-        const navBtn = e.target.closest('[data-nav]');
-        if (navBtn) navigate(navBtn.dataset.nav);
-
-        const calcTab = e.target.closest('[data-calc]');
-        if (calcTab) selectCalculator(calcTab.dataset.calc);
-    });
-
-    // Mobile calc select
-    const mobileCalcSelect = document.getElementById('mobile-calc-select');
-    if (mobileCalcSelect) mobileCalcSelect.addEventListener('change', e => selectCalculator(e.target.value));
-
-    // Botones de acción en panel resultado
-    const shareBtn  = document.getElementById('share-result-btn');
-    const exportBtn = document.getElementById('export-pdf-btn');
-    const saveBtn   = document.getElementById('save-calc-btn');
-    const tcBtn     = document.getElementById('tc-calculate-btn');
-    const compBtn   = document.getElementById('comp-calculate-btn');
-
-    if (shareBtn)  shareBtn.addEventListener('click', shareResult);
-    if (exportBtn) exportBtn.addEventListener('click', exportPDF);
-    if (saveBtn)   saveBtn.addEventListener('click', saveCalculation);
-    if (tcBtn)     tcBtn.addEventListener('click', calculateTrueCost);
-    if (compBtn)   compBtn.addEventListener('click', calculateComparison);
+    showToast('CTS calculada correctamente', 'success');
 }
 
-// =====================================================================
-// ─── FUNCIONES DE ACCIÓN ──────────────────────────────────────────────
-// =====================================================================
+// ===== CALCULADORA: HORAS EXTRAS =====
+function calcularHorasExtras() {
+    const sueldo = parseFloat(document.getElementById('he-sueldo').value);
+    if (!validateInput(sueldo, 'Remuneración')) return;
 
-function saveCalculation() {
-    if (!AppState.lastPayload) {
-        alert('⚠️ Primero realiza un cálculo.');
+    const horas25 = parseFloat(document.getElementById('he-horas-25').value) || 0;
+    const horas35 = parseFloat(document.getElementById('he-horas-35').value) || 0;
+    const jornada = parseInt(document.getElementById('he-jornada').value) || 48;
+    const esNocturno = document.getElementById('he-nocturno').checked;
+
+    const jornadaDiaria = jornada / 6; // Asumiendo 6 días
+    const valorHora = sueldo / 30 / jornadaDiaria;
+
+    // Sobretasa nocturna se aplica al sueldo base
+    const sueldoConNocturno = esNocturno ? sueldo * (1 + DATA.HORAS_EXTRAS.nocturno) : sueldo;
+    const valorHoraBase = esNocturno ? sueldoConNocturno / 30 / jornadaDiaria : valorHora;
+
+    const pagoHoras25 = horas25 * valorHoraBase * (1 + DATA.HORAS_EXTRAS.primeras_2h);
+    const pagoHoras35 = horas35 * valorHoraBase * (1 + DATA.HORAS_EXTRAS.excedentes);
+    const sobreTasaNocturna = esNocturno ? sueldo * DATA.HORAS_EXTRAS.nocturno : 0;
+
+    const totalHorasExtras = pagoHoras25 + pagoHoras35;
+    const totalConNocturno = totalHorasExtras + sobreTasaNocturna;
+
+    const sections = [
+        {
+            title: 'Valor Hora',
+            rows: [
+                { icon: 'fas fa-coins', label: 'Remuneración Mensual', value: `S/ ${fmt(sueldo)}` },
+                { icon: 'fas fa-clock', label: 'Jornada semanal', value: `${jornada} horas` },
+                { icon: 'fas fa-clock', label: 'Jornada diaria', value: `${jornadaDiaria.toFixed(1)} horas` },
+                { icon: 'fas fa-calculator', label: 'Valor hora normal', value: `S/ ${fmt(valorHora)}` },
+                ...(esNocturno ? [{ icon: 'fas fa-moon', label: 'Valor hora nocturna (+35%)', value: `S/ ${fmt(valorHoraBase)}` }] : [])
+            ]
+        },
+        {
+            title: 'Horas Extras',
+            rows: [
+                { icon: 'fas fa-clock', label: `Primeras 2h (+25%): ${horas25}h × S/ ${fmt(valorHoraBase * 1.25)}`, value: `S/ ${fmt(pagoHoras25)}`, class: 'positive' },
+                { icon: 'fas fa-clock', label: `Excedentes (+35%): ${horas35}h × S/ ${fmt(valorHoraBase * 1.35)}`, value: `S/ ${fmt(pagoHoras35)}`, class: 'positive' },
+                { icon: 'fas fa-calculator', label: 'Total Horas Extras', value: `S/ ${fmt(totalHorasExtras)}`, class: 'positive', total: true }
+            ]
+        },
+        ...(esNocturno ? [{
+            title: 'Sobretasa Nocturna',
+            rows: [
+                { icon: 'fas fa-moon', label: 'Sobretasa nocturna (35%)', value: `S/ ${fmt(sobreTasaNocturna)}`, class: 'positive' },
+                { icon: 'fas fa-money-bill-wave', label: 'Total con nocturno', value: `S/ ${fmt(totalConNocturno)}`, class: 'positive', total: true }
+            ]
+        }] : []),
+        {
+            title: 'Base Legal',
+            rows: [
+                { icon: 'fas fa-gavel', label: 'Norma', value: 'D.S. N° 007-2002-TR' },
+                { icon: 'fas fa-info-circle', label: 'Nota', value: 'Horas extras son voluntarias' }
+            ]
+        }
+    ];
+
+    const barChart = [
+        { label: 'Horas al 25%', value: pagoHoras25, percent: totalHorasExtras > 0 ? ((pagoHoras25 / totalHorasExtras) * 100).toFixed(1) : 0, color: '#10b981' },
+        { label: 'Horas al 35%', value: pagoHoras35, percent: totalHorasExtras > 0 ? ((pagoHoras35 / totalHorasExtras) * 100).toFixed(1) : 0, color: '#f59e0b' }
+    ];
+
+    document.getElementById('result-horas-extras').innerHTML = generateResultHTML({
+        heroLabel: 'Total Horas Extras',
+        heroAmount: esNocturno ? totalConNocturno : totalHorasExtras,
+        heroSub: `${horas25 + horas35} horas extra en total`,
+        sections,
+        barChart
+    });
+
+    showToast('Horas extras calculadas correctamente', 'success');
+}
+
+// ===== CALCULADORA: VACACIONES =====
+function calcularVacaciones() {
+    const sueldo = parseFloat(document.getElementById('vac-sueldo').value);
+    if (!validateInput(sueldo, 'Remuneración')) return;
+
+    const diasVac = parseInt(document.getElementById('vac-dias').value) || 30;
+    const mesesLaborados = parseInt(document.getElementById('vac-meses').value) || 12;
+    const noGozadas = document.getElementById('vac-no-gozadas').checked;
+
+    // Remuneración vacacional proporcional
+    const remuVacacional = (sueldo / 30) * diasVac * (mesesLaborados / 12);
+
+    // Indemnización por vacaciones no gozadas (triple)
+    const indemnizacion = noGozadas ? remuVacacional * 2 : 0; // 1 ya se pagó como descanso, +2 de indemnización
+    const totalVacaciones = remuVacacional + indemnizacion;
+
+    const sections = [
+        {
+            title: 'Cálculo de Vacaciones',
+            rows: [
+                { icon: 'fas fa-coins', label: 'Remuneración Mensual', value: `S/ ${fmt(sueldo)}` },
+                { icon: 'fas fa-calendar', label: 'Días de vacaciones', value: `${diasVac} días` },
+                { icon: 'fas fa-calendar-check', label: 'Meses laborados', value: `${mesesLaborados} meses` },
+                { icon: 'fas fa-calculator', label: 'Valor diario', value: `S/ ${fmt(sueldo / 30)}` },
+                { icon: 'fas fa-umbrella-beach', label: 'Remuneración Vacacional', value: `S/ ${fmt(remuVacacional)}`, class: 'positive' }
+            ]
+        },
+        ...(noGozadas ? [{
+            title: 'Indemnización por Vacaciones No Gozadas',
+            rows: [
+                { icon: 'fas fa-exclamation-triangle', label: 'Remuneración por descanso', value: `S/ ${fmt(remuVacacional)}` },
+                { icon: 'fas fa-exclamation-triangle', label: 'Indemnización (x2)', value: `S/ ${fmt(indemnizacion)}`, class: 'positive' },
+                { icon: 'fas fa-info-circle', label: 'Total (triple remuneración)', value: `S/ ${fmt(totalVacaciones)}`, class: 'positive', total: true }
+            ]
+        }] : []),
+        {
+            title: 'Información',
+            rows: [
+                { icon: 'fas fa-gavel', label: 'Norma', value: 'D. Leg. N° 713' },
+                { icon: 'fas fa-calendar', label: 'Derecho', value: '30 días por año completo' },
+                { icon: 'fas fa-info-circle', label: 'Récord mínimo', value: '260 días efectivos (6 días/sem)' }
+            ]
+        }
+    ];
+
+    document.getElementById('result-vacaciones').innerHTML = generateResultHTML({
+        heroLabel: noGozadas ? 'Total Vacaciones (No Gozadas)' : 'Remuneración Vacacional',
+        heroAmount: totalVacaciones,
+        heroSub: `${diasVac} días de descanso vacacional`,
+        sections
+    });
+
+    showToast('Vacaciones calculadas correctamente', 'success');
+}
+
+// ===== CALCULADORA: IMPUESTO A LA RENTA =====
+function calcularImpuestoRenta() {
+    const sueldoMensual = parseFloat(document.getElementById('ir-sueldo').value);
+    if (!validateInput(sueldoMensual, 'Remuneración')) return;
+
+    const meses = parseInt(document.getElementById('ir-meses').value) || 12;
+    const gratificaciones = parseInt(document.getElementById('ir-gratificaciones').value) || 2;
+    const otrosIngresos = parseFloat(document.getElementById('ir-otros').value) || 0;
+
+    const rentaBrutaAnual = (sueldoMensual * meses) + (sueldoMensual * gratificaciones) + otrosIngresos;
+    const deduccion7UIT = DATA.getDeduccion7UIT();
+    const rentaNetaAnual = Math.max(0, rentaBrutaAnual - deduccion7UIT);
+
+    const { impuesto: irAnual, detalleTramos } = DATA.calcularIRAnual(rentaNetaAnual);
+    const irMensual = meses > 0 ? irAnual / meses : 0;
+    const tasaEfectiva = rentaBrutaAnual > 0 ? (irAnual / rentaBrutaAnual) * 100 : 0;
+
+    const sections = [
+        {
+            title: 'Renta Bruta Anual',
+            rows: [
+                { icon: 'fas fa-coins', label: `Remuneraciones (${meses} meses)`, value: `S/ ${fmt(sueldoMensual * meses)}` },
+                { icon: 'fas fa-gift', label: `Gratificaciones (${gratificaciones})`, value: `S/ ${fmt(sueldoMensual * gratificaciones)}` },
+                ...(otrosIngresos > 0 ? [{ icon: 'fas fa-plus', label: 'Otros ingresos', value: `S/ ${fmt(otrosIngresos)}` }] : []),
+                { icon: 'fas fa-calculator', label: 'Renta Bruta Anual', value: `S/ ${fmt(rentaBrutaAnual)}`, total: true }
+            ]
+        },
+        {
+            title: 'Deducciones',
+            rows: [
+                { icon: 'fas fa-minus-circle', label: `Deducción 7 UIT (${DATA.UIT} × 7)`, value: `- S/ ${fmt(deduccion7UIT)}`, class: 'negative' },
+                { icon: 'fas fa-calculator', label: 'Renta Neta Anual', value: `S/ ${fmt(rentaNetaAnual)}`, total: true }
+            ]
+        },
+        {
+            title: 'Impuesto por Tramos',
+            rows: detalleTramos.map(t => ({
+                icon: 'fas fa-layer-group',
+                label: `${t.nombre} (${(t.tasa * 100).toFixed(0)}%)`,
+                value: t.base > 0 ? `S/ ${fmt(t.impuesto)}` : 'S/ 0.00',
+                class: t.impuesto > 0 ? 'negative' : ''
+            })).concat([
+                { icon: 'fas fa-landmark', label: 'IR Anual Total', value: `S/ ${fmt(irAnual)}`, class: 'negative', total: true }
+            ])
+        },
+        {
+            title: 'Retención Mensual',
+            rows: [
+                { icon: 'fas fa-calendar', label: 'Retención mensual estimada', value: `S/ ${fmt(irMensual)}`, class: 'negative' },
+                { icon: 'fas fa-percent', label: 'Tasa efectiva', value: `${tasaEfectiva.toFixed(2)}%` },
+                { icon: 'fas fa-info-circle', label: 'UIT 2024', value: `S/ ${fmt(DATA.UIT)}` }
+            ]
+        }
+    ];
+
+    const barChart = detalleTramos
+        .filter(t => t.impuesto > 0)
+        .map(t => ({
+            label: `${t.nombre} (${(t.tasa * 100).toFixed(0)}%)`,
+            value: t.impuesto,
+            percent: irAnual > 0 ? ((t.impuesto / irAnual) * 100).toFixed(1) : 0,
+            color: t.color
+        }));
+
+    document.getElementById('result-impuesto-renta').innerHTML = generateResultHTML({
+        heroLabel: 'Impuesto a la Renta Anual',
+        heroAmount: irAnual,
+        heroSub: `Retención mensual estimada: S/ ${fmt(irMensual)}`,
+        sections,
+        barChart
+    });
+
+    showToast('Impuesto a la Renta calculado correctamente', 'success');
+}
+
+// ===== CALCULADORA: LIQUIDACIÓN =====
+function calcularLiquidacion() {
+    const sueldo = parseFloat(document.getElementById('liq-sueldo').value);
+    if (!validateInput(sueldo, 'Última Remuneración')) return;
+
+    const fechaIngreso = new Date(document.getElementById('liq-fecha-ingreso').value);
+    const fechaCese = new Date(document.getElementById('liq-fecha-cese').value);
+    const motivo = document.getElementById('liq-motivo').value;
+    const vacPendientes = parseInt(document.getElementById('liq-vac-pendientes').value) || 0;
+    const tieneAsigFamiliar = document.getElementById('liq-asig-familiar').checked;
+
+    if (isNaN(fechaIngreso.getTime()) || isNaN(fechaCese.getTime())) {
+        showToast('Por favor ingresa fechas válidas', 'error');
         return;
     }
-    const { result, calc, regimen } = AppState.lastPayload;
-    const entry = {
-        id:         Date.now(),
-        calculator: calc.title,
-        regimen:    `${regimen.icon} ${regimen.nombre}`,
-        result:     `S/ ${r2(result.total).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`,
-        date:       new Date().toLocaleDateString('es-PE'),
-        time:       new Date().toLocaleTimeString('es-PE')
+
+    if (fechaCese <= fechaIngreso) {
+        showToast('La fecha de cese debe ser posterior al ingreso', 'error');
+        return;
+    }
+
+    const asigFamiliar = tieneAsigFamiliar ? DATA.getAsignacionFamiliar() : 0;
+    const remuTotal = sueldo + asigFamiliar;
+
+    // Calcular tiempo trabajado
+    const diffTime = fechaCese - fechaIngreso;
+    const totalDias = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const anos = Math.floor(totalDias / 365);
+    const mesesRestantes = Math.floor((totalDias % 365) / 30);
+    const diasRestantes = totalDias % 30;
+
+    // CTS Trunca
+    const mesesUltimoSemestre = mesesRestantes % 6 || (mesesRestantes > 0 ? mesesRestantes : 0);
+    const ctsTrunca = (remuTotal / 360) * ((mesesUltimoSemestre * 30) + diasRestantes);
+
+    // Gratificación Trunca (proporcional al semestre)
+    const mesActual = fechaCese.getMonth() + 1;
+    let mesesSemestre;
+    if (mesActual <= 6) {
+        mesesSemestre = mesActual; // Ene-Jun
+    } else {
+        mesesSemestre = mesActual - 6; // Jul-Dic
+    }
+    const gratTrunca = (remuTotal / 6) * mesesSemestre;
+    const bonifGratTrunca = gratTrunca * 0.09;
+
+    // Vacaciones Truncas
+    const mesesVacTruncos = totalDias > 365 ? mesesRestantes : Math.floor(totalDias / 30);
+    const vacTruncas = (remuTotal / 12) * mesesVacTruncos;
+
+    // Vacaciones pendientes
+    const pagoVacPendientes = (sueldo / 30) * vacPendientes;
+
+    // Indemnización por despido arbitrario
+    let indemnizacion = 0;
+    if (motivo === 'despido-arbitrario') {
+        const anosCompletos = anos + (mesesRestantes / 12);
+        indemnizacion = Math.min(
+            remuTotal * 1.5 * anosCompletos,
+            remuTotal * DATA.LIQUIDACION.indemnizacion_despido_arbitrario.tope_meses
+        );
+    }
+
+    const totalLiquidacion = ctsTrunca + gratTrunca + bonifGratTrunca + vacTruncas + pagoVacPendientes + indemnizacion;
+
+    const motivoTextos = {
+        'renuncia': 'Renuncia voluntaria',
+        'despido-arbitrario': 'Despido arbitrario',
+        'mutuo-acuerdo': 'Mutuo acuerdo',
+        'fin-contrato': 'Fin de contrato'
     };
 
-    AppState.savedCalculations.unshift(entry);
-    if (AppState.savedCalculations.length > 10) AppState.savedCalculations = AppState.savedCalculations.slice(0, 10);
-    localStorage.setItem('sueldopro_saved_calcs', JSON.stringify(AppState.savedCalculations));
+    const sections = [
+        {
+            title: 'Datos del Trabajador',
+            rows: [
+                { icon: 'fas fa-coins', label: 'Última Remuneración', value: `S/ ${fmt(remuTotal)}` },
+                { icon: 'fas fa-calendar-plus', label: 'Fecha Ingreso', value: fechaIngreso.toLocaleDateString('es-PE') },
+                { icon: 'fas fa-calendar-minus', label: 'Fecha Cese', value: fechaCese.toLocaleDateString('es-PE') },
+                { icon: 'fas fa-clock', label: 'Tiempo de servicio', value: `${anos} años, ${mesesRestantes} meses, ${diasRestantes} días` },
+                { icon: 'fas fa-ban', label: 'Motivo de cese', value: motivoTextos[motivo] }
+            ]
+        },
+        {
+            title: 'Beneficios Truncos',
+            rows: [
+                { icon: 'fas fa-piggy-bank', label: 'CTS Trunca', value: `S/ ${fmt(ctsTrunca)}`, class: 'positive' },
+                { icon: 'fas fa-gift', label: 'Gratificación Trunca', value: `S/ ${fmt(gratTrunca)}`, class: 'positive' },
+                { icon: 'fas fa-plus', label: 'Bonif. Extraordinaria (9%)', value: `S/ ${fmt(bonifGratTrunca)}`, class: 'positive' },
+                { icon: 'fas fa-umbrella-beach', label: 'Vacaciones Truncas', value: `S/ ${fmt(vacTruncas)}`, class: 'positive' },
+                ...(vacPendientes > 0 ? [{ icon: 'fas fa-calendar-xmark', label: `Vacaciones Pendientes (${vacPendientes} días)`, value: `S/ ${fmt(pagoVacPendientes)}`, class: 'positive' }] : [])
+            ]
+        },
+        ...(motivo === 'despido-arbitrario' ? [{
+            title: 'Indemnización por Despido Arbitrario',
+            rows: [
+                { icon: 'fas fa-gavel', label: '1.5 remuneraciones × año', value: `S/ ${fmt(indemnizacion)}`, class: 'positive' },
+                { icon: 'fas fa-info-circle', label: 'Tope máximo', value: `12 remuneraciones (S/ ${fmt(remuTotal * 12)})` }
+            ]
+        }] : []),
+        {
+            title: 'Total',
+            rows: [
+                { icon: 'fas fa-money-bill-wave', label: 'TOTAL LIQUIDACIÓN', value: `S/ ${fmt(totalLiquidacion)}`, class: 'positive', total: true }
+            ]
+        }
+    ];
 
-    alert(`💾 Guardado!\n${calc.icon} ${calc.title}\n${entry.result}\n${regimen.nombre}`);
-}
+    const barItems = [
+        { label: 'CTS Trunca', value: ctsTrunca, color: '#6366f1' },
+        { label: 'Gratif. Trunca', value: gratTrunca + bonifGratTrunca, color: '#10b981' },
+        { label: 'Vacaciones', value: vacTruncas + pagoVacPendientes, color: '#06b6d4' }
+    ];
+    if (indemnizacion > 0) barItems.push({ label: 'Indemnización', value: indemnizacion, color: '#ef4444' });
 
-function shareResult() {
-    if (!AppState.lastPayload) { alert('⚠️ Primero realiza un cálculo.'); return; }
-    const { result, calc, regimen } = AppState.lastPayload;
-    const text = `${calc.icon} ${calc.title}\n🏢 ${regimen.nombre}\n💰 S/ ${r2(result.total).toLocaleString('es-PE',{minimumFractionDigits:2})}\n✅ SueldoPro Ultra Perú 2026 — sueldopro-2026.vercel.app`;
+    const barChart = barItems.map(item => ({
+        ...item,
+        percent: totalLiquidacion > 0 ? ((item.value / totalLiquidacion) * 100).toFixed(1) : 0
+    }));
 
-    if (navigator.share) {
-        navigator.share({ title: 'SueldoPro Ultra', text, url: window.location.href }).catch(() => {});
-    } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => alert('✅ Copiado al portapapeles!'));
-    } else {
-        alert(text);
-    }
-}
-
-function exportPDF() {
-    if (!AppState.lastPayload) { alert('⚠️ Primero realiza un cálculo.'); return; }
-    // Delegar a la función exportPDF existente en el código original si existe,
-    // o emitir una notificación de que se necesita jsPDF.
-    if (typeof window.jspdf !== 'undefined' || typeof window.jsPDF !== 'undefined') {
-        _doPDFExport(AppState.lastPayload);
-    } else {
-        alert('⚠️ PDF Export requiere la librería jsPDF. Verifica que esté cargada en index.html.');
-    }
-}
-
-// ===== CÁLCULOS ESPECIALES DE SECCIONES =====
-function calculateTrueCost() {
-    const salary = parseFloat(document.getElementById('tc-salary')?.value || 0);
-    const { ok, error } = CalculationEngine.validate(salary, { min: PERU_DATA.minWage, label: 'Sueldo' });
-    if (!ok) { alert(`⚠️ ${error}`); return; }
-
-    const regimen  = REGIMENES_PERU[AppState.currentRegimen];
-    const costoCalc = calcularCostoEmpleador(salary, 0, regimen, {});
-    // Renderizar en el contenedor de Costo Real
-    const tcResult = document.getElementById('tc-result');
-    if (tcResult) {
-        tcResult.innerHTML = `
-            <div class="tc-summary">
-                <div class="tc-row"><span>Sueldo Bruto</span><span>${fmt(costoCalc.sueldoBruto)}</span></div>
-                <div class="tc-row"><span>ESSALUD (9%)</span><span>${fmt(costoCalc.essalud)}</span></div>
-                <div class="tc-row"><span>SCTR + Vida Ley</span><span>${fmt(costoCalc.sctr + costoCalc.vidaLey)}</span></div>
-                <div class="tc-row"><span>Gratificaciones (prov.)</span><span>${fmt(costoCalc.provGratificaciones)}</span></div>
-                <div class="tc-row"><span>CTS (prov.)</span><span>${fmt(costoCalc.provCTS)}</span></div>
-                <div class="tc-row"><span>Vacaciones (prov.)</span><span>${fmt(costoCalc.provVacaciones)}</span></div>
-                <div class="tc-total"><span>COSTO TOTAL</span><span>${fmt(costoCalc.costoTotal)}</span></div>
-                <div class="tc-pct">Carga Social: ${costoCalc.porcentajeCarga.toFixed(1)}%</div>
-            </div>
-        `;
-    }
-}
-
-function calculateComparison() {
-    const salary  = parseFloat(document.getElementById('comp-salary')?.value || 0);
-    if (!salary || salary < PERU_DATA.minWage) { alert('⚠️ Ingresa un sueldo válido.'); return; }
-
-    const resultados = Object.values(REGIMENES_PERU).map(reg => {
-        const neto = calcularSalarioNeto(salary, reg, { sistemaPension: 'afp', afpNombre: 'integra' });
-        return { regimen: reg, neto: neto.salarioNeto };
+    document.getElementById('result-liquidacion').innerHTML = generateResultHTML({
+        heroLabel: 'Total Liquidación',
+        heroAmount: totalLiquidacion,
+        heroSub: `${anos} años, ${mesesRestantes} meses de servicio`,
+        sections,
+        barChart
     });
 
-    const compResult = document.getElementById('comp-result');
-    if (compResult) {
-        compResult.innerHTML = resultados.map(r => `
-            <div class="comp-row">
-                <span>${r.regimen.icon} ${r.regimen.nombre}</span>
-                <span class="comp-neto">${fmt(r.neto)}</span>
-            </div>
-        `).join('');
-    }
+    showToast('Liquidación calculada correctamente', 'success');
 }
 
-// ===== PENTÁGONO BRIDGE =====
-function syncToLiquidezForce(data) {
-    try {
-        localStorage.setItem('pentagon_bridge_sueldopro', JSON.stringify({
-            app: 'sueldopro_peru',
-            timestamp: new Date().toISOString(),
-            data
+// ===== CALCULADORA: ESSALUD =====
+function calcularEsSalud() {
+    const sueldo = parseFloat(document.getElementById('es-sueldo').value);
+    if (!validateInput(sueldo, 'Remuneración')) return;
+
+    const trabajadores = parseInt(document.getElementById('es-trabajadores').value) || 1;
+    const regimen = document.getElementById('es-regimen').value;
+
+    const tasaInfo = DATA.ESSALUD[regimen];
+    const aporteUnitario = sueldo * tasaInfo.tasa;
+    const baseMinima = DATA.RMV * tasaInfo.tasa;
+    const aporteReal = Math.max(aporteUnitario, baseMinima);
+    const aporteTotal = aporteReal * trabajadores;
+    const aporteAnual = aporteTotal * 12;
+
+    const sections = [
+        {
+            title: 'Cálculo EsSalud',
+            rows: [
+                { icon: 'fas fa-coins', label: 'Remuneración por trabajador', value: `S/ ${fmt(sueldo)}` },
+                { icon: 'fas fa-percent', label: 'Tasa EsSalud', value: `${(tasaInfo.tasa * 100).toFixed(1)}%` },
+                { icon: 'fas fa-calculator', label: 'Aporte por trabajador', value: `S/ ${fmt(aporteReal)}` },
+                { icon: 'fas fa-info-circle', label: 'Base mínima (sobre RMV)', value: `S/ ${fmt(baseMinima)}` }
+            ]
+        },
+        {
+            title: 'Totales',
+            rows: [
+                { icon: 'fas fa-users', label: `Trabajadores: ${trabajadores}`, value: '' },
+                { icon: 'fas fa-heart-pulse', label: 'Aporte Mensual Total', value: `S/ ${fmt(aporteTotal)}`, class: 'negative', total: true },
+                { icon: 'fas fa-calendar', label: 'Aporte Anual Total', value: `S/ ${fmt(aporteAnual)}`, class: 'negative' }
+            ]
+        },
+        {
+            title: 'Información',
+            rows: [
+                { icon: 'fas fa-briefcase', label: 'Régimen', value: tasaInfo.nombre },
+                { icon: 'fas fa-gavel', label: 'Norma', value: 'Ley N° 26790' },
+                { icon: 'fas fa-info-circle', label: 'Nota', value: 'A cargo del empleador' }
+            ]
+        }
+    ];
+
+    document.getElementById('result-essalud').innerHTML = generateResultHTML({
+        heroLabel: 'Aporte Mensual EsSalud',
+        heroAmount: aporteTotal,
+        heroSub: `${trabajadores} trabajador(es) | ${tasaInfo.nombre}`,
+        sections
+    });
+
+    showToast('EsSalud calculado correctamente', 'success');
+}
+
+// ===== CALCULADORA: UTILIDADES =====
+function calcularUtilidades() {
+    const rentaEmpresa = parseFloat(document.getElementById('util-renta').value);
+    if (!validateInput(rentaEmpresa, 'Renta anual')) return;
+
+    const porcentajeSector = parseInt(document.getElementById('util-sector').value);
+    const totalTrabajadores = parseInt(document.getElementById('util-total-trabajadores').value) || 1;
+    const diasTrabajados = parseInt(document.getElementById('util-dias-trabajados').value) || 360;
+    const totalDias = parseInt(document.getElementById('util-total-dias').value) || 1;
+    const remuAnual = parseFloat(document.getElementById('util-remu-anual').value) || 0;
+    const totalRemu = parseFloat(document.getElementById('util-total-remu').value) || 1;
+
+    const montoDistribuir = rentaEmpresa * (porcentajeSector / 100);
+    const mitad = montoDistribuir / 2;
+
+    // 50% por días trabajados
+    const porDias = (mitad / totalDias) * diasTrabajados;
+
+    // 50% por remuneraciones
+    const porRemu = totalRemu > 0 ? (mitad / totalRemu) * remuAnual : 0;
+
+    const totalUtilidades = porDias + porRemu;
+
+    // Tope: 18 remuneraciones mensuales
+    const remuMensual = remuAnual / 12;
+    const tope = remuMensual * 18;
+    const utilidadesFinal = Math.min(totalUtilidades, tope);
+    const excedente = totalUtilidades > tope ? totalUtilidades - tope : 0;
+
+    const sections = [
+        {
+            title: 'Datos de la Empresa',
+            rows: [
+                { icon: 'fas fa-building', label: 'Renta Neta Anual', value: `S/ ${fmt(rentaEmpresa)}` },
+                { icon: 'fas fa-percent', label: 'Porcentaje del sector', value: `${porcentajeSector}%` },
+                { icon: 'fas fa-calculator', label: 'Monto a distribuir', value: `S/ ${fmt(montoDistribuir)}` },
+                { icon: 'fas fa-users', label: 'Total trabajadores', value: totalTrabajadores }
+            ]
+        },
+        {
+            title: 'Tu Participación',
+            rows: [
+                { icon: 'fas fa-calendar-check', label: `50% por días (${diasTrabajados}/${totalDias})`, value: `S/ ${fmt(porDias)}`, class: 'positive' },
+                { icon: 'fas fa-coins', label: `50% por remuneración`, value: `S/ ${fmt(porRemu)}`, class: 'positive' },
+                { icon: 'fas fa-calculator', label: 'Total calculado', value: `S/ ${fmt(totalUtilidades)}` },
+                ...(excedente > 0 ? [{ icon: 'fas fa-exclamation-triangle', label: `Tope 18 remuneraciones (S/ ${fmt(tope)})`, value: `Excedente: S/ ${fmt(excedente)}`, class: 'negative' }] : []),
+                { icon: 'fas fa-chart-pie', label: 'UTILIDADES A RECIBIR', value: `S/ ${fmt(utilidadesFinal)}`, class: 'positive', total: true }
+            ]
+        },
+        {
+            title: 'Base Legal',
+            rows: [
+                { icon: 'fas fa-gavel', label: 'Norma', value: 'D. Leg. N° 892' },
+                { icon: 'fas fa-info-circle', label: 'Distribución', value: '50% días + 50% remuneraciones' },
+                { icon: 'fas fa-calendar', label: 'Plazo de pago', value: '30 días de vencida la DJ anual' }
+            ]
+        }
+    ];
+
+    const barChart = [
+        { label: '50% por Días', value: porDias, percent: totalUtilidades > 0 ? ((porDias / totalUtilidades) * 100).toFixed(1) : 50, color: '#6366f1' },
+        { label: '50% por Remuneraciones', value: porRemu, percent: totalUtilidades > 0 ? ((porRemu / totalUtilidades) * 100).toFixed(1) : 50, color: '#10b981' }
+    ];
+
+    document.getElementById('result-utilidades').innerHTML = generateResultHTML({
+        heroLabel: 'Tus Utilidades',
+        heroAmount: utilidadesFinal,
+        heroSub: `Sector: ${porcentajeSector}% | ${diasTrabajados} días trabajados`,
+        sections,
+        barChart
+    });
+
+    showToast('Utilidades calculadas correctamente', 'success');
+}
+
+// ===== CALCULADORA: ASIGNACIÓN FAMILIAR =====
+function calcularAsignacionFamiliar() {
+    const hijos = parseInt(document.getElementById('af-hijos').value) || 0;
+    const rmv = parseFloat(document.getElementById('af-rmv').value);
+
+    const asignacion = rmv * DATA.ASIGNACION_FAMILIAR_PORCENTAJE;
+    const tieneDerechoText = hijos > 0 ? 'Sí tiene derecho' : 'No tiene derecho (requiere al menos 1 hijo)';
+    const montoFinal = hijos > 0 ? asignacion : 0;
+
+    const sections = [
+        {
+            title: 'Cálculo',
+            rows: [
+                { icon: 'fas fa-coins', label: 'RMV Vigente', value: `S/ ${fmt(rmv)}` },
+                { icon: 'fas fa-percent', label: 'Porcentaje', value: '10%' },
+                { icon: 'fas fa-baby', label: 'Número de hijos', value: hijos },
+                { icon: 'fas fa-check-circle', label: 'Derecho', value: tieneDerechoText },
+                { icon: 'fas fa-money-bill-wave', label: 'Asignación Familiar Mensual', value: `S/ ${fmt(montoFinal)}`, class: montoFinal > 0 ? 'positive' : '', total: true }
+            ]
+        },
+        {
+            title: 'Proyección Anual',
+            rows: [
+                { icon: 'fas fa-calendar', label: 'Asignación anual (12 meses)', value: `S/ ${fmt(montoFinal * 12)}` },
+                { icon: 'fas fa-gift', label: 'Impacto en gratificación', value: `+ S/ ${fmt(montoFinal)} por gratificación` },
+                { icon: 'fas fa-piggy-bank', label: 'Impacto en CTS', value: `Se incluye en remu. computable` }
+            ]
+        },
+        {
+            title: 'Requisitos',
+            rows: [
+                { icon: 'fas fa-gavel', label: 'Norma', value: 'Ley N° 25129' },
+                { icon: 'fas fa-baby', label: 'Hijos menores de', value: '18 años' },
+                { icon: 'fas fa-graduation-cap', label: 'Excepción', value: 'Hasta 24 años si estudian' },
+                { icon: 'fas fa-info-circle', label: 'Importante', value: 'Monto fijo (no varía por # hijos)' }
+            ]
+        }
+    ];
+
+    document.getElementById('result-asignacion-familiar').innerHTML = generateResultHTML({
+        heroLabel: 'Asignación Familiar Mensual',
+        heroAmount: montoFinal,
+        heroSub: hijos > 0 ? `Monto fijo por ${hijos} hijo(s)` : 'Sin derecho - Se requiere al menos 1 hijo',
+        sections
+    });
+
+    showToast('Asignación familiar calculada', 'success');
+}
+
+// ===== CALCULADORA: RENTA 5TA DETALLADA =====
+function calcularRentaQuinta() {
+    const sueldoMensual = parseFloat(document.getElementById('r5-sueldo').value);
+    if (!validateInput(sueldoMensual, 'Remuneración')) return;
+
+    const mesCalculo = parseInt(document.getElementById('r5-mes').value);
+    const remuRecibidas = parseFloat(document.getElementById('r5-recibido').value) || 0;
+
+    // Paso 1: Proyección de renta bruta anual
+    const mesesFaltantes = 12 - mesCalculo + 1; // incluye mes actual
+    const proyeccionRemus = sueldoMensual * mesesFaltantes;
+    const gratificacionesProyectadas = (mesCalculo <= 7 ? sueldoMensual : 0) + (mesCalculo <= 12 ? sueldoMensual : 0);
+    const rentaBrutaAnual = remuRecibidas + proyeccionRemus + gratificacionesProyectadas;
+
+    // Paso 2: Deducción 7 UIT
+    const deduccion7UIT = DATA.getDeduccion7UIT();
+    const rentaNetaAnual = Math.max(0, rentaBrutaAnual - deduccion7UIT);
+
+    // Paso 3: Impuesto anual
+    const { impuesto: irAnual, detalleTramos } = DATA.calcularIRAnual(rentaNetaAnual);
+
+    // Paso 4: Retención mensual según divisor
+    const divisor = DATA.DIVISORES_MENSUALES[mesCalculo];
+    const retencionMensual = irAnual / divisor;
+
+    const mesesNombres = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+    const sections = [
+        {
+            title: 'Paso 1: Proyección Renta Bruta Anual',
+            rows: [
+                { icon: 'fas fa-coins', label: 'Remuneraciones ya percibidas', value: `S/ ${fmt(remuRecibidas)}` },
+                { icon: 'fas fa-arrow-right', label: `Proyección restante (${mesesFaltantes} meses)`, value: `S/ ${fmt(proyeccionRemus)}` },
+                { icon: 'fas fa-gift', label: 'Gratificaciones proyectadas', value: `S/ ${fmt(gratificacionesProyectadas)}` },
+                { icon: 'fas fa-calculator', label: 'Renta Bruta Anual Proyectada', value: `S/ ${fmt(rentaBrutaAnual)}`, total: true }
+            ]
+        },
+        {
+            title: 'Paso 2: Renta Neta',
+            rows: [
+                { icon: 'fas fa-minus-circle', label: 'Deducción 7 UIT', value: `- S/ ${fmt(deduccion7UIT)}`, class: 'negative' },
+                { icon: 'fas fa-calculator', label: 'Renta Neta Anual', value: `S/ ${fmt(rentaNetaAnual)}`, total: true }
+            ]
+        },
+        {
+            title: 'Paso 3: Impuesto por Tramos',
+            rows: detalleTramos.filter(t => t.base > 0).map(t => ({
+                icon: 'fas fa-layer-group',
+                label: `${t.nombre}: S/ ${fmt(t.base)} × ${(t.tasa * 100).toFixed(0)}%`,
+                value: `S/ ${fmt(t.impuesto)}`
+            })).concat([
+                { icon: 'fas fa-landmark', label: 'IR Anual Proyectado', value: `S/ ${fmt(irAnual)}`, class: 'negative', total: true }
+            ])
+        },
+        {
+            title: `Paso 4: Retención de ${mesesNombres[mesCalculo]}`,
+            rows: [
+                { icon: 'fas fa-divide', label: `Divisor del mes (${mesesNombres[mesCalculo]})`, value: divisor },
+                { icon: 'fas fa-calculator', label: `S/ ${fmt(irAnual)} ÷ ${divisor}`, value: `S/ ${fmt(retencionMensual)}` },
+                { icon: 'fas fa-money-bill-wave', label: 'RETENCIÓN DEL MES', value: `S/ ${fmt(retencionMensual)}`, class: 'negative', total: true }
+            ]
+        }
+    ];
+
+    const barChart = detalleTramos
+        .filter(t => t.impuesto > 0)
+        .map(t => ({
+            label: `${t.nombre} (${(t.tasa * 100).toFixed(0)}%)`,
+            value: t.impuesto,
+            percent: irAnual > 0 ? ((t.impuesto / irAnual) * 100).toFixed(1) : 0,
+            color: t.color
         }));
-    } catch (e) {
-        console.warn('Bridge sync error:', e);
-    }
+
+    document.getElementById('result-renta-quinta').innerHTML = generateResultHTML({
+        heroLabel: `Retención IR - ${mesesNombres[mesCalculo]}`,
+        heroAmount: retencionMensual,
+        heroSub: `IR Anual proyectado: S/ ${fmt(irAnual)} | Divisor: ${divisor}`,
+        sections,
+        barChart
+    });
+
+    showToast('Retención mensual calculada correctamente', 'success');
 }
 
-// =====================================================================
-// FIN DE SCRIPT.JS v3.0 — SUELDOPRO ULTRA PERÚ 2026
-// Arquitectura: CalculationEngine + UIController + AppState
-// =====================================================================
+// ===== CALCULADORA: COSTO EMPLEADOR =====
+function calcularCostoEmpleador() {
+    const sueldo = parseFloat(document.getElementById('ce-sueldo').value);
+    if (!validateInput(sueldo, 'Remuneración')) return;
+
+    const regimen = document.getElementById('ce-regimen').value;
+    const tieneAsigFamiliar = document.getElementById('ce-asig-familiar').checked;
+    const tieneSCTR = document.getElementById('ce-sctr').checked;
+
+    const regimenInfo = DATA.REGIMENES[regimen];
+    const asigFamiliar = (tieneAsigFamiliar && regimenInfo.asig_familiar) ? DATA.getAsignacionFamiliar() : 0;
+    const remuTotal = sueldo + asigFamiliar;
+
+    // EsSalud
+    const essalud = remuTotal * regimenInfo.essalud;
+
+    // CTS mensual provisionada
+    let ctsMensual = 0;
+    if (regimenInfo.cts) {
+        const factorCTS = regimenInfo.cts_factor || 1;
+        ctsMensual = (remuTotal * factorCTS) / 12;
+    }
+
+    // Gratificación mensual provisionada
+    let gratMensual = 0;
+    if (regimenInfo.gratificacion) {
+        const factorGrat = regimenInfo.gratificacion_meses || 1;
+        gratMensual = (remuTotal * factorGrat * 2) / 12; // 2 gratificaciones al año
+    }
+
+    // Bonificación extraordinaria
+    const bonifExtraMensual = gratMensual * 0.09;
+
+    // Vacaciones provisionadas
+    const vacMensual = (remuTotal / 12) * (regimenInfo.vacaciones_dias / 30);
+
+    // SCTR
+    const sctr = tieneSCTR ? remuTotal * DATA.SCTR.total : 0;
+
+    // Total mensual
+    const costoTotal = remuTotal + essalud + ctsMensual + gratMensual + bonifExtraMensual + vacMensual + sctr;
+    const costoAnual = costoTotal * 12;
+    const porcentajeExtra = ((costoTotal - sueldo) / sueldo * 100);
+
+    const sections = [
+        {
+            title: 'Remuneración',
+            rows: [
+                { icon: 'fas fa-coins', label: 'Sueldo Bruto', value: `S/ ${fmt(sueldo)}` },
+                ...(asigFamiliar > 0 ? [{ icon: 'fas fa-people-roof', label: 'Asignación Familiar', value: `S/ ${fmt(asigFamiliar)}` }] : []),
+                { icon: 'fas fa-calculator', label: 'Remuneración Total', value: `S/ ${fmt(remuTotal)}`, total: true }
+            ]
+        },
+        {
+            title: 'Costos del Empleador (mensual provisionado)',
+            rows: [
+                { icon: 'fas fa-heart-pulse', label: `EsSalud (${(regimenInfo.essalud * 100).toFixed(1)}%)`, value: `S/ ${fmt(essalud)}`, class: 'negative' },
+                ...(ctsMensual > 0 ? [{ icon: 'fas fa-piggy-bank', label: 'CTS (provisión mensual)', value: `S/ ${fmt(ctsMensual)}`, class: 'negative' }] : []),
+                ...(gratMensual > 0 ? [{ icon: 'fas fa-gift', label: 'Gratificaciones (provisión)', value: `S/ ${fmt(gratMensual)}`, class: 'negative' }] : []),
+                ...(bonifExtraMensual > 0 ? [{ icon: 'fas fa-plus', label: 'Bonif. Extraordinaria (9%)', value: `S/ ${fmt(bonifExtraMensual)}`, class: 'negative' }] : []),
+                { icon: 'fas fa-umbrella-beach', label: 'Vacaciones (provisión)', value: `S/ ${fmt(vacMensual)}`, class: 'negative' },
+                ...(sctr > 0 ? [{ icon: 'fas fa-shield-halved', label: 'SCTR', value: `S/ ${fmt(sctr)}`, class: 'negative' }] : [])
+            ]
+        },
+        {
+            title: 'Resumen',
+            rows: [
+                { icon: 'fas fa-building', label: 'COSTO TOTAL MENSUAL', value: `S/ ${fmt(costoTotal)}`, class: 'negative', total: true },
+                { icon: 'fas fa-calendar', label: 'Costo Total Anual', value: `S/ ${fmt(costoAnual)}` },
+                { icon: 'fas fa-percent', label: 'Sobrecosto sobre sueldo', value: `+${porcentajeExtra.toFixed(1)}%` },
+                { icon: 'fas fa-briefcase', label: 'Régimen', value: regimenInfo.nombre }
+            ]
+        }
+    ];
+
+    const barChart = [
+        { label: 'Remuneración', value: remuTotal, percent: ((remuTotal / costoTotal) * 100).toFixed(1), color: '#10b981' },
+        { label: 'EsSalud', value: essalud, percent: ((essalud / costoTotal) * 100).toFixed(1), color: '#ef4444' },
+        { label: 'CTS', value: ctsMensual, percent: ((ctsMensual / costoTotal) * 100).toFixed(1), color: '#6366f1' },
+        { label: 'Gratificaciones', value: gratMensual + bonifExtraMensual, percent: (((gratMensual + bonifExtraMensual) / costoTotal) * 100).toFixed(1), color: '#f59e0b' },
+        { label: 'Vacaciones', value: vacMensual, percent: ((vacMensual / costoTotal) * 100).toFixed(1), color: '#06b6d4' }
+    ].filter(item => item.value > 0);
+
+    document.getElementById('result-costo-empleador').innerHTML = generateResultHTML({
+        heroLabel: 'Costo Total del Empleador',
+        heroAmount: costoTotal,
+        heroSub: `+${porcentajeExtra.toFixed(1)}% sobre sueldo bruto de S/ ${fmt(sueldo)}`,
+        sections,
+        barChart
+    });
+
+    showToast('Costo del empleador calculado correctamente', 'success');
+}
