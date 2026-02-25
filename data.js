@@ -1,90 +1,130 @@
 /* ================================================================
-   SueldoPro Ultra - DATA LAYER v4.0 (2026)
+   SueldoPro Ultra v4.0 - MOTOR DE PLANILLA CORPORATIVO
    ================================================================
-   Motor Financiero de Precisión Certificada SUNAT
-   Legislación Laboral Peruana 2026 - SUNAT / MTPE / SBS
-
-   PRINCIPIOS DE ARQUITECTURA:
-   1. CERO redondeos intermedios (10 decimales internos)
-   2. PLAME-Style: roundPLAME() por concepto, luego suma
-   3. Toda base remunerativa = Sueldo + Asig. Familiar + Prom.Var.
-   4. Funciones puras: input → output, sin side effects
-   5. Audit trail completo en cada cálculo
-   6. Tope SBS Prima AFP sobre remuneración máxima asegurable
-   7. EPS diferencia: 6.75% vs 9% EsSalud (Ley 30334 §3)
-   8. Triple Vacacional (Art. 23 D.Leg. 713)
+   Grado: Fiscalización SUNAT / PLAME / T-Registro
+   
+   REGLAS DE ARQUITECTURA:
+   ───────────────────────
+   R1: CERO redondeos intermedios (10 decimales internos)
+   R2: Redondeo PLAME: solo al monto final por concepto
+   R3: Base remunerativa universal = Sueldo + AF + Prom. Variables
+   R4: Tope SBS para prima de seguro AFP
+   R5: Bonif. 9% EsSalud / 6.75% EPS sobre gratificación
+   R6: Triple vacacional completa
+   R7: Descuento dominical por inasistencias
+   R8: Comisión mixta AFP (flujo + saldo)
+   R9: Divisor HE configurable (240 legal vs días reales)
+   R10: Audit trail paso a paso en cada cálculo
+   
+   Normativa: D.S. 003-97-TR, Ley 27735, Ley 30334, 
+   D.S. 001-97-TR, D.Leg. 713, D.S. 007-2002-TR,
+   Art. 53° LIR, Ley 26790, D.Leg. 688, D.Leg. 892
    ================================================================ */
 
 const DATA = Object.freeze({
 
-    // ═══════════════════════════════════════════
-    //  PARÁMETROS NACIONALES 2026
-    // ═══════════════════════════════════════════
-    UIT: 5150,                           // D.S. N° 309-2023-EF (sin cambio 2026)
-    RMV: 1075,                           // R.M. 2026 — INNEGOCIABLE
-    ASIGNACION_FAMILIAR_PCT: 0.10,       // Ley 25129: 10% RMV = S/ 107.50
+    // ═══════════════════════════════════════════════
+    //  CONSTANTES NACIONALES 2025-2026
+    // ═══════════════════════════════════════════════
+    UIT: 5150,
+    RMV: 1075,
+    ASIGNACION_FAMILIAR_PCT: 0.10,
+    VERSION: '4.0.0',
+    YEAR: 2026,
 
-    // ═══════════════════════════════════════════
-    //  CONSTANTES DE CÁLCULO LEGAL
-    // ═══════════════════════════════════════════
-    HORAS_MES_LEGAL: 240,               // 8h × 30d (D.S. 007-2002-TR Art. 12)
+    // ═══════════════════════════════════════════════
+    //  CONSTANTES LEGALES DE CÁLCULO
+    // ═══════════════════════════════════════════════
+    HORAS_MES_LEGAL: 240,
     DIAS_MES: 30,
     DIAS_ANO: 360,
     MESES_ANO: 12,
     MESES_SEMESTRE: 6,
+    JORNADA_DIARIA_LEGAL: 8,
+    JORNADA_SEMANAL_LEGAL: 48,
 
-    // ═══════════════════════════════════════════
-    //  SISTEMA DE PENSIONES (SBS - 2026)
-    //  Tope Prima SIS = Remuneración Máxima Asegurable SBS
-    // ═══════════════════════════════════════════
-    AFP_SBS_TOPE: 13733.34,             // Remu. Máx. Asegurable (RMA) SBS — Prima se detiene aquí
+    // Tope SBS para Prima de Seguro AFP (actualizado 2025-2026)
+    TOPE_SBS_SEGURO: 13733.34,
 
+    // Mínimo de veces que debe percibirse concepto variable
+    // para ser computable (Art. 17 D.S. 001-97-TR)
+    MINIMO_PERCEPCIONES_VARIABLE: 3,
+    MESES_PROMEDIO_VARIABLE: 6,
+
+    // ═══════════════════════════════════════════════
+    //  SISTEMA DE PENSIONES (SBS 2025-2026)
+    // ═══════════════════════════════════════════════
     PENSIONES: Object.freeze({
         onp: {
+            id: 'onp',
             nombre: "ONP",
             nombreCompleto: "Oficina de Normalización Previsional",
+            tipo: 'snp',
             aporte: 0.13,
-            comision: 0,
+            comisionFlujo: 0,
+            comisionMixta: 0,
+            comisionSaldo: 0,
             seguro: 0,
-            get total() { return this.aporte + this.comision + this.seguro; }
+            topeSBSAplica: false
         },
         "afp-habitat": {
+            id: 'afp-habitat',
             nombre: "AFP Habitat",
             nombreCompleto: "AFP Habitat S.A.",
+            tipo: 'spp',
             aporte: 0.10,
-            comision: 0.0138,
+            comisionFlujo: 0.0138,
+            comisionMixta: 0.0038,
+            comisionSaldo: 0.0038,
             seguro: 0.0192,
-            get total() { return this.aporte + this.comision + this.seguro; }
+            topeSBSAplica: true
         },
         "afp-integra": {
+            id: 'afp-integra',
             nombre: "AFP Integra",
-            nombreCompleto: "AFP Integra S.A.",
+            nombreCompleto: "Integra AFP S.A.",
+            tipo: 'spp',
             aporte: 0.10,
-            comision: 0.0155,
+            comisionFlujo: 0.0155,
+            comisionMixta: 0.0045,
+            comisionSaldo: 0.0045,
             seguro: 0.0192,
-            get total() { return this.aporte + this.comision + this.seguro; }
+            topeSBSAplica: true
         },
         "afp-prima": {
+            id: 'afp-prima',
             nombre: "AFP Prima",
-            nombreCompleto: "AFP Prima S.A.",
+            nombreCompleto: "Prima AFP S.A.",
+            tipo: 'spp',
             aporte: 0.10,
-            comision: 0.0155,
+            comisionFlujo: 0.0155,
+            comisionMixta: 0.0045,
+            comisionSaldo: 0.0045,
             seguro: 0.0192,
-            get total() { return this.aporte + this.comision + this.seguro; }
+            topeSBSAplica: true
         },
         "afp-profuturo": {
+            id: 'afp-profuturo',
             nombre: "AFP ProFuturo",
-            nombreCompleto: "AFP ProFuturo S.A.",
+            nombreCompleto: "ProFuturo AFP S.A.",
+            tipo: 'spp',
             aporte: 0.10,
-            comision: 0.0169,
+            comisionFlujo: 0.0169,
+            comisionMixta: 0.0056,
+            comisionSaldo: 0.0056,
             seguro: 0.0192,
-            get total() { return this.aporte + this.comision + this.seguro; }
+            topeSBSAplica: true
         }
     }),
 
-    // ═══════════════════════════════════════════
+    TIPO_COMISION: Object.freeze({
+        FLUJO: 'flujo',
+        MIXTA: 'mixta'
+    }),
+
+    // ═══════════════════════════════════════════════
     //  TRAMOS IR 5TA CATEGORÍA (Art. 53° LIR)
-    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════════════
     TRAMOS_IR: Object.freeze([
         { hasta_uit: 5,        tasa: 0.08, nombre: "1er Tramo", color: "#6366f1" },
         { hasta_uit: 20,       tasa: 0.14, nombre: "2do Tramo", color: "#10b981" },
@@ -101,75 +141,74 @@ const DATA = Object.freeze({
         9: 4,  10: 4, 11: 4, 12: 1
     }),
 
-    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════════════
     //  HORAS EXTRAS (D.S. 007-2002-TR)
-    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════════════
     SOBRETASA_HE_25: 0.25,
     SOBRETASA_HE_35: 0.35,
     SOBRETASA_NOCTURNO: 0.35,
 
-    // Factor inasistencia PLAME: 1 día + 1/5 dominical = 1.2
-    FACTOR_INASISTENCIA: 1.2,
+    DIVISOR_HE: Object.freeze({
+        LEGAL_240: 240,
+        DIAS_REALES: 'real'
+    }),
 
-    // ═══════════════════════════════════════════
-    //  ESSALUD (Ley 26790)
-    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════════════
+    //  ESSALUD / EPS (Ley 26790)
+    // ═══════════════════════════════════════════════
     ESSALUD: Object.freeze({
-        general: { tasa: 0.09,  nombre: "Régimen General" },
-        pequena: { tasa: 0.09,  nombre: "Pequeña Empresa" },
-        agrario: { tasa: 0.06,  nombre: "Régimen Agrario" },
-        micro:   { tasa: 0.045, nombre: "Microempresa (subsidiado 50%)" }
+        general:  { tasa: 0.09,  nombre: "Régimen General" },
+        pequena:  { tasa: 0.09,  nombre: "Pequeña Empresa" },
+        agrario:  { tasa: 0.06,  nombre: "Régimen Agrario" },
+        micro:    { tasa: 0.045, nombre: "Microempresa (subsidiado 50%)" }
     }),
 
-    // ═══════════════════════════════════════════
-    //  GRATIFICACIÓN (Ley 27735 + Ley 30334)
-    //  Bonif. Extraordinaria diferenciada por EPS
-    // ═══════════════════════════════════════════
-    BONIF_EXTRAORDINARIA:     0.09,    // 9% — Trabajador sin EPS (EsSalud completo al empleador)
-    BONIF_EXTRAORDINARIA_EPS: 0.0675, // 6.75% — Trabajador con EPS (empleador aporta 75% EsSalud = 6.75%)
+    // Bonificación Extraordinaria sobre Gratificación
+    BONIF_ESSALUD: 0.09,
+    BONIF_EPS: 0.0675,
 
-    PERIODOS_GRATIFICACION: Object.freeze({
-        julio:    { nombre: "Fiestas Patrias", semestre: [1, 6],  mes_pago: 7 },
-        diciembre:{ nombre: "Navidad",         semestre: [7, 12], mes_pago: 12 }
-    }),
-
-    // Mínimo de veces para considerar variable en el semestre/año
-    VECES_MIN_VARIABLE_SEMESTRE: 3,
-    VECES_MIN_VARIABLE_ANO:      3,
-
-    // ═══════════════════════════════════════════
-    //  CTS (D.S. 001-97-TR)
-    // ═══════════════════════════════════════════
-    CTS_SEXTO_GRATIFICACION: 1 / 6,
-
-    // ═══════════════════════════════════════════
-    //  SCTR (D.S. 003-98-SA)
-    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════════════
+    //  SCTR + VIDA LEY
+    // ═══════════════════════════════════════════════
     SCTR: Object.freeze({
-        salud:   0.0053,
+        salud: 0.0053,
         pension: 0.0053,
         get total() { return this.salud + this.pension; }
     }),
 
-    // ═══════════════════════════════════════════
-    //  VIDA LEY (D. Leg. 688)
-    // ═══════════════════════════════════════════
     VIDA_LEY: Object.freeze({
-        "4-mas":  { factor: 16, nombre: "4+ años (16 remuneraciones)" },
-        "natural":{ factor: 32, nombre: "Muerte natural (32 remuneraciones)" },
-        prima_mensual_estimada: 0.0053
+        anos_minimo: 4,
+        prima_estimada: 0.0053,
+        cobertura_natural: 16,
+        cobertura_accidental: 32
     }),
 
-    // ═══════════════════════════════════════════
-    //  VACACIONES (D. Leg. 713)
-    // ═══════════════════════════════════════════
-    VACACIONES_INDEMNIZACION_FACTOR: 3, // Triple: 1 trabajo + 1 descanso + 1 indemnización
+    // ═══════════════════════════════════════════════
+    //  GRATIFICACIÓN (Ley 27735 + Ley 30334)
+    // ═══════════════════════════════════════════════
+    PERIODOS_GRATIFICACION: Object.freeze({
+        julio:     { nombre: "Fiestas Patrias", semestre: [1, 6],  mes_pago: 7 },
+        diciembre: { nombre: "Navidad",         semestre: [7, 12], mes_pago: 12 }
+    }),
 
-    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════════════
+    //  CTS (D.S. 001-97-TR)
+    // ═══════════════════════════════════════════════
+    CTS_SEXTO_GRATIFICACION: 1 / 6,
+
+    // ═══════════════════════════════════════════════
+    //  INASISTENCIAS - Descuento dominical
+    //  (D.Leg. 713 Art. 2, D.S. 012-92-TR)
+    //  Factor 1.2 = día laborable + parte proporcional dominical
+    // ═══════════════════════════════════════════════
+    FACTOR_DESCUENTO_INASISTENCIA: 1.2,
+
+    // ═══════════════════════════════════════════════
     //  REGÍMENES LABORALES
-    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════════════
     REGIMENES: Object.freeze({
         general: {
+            id: 'general',
             nombre: "Régimen General",
             cts: true,
             cts_dias_ano: 30,
@@ -184,6 +223,7 @@ const DATA = Object.freeze({
             indemnizacion_tope_remu: 12
         },
         pequena: {
+            id: 'pequena',
             nombre: "Pequeña Empresa",
             cts: true,
             cts_dias_ano: 15,
@@ -198,6 +238,7 @@ const DATA = Object.freeze({
             indemnizacion_tope_remu: 4
         },
         micro: {
+            id: 'micro',
             nombre: "Microempresa",
             cts: false,
             cts_dias_ano: 0,
@@ -213,88 +254,116 @@ const DATA = Object.freeze({
         }
     }),
 
-    // ═══════════════════════════════════════════
-    //  UTILIDADES (D. Leg. 892)
-    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════════════
+    //  UTILIDADES (D.Leg. 892)
+    // ═══════════════════════════════════════════════
     UTILIDADES_SECTOR: Object.freeze({
-        pesca:    { pct: 10, nombre: "Pesquería" },
-        telecom:  { pct: 10, nombre: "Telecomunicaciones" },
-        industria:{ pct: 8,  nombre: "Industria Manufacturera" },
-        mineria:  { pct: 8,  nombre: "Minería" },
-        comercio: { pct: 5,  nombre: "Comercio al por mayor/menor" },
-        otros:    { pct: 5,  nombre: "Otras actividades" }
+        10: "Pesquería / Telecomunicaciones",
+        8:  "Industria / Minería",
+        5:  "Comercio / Restaurantes / Otros"
     }),
     UTILIDADES_TOPE_REMUNERACIONES: 18,
 
-    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════════════
+    //  VACACIONES (D.Leg. 713)
+    //  Triple vacacional: Art. 23
+    // ═══════════════════════════════════════════════
+    TRIPLE_VACACIONAL: Object.freeze({
+        remuDescanso: 1,
+        remuTrabajo: 1,
+        indemnizacion: 1
+    }),
+
+    // ═══════════════════════════════════════════════
+    //  CONCEPTOS REMUNERATIVOS / NO REMUNERATIVOS
+    // ═══════════════════════════════════════════════
+    CONCEPTOS: Object.freeze({
+        REMUNERATIVO: {
+            sueldo_basico: { nombre: "Sueldo Básico", computableHE: true, computableBeneficios: true },
+            asig_familiar: { nombre: "Asignación Familiar", computableHE: true, computableBeneficios: true },
+            comisiones: { nombre: "Comisiones", computableHE: true, computableBeneficios: true, variable: true },
+            bonos_regulares: { nombre: "Bonos Regulares", computableHE: true, computableBeneficios: true, variable: true },
+            horas_extras: { nombre: "Horas Extras", computableHE: false, computableBeneficios: false },
+            alimentacion_principal: { nombre: "Alimentación Principal", computableHE: true, computableBeneficios: true }
+        },
+        NO_REMUNERATIVO: {
+            movilidad_supeditada: { nombre: "Movilidad (supeditada a asistencia)", tope_diario_pct: 0 },
+            refrigerio_no_alim: { nombre: "Refrigerio (no alimentación principal)", tope: 0 },
+            condicion_trabajo: { nombre: "Condición de Trabajo", tope: 0 },
+            gratificacion_extraordinaria: { nombre: "Gratificación Extraordinaria", tope: 0 },
+            utilidades: { nombre: "Utilidades", tope: 0 },
+            cts: { nombre: "CTS", tope: 0 }
+        }
+    }),
+
+    // ═══════════════════════════════════════════════
     //  FAQ
-    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════════════
     FAQ: Object.freeze([
         {
             pregunta: "¿Cómo se calcula el sueldo neto en Perú?",
-            respuesta: "El sueldo neto se obtiene restando al sueldo bruto (incluyendo asignación familiar si aplica) los descuentos de ley: aporte al sistema de pensiones (ONP 13% o AFP ~13.30%-13.61%) y, si corresponde, el Impuesto a la Renta de 5ta categoría. La fórmula es: <strong>Sueldo Neto = (Sueldo + Asig. Familiar) - Pensión - IR 5ta</strong>."
+            respuesta: "El sueldo neto se obtiene restando al sueldo bruto (incluyendo asignación familiar y promedio de conceptos variables) los descuentos de ley: aporte al sistema de pensiones (ONP 13% o AFP ~13.30%-13.61%) y, si corresponde, el Impuesto a la Renta de 5ta categoría. Fórmula: <strong>Sueldo Neto = Base Remunerativa - Pensión - IR 5ta - Descuento Inasistencias</strong>."
         },
         {
-            pregunta: "¿Cuándo se pagan las gratificaciones en Perú?",
-            respuesta: "Se pagan en <strong>julio (Fiestas Patrias)</strong> y <strong>diciembre (Navidad)</strong>. El monto equivale a una remuneración completa si se trabajó el semestre íntegro, o proporcional (sextos). Si el trabajador recibió comisiones/bonos al menos 3 veces en el semestre, el promedio de estos conceptos variables <strong>se integra a la base computable</strong>. Adicionalmente, se recibe una <strong>Bonificación Extraordinaria: 9% sin EPS, 6.75% con EPS</strong> (Ley 30334)."
-        },
-        {
-            pregunta: "¿Cómo se calcula la CTS?",
-            respuesta: "La CTS se deposita semestralmente (mayo y noviembre). La remuneración computable incluye: <strong>Sueldo + Asig. Familiar + 1/6 de la última gratificación + Promedio comisiones/bonos</strong> (si se percibieron ≥3 veces en el semestre). Se calcula como (Remu. Computable / 360) × días del semestre."
+            pregunta: "¿Cuándo se pagan las gratificaciones?",
+            respuesta: "Se pagan en <strong>julio (Fiestas Patrias)</strong> y <strong>diciembre (Navidad)</strong>. El monto equivale a una remuneración completa (incluyendo promedio de variables) si se trabajó el semestre íntegro. Se añade una <strong>Bonificación Extraordinaria del 9%</strong> (EsSalud) o <strong>6.75%</strong> si el trabajador tiene EPS."
         },
         {
             pregunta: "¿Cómo se calculan las horas extras legalmente?",
-            respuesta: "El valor hora se obtiene dividiendo la remuneración mensual entre <strong>240 horas</strong> (30d × 8h). Las primeras 2 horas extras tienen sobretasa de <strong>25%</strong> y las siguientes <strong>35%</strong>. Las inasistencias se descuentan con factor 1.2 (sueldo diario × 1.2) para incluir el proporcional de dominicales, siguiendo la metodología PLAME."
-        },
-        {
-            pregunta: "¿Cuál es la RMV y la UIT vigentes en 2026?",
-            respuesta: "RMV 2026: <strong>S/ 1,075</strong>. La Asignación Familiar es el 10% de la RMV = <strong>S/ 107.50</strong>. La UIT 2026 es <strong>S/ 5,150</strong>. Las primeras 7 UIT (S/ 36,050) de renta bruta anual están exoneradas del IR 5ta categoría."
-        },
-        {
-            pregunta: "¿Cuál es la diferencia entre ONP y AFP?",
-            respuesta: "La <strong>ONP</strong> descuenta un 13% fijo. Las <strong>AFP</strong> descuentan: 10% aporte obligatorio + comisión (1.38% a 1.69%) + prima de seguro (1.92%), pero la Prima SIS <strong>se detiene en la Remuneración Máxima Asegurable (RMA) de S/ 13,733.34</strong> establecida por la SBS. AFP Habitat es la más económica."
+            respuesta: "El valor hora se obtiene dividiendo la remuneración mensual computable entre <strong>240 horas</strong> (30d × 8h). Las primeras 2 horas extras diarias: <strong>+25%</strong>. Las siguientes: <strong>+35%</strong>. Trabajo nocturno (10pm-6am): sobretasa adicional del 35%."
         },
         {
             pregunta: "¿Qué es la Triple Vacacional?",
-            respuesta: "Si el empleador no otorgó las vacaciones en el año siguiente al año de derecho, el trabajador tiene derecho a <strong>3 remuneraciones</strong> (Art. 23, D. Leg. 713): 1 por el trabajo durante el período vacacional, 1 por el descanso no gozado y 1 de indemnización. En la práctica el empleador debe pagar 2 adicionales (la 1° ya fue pagada como salario ordinario)."
+            respuesta: "Si el trabajador no gozó sus vacaciones en el año siguiente al que adquirió el derecho, recibe: <strong>1 remuneración</strong> (ya pagada durante el trabajo), <strong>1 remuneración</strong> (por el descanso no gozado) y <strong>1 remuneración</strong> (indemnización). Total: 3 remuneraciones."
         },
         {
-            pregunta: "¿Qué incluye la liquidación de beneficios sociales?",
-            respuesta: "Incluye: <strong>CTS trunca</strong>, <strong>Gratificación trunca</strong> + bonif. extraordinaria, <strong>Vacaciones truncas</strong>, vacaciones no gozadas (con posible triple), y en caso de despido arbitrario, <strong>indemnización</strong> (1.5 remu/año en régimen general, tope 12 remuneraciones)."
+            pregunta: "¿Cuál es el tope SBS para la prima de seguro AFP?",
+            respuesta: "La prima de seguro de invalidez y sobrevivencia se calcula sobre la remuneración, pero tiene un <strong>tope de S/ 13,733.34</strong> (Remuneración Máxima Asegurable). Si el sueldo excede este monto, la prima se calcula solo hasta el tope."
         },
         {
-            pregunta: "¿Cuánto cuesta realmente un trabajador al empleador?",
-            respuesta: "En régimen general el costo adicional sobre el sueldo bruto es <strong>+45% a +55%</strong>: EsSalud (9%), CTS (~8.33%), Gratificaciones mensualizadas (~18.17% con bonif.), Vacaciones (~8.33%), Vida Ley (~0.53%), y SCTR si aplica (~1.06%). El <strong>Costo Laboral Anual</strong> incluye también el costo potencial de liquidación."
+            pregunta: "¿Cómo afectan las inasistencias al sueldo?",
+            respuesta: "Cada día de inasistencia injustificada descuenta: <strong>(Sueldo/30) × 1.2</strong>. El factor 1.2 incluye la parte proporcional del descanso semanal (dominical). Si se falta toda la semana, se pierde también el dominical completo."
         },
         {
-            pregunta: "¿Las utilidades son obligatorias para todas las empresas?",
-            respuesta: "Solo para empresas con <strong>más de 20 trabajadores</strong> que generan rentas de tercera categoría. El porcentaje varía por sector: Pesca/Telecom (10%), Industria/Minería (8%), Comercio/Otros (5%). Se distribuye 50% por días trabajados y 50% por remuneraciones. <strong>Tope: 18 remuneraciones mensuales</strong> por trabajador."
+            pregunta: "¿Cuál es la diferencia entre Bonif. 9% y 6.75%?",
+            respuesta: "La Bonificación Extraordinaria sobre la gratificación es del <strong>9%</strong> si el trabajador está afiliado a EsSalud, y del <strong>6.75%</strong> si tiene EPS (Entidad Prestadora de Salud). Esto porque con EPS, el empleador paga 6.75% a EsSalud y el resto a la EPS."
+        },
+        {
+            pregunta: "¿Qué es la comisión mixta en AFP?",
+            respuesta: "Es un esquema donde se cobra una comisión sobre el <strong>flujo</strong> (porcentaje del sueldo) más una comisión sobre el <strong>saldo</strong> acumulado en el fondo. El trabajador puede elegir entre comisión sobre flujo pura o comisión mixta."
+        },
+        {
+            pregunta: "¿Los conceptos variables se incluyen en la CTS?",
+            respuesta: "Sí, si se percibieron al menos <strong>3 veces en el semestre</strong> computable. Se toma el <strong>promedio de los últimos 6 meses</strong>. Aplica para comisiones, bonos regulares y otros conceptos remunerativos variables."
+        },
+        {
+            pregunta: "¿Cuánto cuesta un trabajador al empleador?",
+            respuesta: "En régimen general, el sobrecosto es de <strong>+45% a +55%</strong> sobre el sueldo bruto: EsSalud (9%), CTS (~8.33%), Gratificaciones + Bonif. (~18.17%), Vacaciones (~8.33%), Vida Ley (~0.53%), SCTR si aplica (~1.06%)."
         }
     ])
 });
 
 
 // ═══════════════════════════════════════════════════════════════
-//  MOTOR DE CÁLCULO DE PRECISIÓN v4.0 (PLAME-Certified)
+//  MOTOR DE CÁLCULO v4.0 (CalcEngine)
+//  Separación total: Lógica pura → sin acceso al DOM
 // ═══════════════════════════════════════════════════════════════
 
 const CalcEngine = (() => {
 
-    // ─── Precisión Financiera ─────────────────────────────────
-    const _precision = 10;
+    // ─────────────────────────────────────────────
+    //  PRECISIÓN FINANCIERA
+    //  R1: 10 decimales internos
+    //  R2: Redondeo PLAME al final por concepto
+    // ─────────────────────────────────────────────
+    const _PRECISION = 10;
 
-    function safeCalc(value) {
+    function safe(value) {
         if (typeof value !== 'number' || !isFinite(value)) return 0;
-        return parseFloat(value.toFixed(_precision));
+        return parseFloat(value.toFixed(_PRECISION));
     }
 
-    function roundUI(value) {
-        return Math.round(value * 100) / 100;
-    }
-
-    // PLAME-Style: redondear monto final POR CONCEPTO (no la base)
-    // Igual que hace la planilla electrónica SUNAT
-    function roundPLAME(value) {
+    function plameRound(value) {
         return Math.round(value * 100) / 100;
     }
 
@@ -302,927 +371,1004 @@ const CalcEngine = (() => {
         return new Intl.NumberFormat('es-PE', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
-        }).format(roundUI(amount));
+        }).format(plameRound(amount));
     }
 
-    // ─── Base Remunerativa Universal ──────────────────────────
-    function getBaseRemunerativa(sueldoBruto, incluyeAsigFamiliar, regimen = 'general') {
-        const reg = DATA.REGIMENES[regimen];
-        let asigFamiliar = 0;
-        if (incluyeAsigFamiliar && reg && reg.asig_familiar) {
-            asigFamiliar = safeCalc(DATA.RMV * DATA.ASIGNACION_FAMILIAR_PCT);
+    // ─────────────────────────────────────────────
+    //  AUDIT LOGGER
+    // ─────────────────────────────────────────────
+    class AuditLog {
+        constructor(titulo) {
+            this.lines = [`=== ${titulo} ===`, `Motor v${DATA.VERSION} | ${new Date().toISOString()}`];
         }
+        add(msg) { this.lines.push(msg); }
+        section(title) { this.lines.push(`\n--- ${title} ---`); }
+        calc(label, expr, result) { this.lines.push(`${label}: ${expr} = ${result}`); }
+        warn(msg) { this.lines.push(`⚠ ${msg}`); }
+        toString() { return this.lines.join('\n'); }
+    }
+
+    // ─────────────────────────────────────────────
+    //  BASE REMUNERATIVA UNIVERSAL
+    //  R3: Sueldo + AF + Promedio Variables
+    //  Incluye descuento por inasistencias
+    // ─────────────────────────────────────────────
+    function getBaseRemunerativa(params) {
+        const {
+            sueldoBruto = 0,
+            incluyeAsigFamiliar = false,
+            regimen = 'general',
+            promedioComisiones = 0,
+            promedioBonos = 0,
+            vecesComisiones = 6,
+            vecesBonos = 6,
+            diasFaltados = 0,
+            conceptosNoRemunerativos = {}
+        } = params;
+
+        const audit = new AuditLog('BASE REMUNERATIVA');
+        const reg = DATA.REGIMENES[regimen] || DATA.REGIMENES.general;
+
+        const sueldo = safe(sueldoBruto);
+        audit.add(`Sueldo bruto: ${sueldo}`);
+
+        // Asignación familiar
+        let asigFamiliar = 0;
+        if (incluyeAsigFamiliar && reg.asig_familiar) {
+            asigFamiliar = safe(DATA.RMV * DATA.ASIGNACION_FAMILIAR_PCT);
+            audit.calc('Asig. Familiar', `${DATA.RMV} × ${DATA.ASIGNACION_FAMILIAR_PCT}`, asigFamiliar);
+        }
+
+        // Conceptos variables (Art. 17 D.S. 001-97-TR)
+        let comisionesComputable = 0;
+        if (promedioComisiones > 0 && vecesComisiones >= DATA.MINIMO_PERCEPCIONES_VARIABLE) {
+            comisionesComputable = safe(promedioComisiones);
+            audit.calc('Comisiones computable', `promedio 6m (${vecesComisiones} veces)`, comisionesComputable);
+        } else if (promedioComisiones > 0) {
+            audit.warn(`Comisiones NO computables: ${vecesComisiones} veces < ${DATA.MINIMO_PERCEPCIONES_VARIABLE} mínimo`);
+        }
+
+        let bonosComputable = 0;
+        if (promedioBonos > 0 && vecesBonos >= DATA.MINIMO_PERCEPCIONES_VARIABLE) {
+            bonosComputable = safe(promedioBonos);
+            audit.calc('Bonos computable', `promedio 6m (${vecesBonos} veces)`, bonosComputable);
+        } else if (promedioBonos > 0) {
+            audit.warn(`Bonos NO computables: ${vecesBonos} veces < ${DATA.MINIMO_PERCEPCIONES_VARIABLE} mínimo`);
+        }
+
+        // Base bruta (antes de descuentos)
+        const baseBruta = safe(sueldo + asigFamiliar + comisionesComputable + bonosComputable);
+        audit.calc('Base bruta', `${sueldo} + ${asigFamiliar} + ${comisionesComputable} + ${bonosComputable}`, baseBruta);
+
+        // Descuento por inasistencias (con dominical)
+        let descuentoInasistencias = 0;
+        if (diasFaltados > 0) {
+            const valorDia = safe(sueldo / DATA.DIAS_MES);
+            descuentoInasistencias = safe(valorDia * diasFaltados * DATA.FACTOR_DESCUENTO_INASISTENCIA);
+            audit.section('DESCUENTO INASISTENCIAS');
+            audit.calc('Valor día', `${sueldo} / ${DATA.DIAS_MES}`, valorDia);
+            audit.calc('Desc. con dominical', `${valorDia} × ${diasFaltados} × ${DATA.FACTOR_DESCUENTO_INASISTENCIA}`, descuentoInasistencias);
+        }
+
+        const baseNeta = safe(baseBruta - descuentoInasistencias);
+        audit.calc('BASE NETA (para descuentos)', `${baseBruta} - ${descuentoInasistencias}`, baseNeta);
+
+        // Base para beneficios (sin descuento inasistencias, con variables)
+        const baseBeneficios = safe(sueldo + asigFamiliar + comisionesComputable + bonosComputable);
+
+        // Base para horas extras (solo conceptos computableHE)
+        const baseHorasExtras = safe(sueldo + asigFamiliar + comisionesComputable + bonosComputable);
+
+        // Conceptos no remunerativos (informativos)
+        const totalNoRemunerativo = safe(
+            (conceptosNoRemunerativos.movilidad || 0) +
+            (conceptosNoRemunerativos.refrigerio || 0) +
+            (conceptosNoRemunerativos.condicionTrabajo || 0)
+        );
+
         return {
-            sueldoBruto: safeCalc(sueldoBruto),
-            asigFamiliar: safeCalc(asigFamiliar),
-            total: safeCalc(sueldoBruto + asigFamiliar)
+            sueldoBruto: sueldo,
+            asigFamiliar,
+            comisionesComputable,
+            bonosComputable,
+            baseBruta,
+            diasFaltados,
+            descuentoInasistencias,
+            baseNeta,
+            baseBeneficios,
+            baseHorasExtras,
+            totalNoRemunerativo,
+            conceptosNoRemunerativos,
+            regimen: reg,
+            audit: audit.toString()
         };
     }
 
-    // ─── Promedio de Remuneración Variable ────────────────────
-    // Ley exige incluir el promedio si se percibió al menos N veces
-    function getPromedioVariable(promedioMensual, vecesPercibido, minVeces) {
-        if (vecesPercibido >= minVeces && promedioMensual > 0) {
-            return safeCalc(promedioMensual);
-        }
-        return 0;
-    }
+    // ─────────────────────────────────────────────
+    //  PENSIONES (ONP / AFP)
+    //  R4: Tope SBS para prima de seguro
+    //  Soporte comisión flujo y mixta
+    // ─────────────────────────────────────────────
+    function calcularPension(params) {
+        const {
+            baseImponible,
+            tipoPension = 'onp',
+            tipoComision = 'flujo',
+            saldoAFP = 0
+        } = params;
 
-    // ─── Pensiones — Con Tope SBS sobre Prima ────────────────
-    function calcularPension(baseTotal, tipoPension) {
+        const audit = new AuditLog('CÁLCULO PENSIONES');
         const p = DATA.PENSIONES[tipoPension];
         if (!p) return { total: 0, detalle: [], audit: 'Pensión no encontrada' };
 
-        const audit = [];
-        let detalles = [];
+        const detalles = [];
+        const base = safe(baseImponible);
+        audit.add(`Base imponible: ${base}`);
+        audit.add(`Sistema: ${p.nombreCompleto} (${p.tipo.toUpperCase()})`);
 
-        if (tipoPension === 'onp') {
-            const monto = roundPLAME(safeCalc(baseTotal * p.aporte));
-            detalles.push({ concepto: `ONP (${(p.aporte * 100).toFixed(0)}%)`, monto, tasa: p.aporte });
-            audit.push(`ONP: ${baseTotal} × ${p.aporte} = ${monto}`);
+        if (p.tipo === 'snp') {
+            // ONP: 13% simple
+            const monto = safe(base * p.aporte);
+            detalles.push({ concepto: `ONP (${(p.aporte * 100).toFixed(0)}%)`, monto, tasa: p.aporte, base });
+            audit.calc('ONP', `${base} × ${p.aporte}`, monto);
         } else {
-            // Aporte al Fondo y Comisión: sobre base completa
-            const fondo   = roundPLAME(safeCalc(baseTotal * p.aporte));
-            const comision = roundPLAME(safeCalc(baseTotal * p.comision));
+            // AFP: Fondo + Comisión + Prima de Seguro
+            // 1. Aporte obligatorio al fondo (10%)
+            const fondo = safe(base * p.aporte);
+            detalles.push({ concepto: `Aporte al fondo (${(p.aporte * 100).toFixed(0)}%)`, monto: fondo, tasa: p.aporte, base });
+            audit.calc('Fondo obligatorio', `${base} × ${p.aporte}`, fondo);
 
-            // Prima SIS: se detiene en el Tope RMA de la SBS
-            const baseParaSeguro = Math.min(baseTotal, DATA.AFP_SBS_TOPE);
-            const seguro = roundPLAME(safeCalc(baseParaSeguro * p.seguro));
-
-            const topeAplicado = baseTotal > DATA.AFP_SBS_TOPE;
-            detalles = [
-                { concepto: `Fondo obligatorio (${(p.aporte * 100).toFixed(0)}%)`, monto: fondo, tasa: p.aporte },
-                { concepto: `Comisión flujo (${(p.comision * 100).toFixed(2)}%)`, monto: comision, tasa: p.comision },
-                { concepto: `Prima Seguro SIS (${(p.seguro * 100).toFixed(2)}%)${topeAplicado ? ' [TOPE SBS]' : ''}`, monto: seguro, tasa: p.seguro }
-            ];
-            audit.push(`Fondo: ${baseTotal} × ${p.aporte} = ${fondo}`);
-            audit.push(`Comisión: ${baseTotal} × ${p.comision} = ${comision}`);
-            if (topeAplicado) {
-                audit.push(`Prima SIS: Tope RMA S/ ${DATA.AFP_SBS_TOPE} aplicado`);
-                audit.push(`Prima SIS: ${baseParaSeguro} × ${p.seguro} = ${seguro} (base capeada)`);
+            // 2. Comisión según tipo
+            let comision = 0;
+            if (tipoComision === 'mixta') {
+                const comFlujo = safe(base * p.comisionMixta);
+                const comSaldo = safe(saldoAFP * (p.comisionSaldo / 12));
+                comision = safe(comFlujo + comSaldo);
+                detalles.push({
+                    concepto: `Comisión mixta (flujo ${(p.comisionMixta * 100).toFixed(2)}% + saldo)`,
+                    monto: comision,
+                    tasa: p.comisionMixta,
+                    base
+                });
+                audit.section('COMISIÓN MIXTA');
+                audit.calc('Com. flujo', `${base} × ${p.comisionMixta}`, comFlujo);
+                audit.calc('Com. saldo', `${saldoAFP} × ${p.comisionSaldo}/12`, comSaldo);
+                audit.calc('Com. total', `${comFlujo} + ${comSaldo}`, comision);
             } else {
-                audit.push(`Prima SIS: ${baseTotal} × ${p.seguro} = ${seguro}`);
+                comision = safe(base * p.comisionFlujo);
+                detalles.push({
+                    concepto: `Comisión flujo (${(p.comisionFlujo * 100).toFixed(2)}%)`,
+                    monto: comision,
+                    tasa: p.comisionFlujo,
+                    base
+                });
+                audit.calc('Comisión flujo', `${base} × ${p.comisionFlujo}`, comision);
+            }
+
+            // 3. Prima de seguro con TOPE SBS
+            let baseSeguro = base;
+            let topeAplicado = false;
+            if (p.topeSBSAplica && base > DATA.TOPE_SBS_SEGURO) {
+                baseSeguro = DATA.TOPE_SBS_SEGURO;
+                topeAplicado = true;
+                audit.warn(`Tope SBS aplicado: ${base} > ${DATA.TOPE_SBS_SEGURO}`);
+            }
+            const seguro = safe(baseSeguro * p.seguro);
+            detalles.push({
+                concepto: `Prima seguro (${(p.seguro * 100).toFixed(2)}%)${topeAplicado ? ' [TOPE SBS]' : ''}`,
+                monto: seguro,
+                tasa: p.seguro,
+                base: baseSeguro,
+                topeAplicado
+            });
+            audit.calc('Prima seguro', `${baseSeguro} × ${p.seguro}`, seguro);
+            if (topeAplicado) {
+                audit.add(`Base seguro limitada al tope SBS: ${DATA.TOPE_SBS_SEGURO}`);
             }
         }
 
-        // PLAME: suma de conceptos ya redondeados
-        const total = safeCalc(detalles.reduce((s, d) => s + d.monto, 0));
-        audit.push(`Total pensión (PLAME): ${total}`);
+        const total = safe(detalles.reduce((s, d) => s + d.monto, 0));
+        const tasaEfectiva = base > 0 ? safe(total / base) : 0;
+        audit.calc('TOTAL PENSIÓN', detalles.map(d => d.monto).join(' + '), total);
+        audit.calc('Tasa efectiva', `${total} / ${base}`, tasaEfectiva);
 
         return {
             nombre: p.nombre,
             nombreCompleto: p.nombreCompleto,
-            total,
+            tipo: p.tipo,
+            total: safe(total),
             detalle: detalles,
-            tasaEfectiva: safeCalc(total / baseTotal),
-            audit: audit.join('\n')
+            tasaEfectiva,
+            tipoComision,
+            audit: audit.toString()
         };
     }
 
-    // ─── Impuesto a la Renta 5ta Categoría ────────────────────
+    // ─────────────────────────────────────────────
+    //  IMPUESTO A LA RENTA - TRAMOS
+    // ─────────────────────────────────────────────
     function calcularIRAnual(rentaNetaAnual) {
-        const audit = [];
+        const audit = new AuditLog('IR ANUAL POR TRAMOS');
         let impuestoTotal = 0;
-        let restante = safeCalc(Math.max(0, rentaNetaAnual));
+        let restante = safe(Math.max(0, rentaNetaAnual));
         let limiteAnterior = 0;
         const tramos = [];
 
-        audit.push(`Renta neta anual: S/ ${restante}`);
+        audit.add(`Renta neta anual: ${restante}`);
 
         for (const tramo of DATA.TRAMOS_IR) {
             const limiteSuperior = tramo.hasta_uit === Infinity
-                ? Infinity
-                : safeCalc(tramo.hasta_uit * DATA.UIT);
+                ? Infinity : safe(tramo.hasta_uit * DATA.UIT);
             const rangoTramo = limiteSuperior === Infinity
-                ? restante
-                : safeCalc(limiteSuperior - limiteAnterior);
+                ? restante : safe(limiteSuperior - limiteAnterior);
 
-            const baseGravable = safeCalc(Math.min(Math.max(0, restante), rangoTramo));
-            const impuestoTramo = safeCalc(baseGravable * tramo.tasa);
+            const baseGravable = safe(Math.min(Math.max(0, restante), rangoTramo));
+            const impuestoTramo = safe(baseGravable * tramo.tasa);
 
             tramos.push({
-                nombre: tramo.nombre,
-                tasa: tramo.tasa,
-                color: tramo.color,
-                limiteInferior: limiteAnterior,
-                limiteSuperior,
-                rangoTramo,
-                baseGravable,
-                impuesto: impuestoTramo
+                nombre: tramo.nombre, tasa: tramo.tasa, color: tramo.color,
+                limiteInferior: limiteAnterior, limiteSuperior,
+                baseGravable, impuesto: impuestoTramo
             });
 
             if (baseGravable > 0) {
-                audit.push(`${tramo.nombre}: ${baseGravable} × ${tramo.tasa} = ${impuestoTramo}`);
+                audit.calc(tramo.nombre, `${baseGravable} × ${tramo.tasa}`, impuestoTramo);
             }
 
-            impuestoTotal = safeCalc(impuestoTotal + impuestoTramo);
-            restante = safeCalc(restante - baseGravable);
+            impuestoTotal = safe(impuestoTotal + impuestoTramo);
+            restante = safe(restante - baseGravable);
             limiteAnterior = limiteSuperior;
         }
 
-        audit.push(`IR Anual Total: S/ ${impuestoTotal}`);
-
-        return { impuesto: impuestoTotal, tramos, audit: audit.join('\n') };
+        audit.calc('IR TOTAL', 'Σ tramos', impuestoTotal);
+        return { impuesto: impuestoTotal, tramos, audit: audit.toString() };
     }
 
-    // ─── Proyección Renta 5ta (Procedimiento SUNAT) ───────────
+    // ─────────────────────────────────────────────
+    //  PROYECCIÓN RENTA 5TA (Art. 40° Reglamento LIR)
+    //  R5: Incluye Bonif. 9% / 6.75% según EPS
+    // ─────────────────────────────────────────────
     function proyectarRenta5ta(params) {
         const {
-            sueldoMensual, asigFamiliar = 0,
-            mesCalculo, remuPercibidas = 0,
-            gratPercibidas = 0, otrosIngresos = 0
+            sueldoMensual, asigFamiliar = 0, promedioVariables = 0,
+            mesCalculo, remuPercibidas = 0, gratPercibidas = 0,
+            otrosIngresos = 0, tieneEPS = false
         } = params;
 
-        const audit = [];
-        const base = safeCalc(sueldoMensual + asigFamiliar);
+        const audit = new AuditLog(`PROYECCIÓN RENTA 5TA - MES ${mesCalculo}`);
+        const base = safe(sueldoMensual + asigFamiliar + promedioVariables);
         const mesesRestantes = 12 - mesCalculo + 1;
-        const proyeccionSueldos = safeCalc(base * mesesRestantes);
+        const tasaBonif = tieneEPS ? DATA.BONIF_EPS : DATA.BONIF_ESSALUD;
 
+        audit.add(`Base mensual: ${base} (Sueldo: ${sueldoMensual} + AF: ${asigFamiliar} + Var: ${promedioVariables})`);
+        audit.add(`Tipo bonif.: ${tieneEPS ? 'EPS 6.75%' : 'EsSalud 9%'}`);
+
+        const proyeccionSueldos = safe(base * mesesRestantes);
+
+        // Gratificaciones pendientes + bonificación
         let gratPendientes = 0;
         let bonifPendientes = 0;
-
         if (mesCalculo <= 7) {
-            gratPendientes = safeCalc(gratPendientes + base);
-            bonifPendientes = safeCalc(bonifPendientes + base * DATA.BONIF_EXTRAORDINARIA);
+            gratPendientes = safe(gratPendientes + base);
+            bonifPendientes = safe(bonifPendientes + base * tasaBonif);
         }
         if (mesCalculo <= 12) {
-            gratPendientes = safeCalc(gratPendientes + base);
-            bonifPendientes = safeCalc(bonifPendientes + base * DATA.BONIF_EXTRAORDINARIA);
+            gratPendientes = safe(gratPendientes + base);
+            bonifPendientes = safe(bonifPendientes + base * tasaBonif);
         }
 
-        const rentaBrutaAnual = safeCalc(
-            remuPercibidas + gratPercibidas +
-            proyeccionSueldos + gratPendientes +
-            bonifPendientes + otrosIngresos
+        const rentaBrutaAnual = safe(
+            remuPercibidas + gratPercibidas + proyeccionSueldos +
+            gratPendientes + bonifPendientes + otrosIngresos
         );
 
-        const deduccion7UIT = safeCalc(DATA.DEDUCCION_UIT * DATA.UIT);
-        const rentaNetaAnual = safeCalc(Math.max(0, rentaBrutaAnual - deduccion7UIT));
+        const deduccion7UIT = safe(DATA.DEDUCCION_UIT * DATA.UIT);
+        const rentaNetaAnual = safe(Math.max(0, rentaBrutaAnual - deduccion7UIT));
 
-        audit.push(`=== PROYECCIÓN RENTA 5TA - MES ${mesCalculo} ===`);
-        audit.push(`Base mensual: ${base} (Sueldo: ${sueldoMensual} + AF: ${asigFamiliar})`);
-        audit.push(`Remuneraciones percibidas: ${remuPercibidas}`);
-        audit.push(`Gratificaciones percibidas: ${gratPercibidas}`);
-        audit.push(`Proyección sueldos (${mesesRestantes} meses): ${proyeccionSueldos}`);
-        audit.push(`Gratificaciones pendientes: ${gratPendientes}`);
-        audit.push(`Bonif. extraordinarias pendientes: ${bonifPendientes}`);
-        audit.push(`Otros ingresos: ${otrosIngresos}`);
-        audit.push(`RENTA BRUTA ANUAL: ${rentaBrutaAnual}`);
-        audit.push(`Deducción 7 UIT (${DATA.DEDUCCION_UIT} × S/ ${DATA.UIT}): -${deduccion7UIT}`);
-        audit.push(`RENTA NETA ANUAL: ${rentaNetaAnual}`);
+        audit.section('COMPOSICIÓN RENTA BRUTA');
+        audit.add(`Remu. percibidas: ${remuPercibidas}`);
+        audit.add(`Grat. percibidas: ${gratPercibidas}`);
+        audit.add(`Proyección sueldos (${mesesRestantes}m): ${proyeccionSueldos}`);
+        audit.add(`Grat. pendientes: ${gratPendientes}`);
+        audit.add(`Bonif. ${tieneEPS ? '6.75%' : '9%'} pendientes: ${bonifPendientes}`);
+        audit.add(`Otros ingresos: ${otrosIngresos}`);
+        audit.calc('RENTA BRUTA ANUAL', 'Σ componentes', rentaBrutaAnual);
+        audit.calc('Deducción 7 UIT', `7 × ${DATA.UIT}`, deduccion7UIT);
+        audit.calc('RENTA NETA ANUAL', `${rentaBrutaAnual} - ${deduccion7UIT}`, rentaNetaAnual);
 
         const irResult = calcularIRAnual(rentaNetaAnual);
         const divisor = DATA.DIVISORES_RETENCION[mesCalculo] || 12;
-        const retencionMensual = safeCalc(irResult.impuesto / divisor);
+        const retencionMensual = safe(irResult.impuesto / divisor);
 
-        audit.push(`IR Anual: ${irResult.impuesto}`);
-        audit.push(`Divisor mes ${mesCalculo}: ${divisor}`);
-        audit.push(`RETENCIÓN MENSUAL: ${irResult.impuesto} / ${divisor} = ${retencionMensual}`);
+        audit.section('RETENCIÓN MENSUAL');
+        audit.calc('IR Anual', '', irResult.impuesto);
+        audit.add(`Divisor mes ${mesCalculo}: ${divisor}`);
+        audit.calc('RETENCIÓN', `${irResult.impuesto} / ${divisor}`, retencionMensual);
 
         return {
             rentaBrutaAnual, deduccion7UIT, rentaNetaAnual,
             irAnual: irResult.impuesto, tramos: irResult.tramos,
-            divisor, retencionMensual,
+            divisor, retencionMensual, tasaBonif,
             desglose: {
-                remuPercibidas, gratPercibidas,
-                proyeccionSueldos, gratPendientes,
-                bonifPendientes, otrosIngresos, mesesRestantes
+                remuPercibidas, gratPercibidas, proyeccionSueldos,
+                gratPendientes, bonifPendientes, otrosIngresos, mesesRestantes
             },
-            audit: audit.join('\n') + '\n' + irResult.audit
+            audit: audit.toString() + '\n' + irResult.audit
         };
     }
+
 
     // ═══════════════════════════════════════════════
     //  CALCULADORAS PRINCIPALES
     // ═══════════════════════════════════════════════
 
-    // ─── 1. SUELDO NETO ───────────────────────────────────────
+    // ─── 1. SUELDO NETO ──────────────────────────
     function sueldoNeto(params) {
         const {
             sueldoBruto, regimen = 'general', tipoPension = 'onp',
+            tipoComision = 'flujo', saldoAFP = 0,
             incluyeAsigFamiliar = false, mesCalculo = 6,
-            diasFaltados = 0
+            promedioComisiones = 0, promedioBonos = 0,
+            vecesComisiones = 6, vecesBonos = 6,
+            diasFaltados = 0, tieneEPS = false,
+            conceptosNoRemunerativos = {}
         } = params;
 
-        const audit = ['=== CÁLCULO SUELDO NETO 2026 ==='];
+        const audit = new AuditLog('SUELDO NETO');
 
-        const base = getBaseRemunerativa(sueldoBruto, incluyeAsigFamiliar, regimen);
-        audit.push(`Base: ${base.sueldoBruto} + AF ${base.asigFamiliar} = ${base.total}`);
-        audit.push(`RMV 2026: S/ ${DATA.RMV} → AF = S/ ${DATA.RMV * DATA.ASIGNACION_FAMILIAR_PCT}`);
+        const base = getBaseRemunerativa({
+            sueldoBruto, incluyeAsigFamiliar, regimen,
+            promedioComisiones, promedioBonos,
+            vecesComisiones, vecesBonos, diasFaltados,
+            conceptosNoRemunerativos
+        });
 
-        // Descuento por inasistencias — PLAME-Style
-        // (Sueldo / 30) × días_faltados × 1.2  [factor 1.2 = día + dominical proporcional]
-        let descuentoInasistencias = 0;
-        if (diasFaltados > 0) {
-            descuentoInasistencias = roundPLAME(
-                safeCalc((base.total / DATA.DIAS_MES) * diasFaltados * DATA.FACTOR_INASISTENCIA)
-            );
-            audit.push(`Descuento inasistencias: (${base.total}/30) × ${diasFaltados}d × 1.2 = ${descuentoInasistencias}`);
-        }
+        // Pensión sobre base neta (después de inasistencias)
+        const pension = calcularPension({
+            baseImponible: base.baseNeta,
+            tipoPension, tipoComision, saldoAFP
+        });
 
-        const baseEfectiva = safeCalc(base.total - descuentoInasistencias);
-
-        const pension = calcularPension(baseEfectiva, tipoPension);
-        audit.push(`Pensión (${pension.nombre}): ${pension.total}`);
-
+        // IR sobre base sin descuento inasistencias (proyección)
+        const promedioVar = safe(base.comisionesComputable + base.bonosComputable);
         const irProyeccion = proyectarRenta5ta({
             sueldoMensual: base.sueldoBruto,
             asigFamiliar: base.asigFamiliar,
+            promedioVariables: promedioVar,
             mesCalculo,
-            remuPercibidas: 0,
-            gratPercibidas: 0,
-            otrosIngresos: 0
+            tieneEPS
         });
-        const irMensual = irProyeccion.retencionMensual;
-        audit.push(`IR 5ta mensual: ${irMensual}`);
 
-        const totalDescuentos = safeCalc(pension.total + irMensual + descuentoInasistencias);
-        const neto = safeCalc(base.total - totalDescuentos);
+        const totalDescuentos = safe(pension.total + irProyeccion.retencionMensual);
+        const neto = safe(base.baseNeta - totalDescuentos);
 
-        audit.push(`Total descuentos: ${totalDescuentos}`);
-        audit.push(`SUELDO NETO: ${base.total} - ${totalDescuentos} = ${neto}`);
+        audit.section('RESUMEN');
+        audit.add(`Base neta (post inasistencias): ${base.baseNeta}`);
+        audit.add(`Pensión: ${pension.total}`);
+        audit.add(`IR 5ta mensual: ${irProyeccion.retencionMensual}`);
+        audit.add(`Total descuentos: ${totalDescuentos}`);
+        audit.calc('SUELDO NETO', `${base.baseNeta} - ${totalDescuentos}`, neto);
+
+        // Validación de auditoría
+        const verificacion = safe(base.baseNeta - pension.total - irProyeccion.retencionMensual);
+        if (Math.abs(verificacion - neto) > 0.001) {
+            audit.warn(`¡ALERTA AUDITORÍA! Diferencia detectada: ${Math.abs(verificacion - neto)}`);
+        } else {
+            audit.add('✓ Verificación de integridad: PASS');
+        }
 
         return {
-            base, pension,
-            ir: {
-                mensual: irMensual,
+            base, pension, ir: {
+                mensual: irProyeccion.retencionMensual,
                 anual: irProyeccion.irAnual,
                 tramos: irProyeccion.tramos,
-                rentaNetaAnual: irProyeccion.rentaNetaAnual
+                rentaNetaAnual: irProyeccion.rentaNetaAnual,
+                tasaBonif: irProyeccion.tasaBonif
             },
-            diasFaltados,
-            descuentoInasistencias,
-            baseEfectiva,
             totalDescuentos,
             sueldoNeto: neto,
-            porcentajeDescuento: safeCalc((totalDescuentos / base.total) * 100),
-            regimen: DATA.REGIMENES[regimen],
-            audit: audit.join('\n')
+            porcentajeDescuento: base.baseNeta > 0 ? safe((totalDescuentos / base.baseNeta) * 100) : 0,
+            conceptosNoRemunerativos: base.totalNoRemunerativo,
+            totalBoleta: safe(neto + base.totalNoRemunerativo),
+            audit: audit.toString() + '\n\n' + base.audit + '\n\n' + pension.audit
         };
     }
 
-    // ─── 2. GRATIFICACIÓN ─────────────────────────────────────
-    // Acepta remuneración variable si fue percibida ≥3 veces en el semestre
+    // ─── 2. GRATIFICACIÓN ────────────────────────
     function gratificacion(params) {
         const {
             sueldoBruto, periodo = 'julio', mesesTrabajados = 6,
-            incluyeAsigFamiliar = false, incluyeBonif = true,
-            promedioComisiones = 0, vecesPercibidoSemestre = 0,
-            tieneEPS = false
+            incluyeAsigFamiliar = false, tieneEPS = false,
+            promedioComisiones = 0, promedioBonos = 0,
+            vecesComisiones = 6, vecesBonos = 6,
+            diasTrabajadosUltimoMes = 30
         } = params;
 
-        const audit = ['=== CÁLCULO GRATIFICACIÓN 2026 ==='];
+        const audit = new AuditLog('GRATIFICACIÓN');
+        const base = getBaseRemunerativa({
+            sueldoBruto, incluyeAsigFamiliar,
+            promedioComisiones, promedioBonos,
+            vecesComisiones, vecesBonos
+        });
 
-        const base = getBaseRemunerativa(sueldoBruto, incluyeAsigFamiliar);
-        const mesesEfectivos = Math.min(Math.max(0, mesesTrabajados), DATA.MESES_SEMESTRE);
+        const meses = Math.min(Math.max(0, mesesTrabajados), DATA.MESES_SEMESTRE);
+        const diasProp = Math.min(Math.max(0, diasTrabajadosUltimoMes), 30);
 
-        // Remuneración variable: incluir si ≥3 meses en el semestre
-        const promVar = getPromedioVariable(
-            promedioComisiones,
-            vecesPercibidoSemestre,
-            DATA.VECES_MIN_VARIABLE_SEMESTRE
-        );
-        const baseComputable = safeCalc(base.total + promVar);
+        // Gratificación = (Base / 6) × meses + (Base / 6 / 30) × días del último mes incompleto
+        const gratBase = safe((base.baseBeneficios / DATA.MESES_SEMESTRE) * meses);
 
-        audit.push(`Base fija: ${base.total}`);
-        audit.push(`Promedio comisiones/bonos (${vecesPercibidoSemestre} veces en semestre): ${promedioComisiones}`);
-        if (promVar > 0) {
-            audit.push(`✓ Variable incluida (≥${DATA.VECES_MIN_VARIABLE_SEMESTRE} veces): +${promVar}`);
-        } else if (promedioComisiones > 0) {
-            audit.push(`✗ Variable NO incluida (<${DATA.VECES_MIN_VARIABLE_SEMESTRE} veces percibida)`);
-        }
-        audit.push(`Base computable: ${baseComputable}`);
-        audit.push(`Meses: ${mesesEfectivos} / ${DATA.MESES_SEMESTRE}`);
+        const tasaBonif = tieneEPS ? DATA.BONIF_EPS : DATA.BONIF_ESSALUD;
+        const bonif = safe(gratBase * tasaBonif);
+        const total = safe(gratBase + bonif);
 
-        // PLAME-Style: roundPLAME por concepto
-        const gratificacionBase = roundPLAME(
-            safeCalc((baseComputable / DATA.MESES_SEMESTRE) * mesesEfectivos)
-        );
-
-        // Bonif. Extraordinaria diferenciada por EPS (Ley 30334, Art. 3)
-        const tasaBonif = tieneEPS ? DATA.BONIF_EXTRAORDINARIA_EPS : DATA.BONIF_EXTRAORDINARIA;
-        const bonifExtraordinaria = incluyeBonif
-            ? roundPLAME(safeCalc(gratificacionBase * tasaBonif))
-            : 0;
-
-        const totalRecibir = safeCalc(gratificacionBase + bonifExtraordinaria);
-
-        audit.push(`Gratificación: (${baseComputable} / 6) × ${mesesEfectivos} = ${gratificacionBase} [PLAME]`);
-        audit.push(`Bonif. ${tieneEPS ? '6.75% (EPS)' : '9% (EsSalud)'}: ${gratificacionBase} × ${tasaBonif} = ${bonifExtraordinaria} [PLAME]`);
-        audit.push(`TOTAL: ${totalRecibir}`);
+        audit.add(`Base beneficios: ${base.baseBeneficios}`);
+        audit.add(`Variables incluidas: Comisiones ${base.comisionesComputable}, Bonos ${base.bonosComputable}`);
+        audit.calc('Gratificación', `(${base.baseBeneficios} / 6) × ${meses}`, gratBase);
+        audit.add(`Tipo bonif.: ${tieneEPS ? 'EPS 6.75%' : 'EsSalud 9%'}`);
+        audit.calc('Bonificación', `${gratBase} × ${tasaBonif}`, bonif);
+        audit.calc('TOTAL', `${gratBase} + ${bonif}`, total);
 
         return {
-            base, baseComputable, promVar,
-            periodo: DATA.PERIODOS_GRATIFICACION[periodo],
-            mesesEfectivos, gratificacionBase,
-            tasaBonif, tieneEPS,
-            bonifExtraordinaria, totalRecibir,
-            audit: audit.join('\n')
+            base, periodo: DATA.PERIODOS_GRATIFICACION[periodo],
+            mesesEfectivos: meses, gratificacionBase: gratBase,
+            tasaBonif, tieneEPS, bonifExtraordinaria: bonif,
+            totalRecibir: total,
+            audit: audit.toString() + '\n\n' + base.audit
         };
     }
 
-    // ─── 3. CTS ───────────────────────────────────────────────
-    // Incluye promedio variable si percibido ≥3 veces en el semestre
+    // ─── 3. CTS ──────────────────────────────────
     function cts(params) {
         const {
             sueldoBruto, meses = 6, dias = 0,
             incluyeAsigFamiliar = false, ultimaGratificacion = 0,
-            promedioComisiones = 0, vecesPercibidoSemestre = 0
+            promedioComisiones = 0, promedioBonos = 0,
+            vecesComisiones = 6, vecesBonos = 6
         } = params;
 
-        const audit = ['=== CÁLCULO CTS 2026 ==='];
+        const audit = new AuditLog('CTS');
+        const base = getBaseRemunerativa({
+            sueldoBruto, incluyeAsigFamiliar,
+            promedioComisiones, promedioBonos,
+            vecesComisiones, vecesBonos
+        });
 
-        const base = getBaseRemunerativa(sueldoBruto, incluyeAsigFamiliar);
+        const sextoGrat = safe(ultimaGratificacion * DATA.CTS_SEXTO_GRATIFICACION);
+        const remuComputable = safe(base.baseBeneficios + sextoGrat);
+        const totalDias = safe(meses * DATA.DIAS_MES + dias);
+        const valorDiario = safe(remuComputable / DATA.DIAS_ANO);
+        const ctsTotal = safe(valorDiario * totalDias);
 
-        // 1/6 última gratificación (incluye la variable si la gratif ya la incluía)
-        const sextoGrat = safeCalc(ultimaGratificacion * DATA.CTS_SEXTO_GRATIFICACION);
-
-        // Remuneración variable CTS
-        const promVar = getPromedioVariable(
-            promedioComisiones,
-            vecesPercibidoSemestre,
-            DATA.VECES_MIN_VARIABLE_SEMESTRE
-        );
-
-        const remuComputable = safeCalc(base.total + sextoGrat + promVar);
-
-        const totalDias = safeCalc(meses * DATA.DIAS_MES + dias);
-        const valorDiario = safeCalc(remuComputable / DATA.DIAS_ANO);
-
-        // PLAME-Style: redondear el depósito final
-        const ctsTotal = roundPLAME(safeCalc(valorDiario * totalDias));
-
-        audit.push(`Base: ${base.total}`);
-        audit.push(`1/6 Gratificación: ${ultimaGratificacion} / 6 = ${sextoGrat}`);
-        audit.push(`Promedio comisiones/bonos (${vecesPercibidoSemestre} veces): ${promedioComisiones}`);
-        if (promVar > 0) {
-            audit.push(`✓ Variable incluida (≥${DATA.VECES_MIN_VARIABLE_SEMESTRE} veces): +${promVar}`);
-        } else if (promedioComisiones > 0) {
-            audit.push(`✗ Variable NO incluida (<${DATA.VECES_MIN_VARIABLE_SEMESTRE} veces percibida)`);
-        }
-        audit.push(`Remu. computable: ${remuComputable}`);
-        audit.push(`Días: ${meses}m × 30 + ${dias}d = ${totalDias}`);
-        audit.push(`Valor diario: ${remuComputable} / 360 = ${valorDiario}`);
-        audit.push(`CTS [PLAME]: ${valorDiario} × ${totalDias} = ${ctsTotal}`);
+        audit.add(`Base beneficios: ${base.baseBeneficios}`);
+        audit.add(`Variables: Comisiones ${base.comisionesComputable}, Bonos ${base.bonosComputable}`);
+        audit.calc('1/6 Gratificación', `${ultimaGratificacion} × 1/6`, sextoGrat);
+        audit.calc('Remu. computable', `${base.baseBeneficios} + ${sextoGrat}`, remuComputable);
+        audit.calc('Total días', `${meses}×30 + ${dias}`, totalDias);
+        audit.calc('Valor diario', `${remuComputable} / 360`, valorDiario);
+        audit.calc('CTS', `${valorDiario} × ${totalDias}`, ctsTotal);
 
         return {
-            base, sextoGratificacion: sextoGrat,
-            promVar, remuComputable,
-            totalDias, valorDiario,
-            cts: ctsTotal,
-            audit: audit.join('\n')
+            base, sextoGratificacion: sextoGrat, remuComputable,
+            totalDias, valorDiario, cts: ctsTotal,
+            audit: audit.toString() + '\n\n' + base.audit
         };
     }
 
-    // ─── 4. HORAS EXTRAS ──────────────────────────────────────
-    // Incluye descuento de inasistencias PLAME-Style
+    // ─── 4. HORAS EXTRAS ─────────────────────────
     function horasExtras(params) {
         const {
             sueldoBruto, horas25 = 0, horas35 = 0,
-            incluyeAsigFamiliar = false, esNocturno = false
+            incluyeAsigFamiliar = false, esNocturno = false,
+            promedioComisiones = 0, promedioBonos = 0,
+            vecesComisiones = 6, vecesBonos = 6,
+            divisorHE = 'legal',
+            diasRealesMes = 30
         } = params;
 
-        const audit = ['=== CÁLCULO HORAS EXTRAS 2026 ==='];
-        audit.push(`D.S. 007-2002-TR | Divisor legal: ${DATA.HORAS_MES_LEGAL} horas`);
+        const audit = new AuditLog('HORAS EXTRAS');
+        const base = getBaseRemunerativa({
+            sueldoBruto, incluyeAsigFamiliar,
+            promedioComisiones, promedioBonos,
+            vecesComisiones, vecesBonos
+        });
 
-        const base = getBaseRemunerativa(sueldoBruto, incluyeAsigFamiliar);
+        // Determinar divisor
+        let divisor;
+        if (divisorHE === 'real') {
+            divisor = safe(diasRealesMes * DATA.JORNADA_DIARIA_LEGAL);
+            audit.add(`Divisor por días reales: ${diasRealesMes} × ${DATA.JORNADA_DIARIA_LEGAL} = ${divisor}`);
+        } else {
+            divisor = DATA.HORAS_MES_LEGAL;
+            audit.add(`Divisor legal fijo: ${divisor} (30 × 8)`);
+        }
 
-        const sobreTasaNocturna = esNocturno
-            ? safeCalc(base.total * DATA.SOBRETASA_NOCTURNO)
-            : 0;
-        const baseParaHE = esNocturno
-            ? safeCalc(base.total + sobreTasaNocturna)
-            : base.total;
+        audit.add(`D.S. 007-2002-TR | Divisor: ${divisor} horas`);
 
-        // Valor hora: sin redondeo (preservar todos los decimales)
-        const valorHora = safeCalc(baseParaHE / DATA.HORAS_MES_LEGAL);
+        // Sobretasa nocturna
+        const sobreTasaNocturna = esNocturno ? safe(base.baseHorasExtras * DATA.SOBRETASA_NOCTURNO) : 0;
+        const baseParaHE = esNocturno ? safe(base.baseHorasExtras + sobreTasaNocturna) : base.baseHorasExtras;
 
-        const valorHora25 = safeCalc(valorHora * (1 + DATA.SOBRETASA_HE_25));
-        const valorHora35 = safeCalc(valorHora * (1 + DATA.SOBRETASA_HE_35));
-
-        // PLAME-Style: redondear por concepto, no la base
-        const pagoHoras25 = roundPLAME(safeCalc(horas25 * valorHora25));
-        const pagoHoras35 = roundPLAME(safeCalc(horas35 * valorHora35));
-        const totalHorasExtras = safeCalc(pagoHoras25 + pagoHoras35);
-
-        audit.push(`RMV 2026: ${DATA.RMV} → AF: S/ ${DATA.RMV * DATA.ASIGNACION_FAMILIAR_PCT}`);
-        audit.push(`Base remunerativa: ${base.total} (Sueldo: ${base.sueldoBruto} + AF: ${base.asigFamiliar})`);
         if (esNocturno) {
-            audit.push(`Sobretasa nocturna 35%: ${base.total} × 0.35 = ${sobreTasaNocturna}`);
-            audit.push(`Base para HE (con nocturno): ${baseParaHE}`);
+            audit.calc('Sobretasa nocturna', `${base.baseHorasExtras} × ${DATA.SOBRETASA_NOCTURNO}`, sobreTasaNocturna);
+            audit.calc('Base para HE', `${base.baseHorasExtras} + ${sobreTasaNocturna}`, baseParaHE);
         }
-        audit.push(`Valor hora: ${baseParaHE} / ${DATA.HORAS_MES_LEGAL} = ${valorHora}`);
-        audit.push(`Valor hora +25%: ${valorHora} × 1.25 = ${valorHora25}`);
-        audit.push(`Valor hora +35%: ${valorHora} × 1.35 = ${valorHora35}`);
-        audit.push(`Pago 25% (${horas25}h) [PLAME]: ${horas25} × ${valorHora25} = ${pagoHoras25}`);
-        audit.push(`Pago 35% (${horas35}h) [PLAME]: ${horas35} × ${valorHora35} = ${pagoHoras35}`);
-        audit.push(`TOTAL HORAS EXTRAS: ${totalHorasExtras}`);
 
-        // Benchmark SUNAT: S/ 1,130 + AF → Base S/ 1,237.50
-        if (Math.abs(base.total - 1237.50) < 0.01) {
-            audit.push(`--- BENCHMARK SUNAT ---`);
-            audit.push(`Base: 1237.50 | V.Hora: ${valorHora} | V.Hora+25%: ${valorHora25} | V.Hora+35%: ${valorHora35}`);
-        }
+        // Valor hora sin redondeo intermedio
+        const valorHora = safe(baseParaHE / divisor);
+        const valorHora25 = safe(valorHora * (1 + DATA.SOBRETASA_HE_25));
+        const valorHora35 = safe(valorHora * (1 + DATA.SOBRETASA_HE_35));
+
+        // Pago sin redondeo intermedio
+        const pagoHoras25 = safe(horas25 * valorHora25);
+        const pagoHoras35 = safe(horas35 * valorHora35);
+        const totalHorasExtras = safe(pagoHoras25 + pagoHoras35);
+
+        audit.section('CÁLCULO VALOR HORA');
+        audit.calc('Valor hora', `${baseParaHE} / ${divisor}`, valorHora);
+        audit.calc('Valor hora +25%', `${valorHora} × 1.25`, valorHora25);
+        audit.calc('Valor hora +35%', `${valorHora} × 1.35`, valorHora35);
+        audit.section('PAGO');
+        audit.calc(`Pago 25% (${horas25}h)`, `${horas25} × ${valorHora25}`, pagoHoras25);
+        audit.calc(`Pago 35% (${horas35}h)`, `${horas35} × ${valorHora35}`, pagoHoras35);
+        audit.calc('TOTAL HE', `${pagoHoras25} + ${pagoHoras35}`, totalHorasExtras);
+        audit.add(`Monto PLAME (redondeado): S/ ${plameRound(totalHorasExtras)}`);
 
         return {
             base, esNocturno, sobreTasaNocturna, baseParaHE,
-            valorHora, valorHora25, valorHora35,
-            horas25, horas35,
-            pagoHoras25, pagoHoras35,
+            divisor, valorHora, valorHora25, valorHora35,
+            horas25, horas35, pagoHoras25, pagoHoras35,
             totalHorasExtras,
-            audit: audit.join('\n')
+            audit: audit.toString() + '\n\n' + base.audit
         };
     }
 
-    // ─── 5. VACACIONES ────────────────────────────────────────
-    // Incluye Triple Vacacional y promedio variable
+    // ─── 5. VACACIONES ───────────────────────────
     function vacaciones(params) {
         const {
             sueldoBruto, diasVacaciones = 30, mesesLaborados = 12,
-            incluyeAsigFamiliar = false, noGozadas = false,
-            promedioComisiones12m = 0, vecesPercibidoAno = 0
+            incluyeAsigFamiliar = false, tripleVacacional = false,
+            promedioComisiones = 0, promedioBonos = 0,
+            vecesComisiones = 6, vecesBonos = 6
         } = params;
 
-        const audit = ['=== CÁLCULO VACACIONES 2026 ==='];
+        const audit = new AuditLog('VACACIONES');
+        const base = getBaseRemunerativa({
+            sueldoBruto, incluyeAsigFamiliar,
+            promedioComisiones, promedioBonos,
+            vecesComisiones, vecesBonos
+        });
 
-        const base = getBaseRemunerativa(sueldoBruto, incluyeAsigFamiliar);
+        const valorDiario = safe(base.baseBeneficios / DATA.DIAS_MES);
+        const proporcion = safe(mesesLaborados / DATA.MESES_ANO);
+        const remuVacacional = safe(valorDiario * diasVacaciones * proporcion);
 
-        // Remuneración variable vacacional: promedio últimos 12 meses
-        const promVar = getPromedioVariable(
-            promedioComisiones12m,
-            vecesPercibidoAno,
-            DATA.VECES_MIN_VARIABLE_ANO
-        );
-        const baseComputable = safeCalc(base.total + promVar);
+        audit.add(`Base beneficios: ${base.baseBeneficios}`);
+        audit.calc('Valor diario', `${base.baseBeneficios} / 30`, valorDiario);
+        audit.calc('Proporción', `${mesesLaborados} / 12`, proporcion);
+        audit.calc('Remu. vacacional', `${valorDiario} × ${diasVacaciones} × ${proporcion}`, remuVacacional);
 
-        audit.push(`Base fija: ${base.total}`);
-        if (promVar > 0) {
-            audit.push(`✓ Promedio variable anual incluido: +${promVar}`);
-        }
-        audit.push(`Base computable: ${baseComputable}`);
-
-        const valorDiario = safeCalc(baseComputable / DATA.DIAS_MES);
-        const proporcion = safeCalc(mesesLaborados / DATA.MESES_ANO);
-        const remuVacacional = roundPLAME(safeCalc(valorDiario * diasVacaciones * proporcion));
-
+        // Triple vacacional (Art. 23 D.Leg. 713)
+        let remuDescanso = 0;
+        let remuTrabajo = 0;
         let indemnizacion = 0;
-        let tripleDetalle = null;
 
-        if (noGozadas) {
-            // Triple Vacacional (Art. 23 D.Leg. 713):
-            // 1 remuneración: por el trabajo (ya pagada como salario ordinario)
-            // 1 remuneración: por el descanso no gozado   → a pagar
-            // 1 remuneración: indemnización                → a pagar
-            // El empleador debe pagar 2 adicionales
-            indemnizacion = roundPLAME(safeCalc(remuVacacional * 2));
-            tripleDetalle = {
-                porTrabajo:   remuVacacional,  // Ya pagado como salario (referencial)
-                porDescanso:  remuVacacional,  // A pagar ahora
-                porIndemnizacion: remuVacacional, // A pagar ahora
-                totalTriple: safeCalc(remuVacacional * 3),
-                aPagarAhora: indemnizacion
-            };
-            audit.push(`TRIPLE VACACIONAL (Art. 23 D.Leg. 713):`);
-            audit.push(`  1° Remu. por trabajo (ya pagada): ${remuVacacional}`);
-            audit.push(`  2° Remu. por descanso no gozado:  ${remuVacacional}`);
-            audit.push(`  3° Remu. de indemnización:        ${remuVacacional}`);
-            audit.push(`  TOTAL TRIPLE: ${safeCalc(remuVacacional * 3)}`);
-            audit.push(`  A pagar ahora (2°+3°): ${indemnizacion} [PLAME]`);
+        if (tripleVacacional) {
+            audit.section('TRIPLE VACACIONAL (Art. 23 D.Leg. 713)');
+            remuDescanso = remuVacacional;
+            remuTrabajo = remuVacacional;
+            indemnizacion = remuVacacional;
+            audit.add(`1. Remu. por descanso adquirido (ya pagada): ${remuDescanso}`);
+            audit.add(`2. Remu. por trabajo en período vacacional: ${remuTrabajo}`);
+            audit.add(`3. Indemnización: ${indemnizacion}`);
         }
 
-        const total = safeCalc(remuVacacional + indemnizacion);
+        const total = tripleVacacional
+            ? safe(remuDescanso + remuTrabajo + indemnizacion)
+            : remuVacacional;
 
-        audit.push(`Valor diario: ${baseComputable} / 30 = ${valorDiario}`);
-        audit.push(`Proporción: ${mesesLaborados} / 12 = ${proporcion}`);
-        audit.push(`Remu. vacacional [PLAME]: ${valorDiario} × ${diasVacaciones} × ${proporcion} = ${remuVacacional}`);
-        audit.push(`TOTAL: ${total}`);
+        audit.calc('TOTAL', '', total);
 
         return {
-            base, baseComputable, promVar, valorDiario, proporcion,
-            remuVacacional, noGozadas, indemnizacion,
-            tripleDetalle, total,
-            audit: audit.join('\n')
+            base, valorDiario, proporcion, remuVacacional,
+            tripleVacacional, remuDescanso, remuTrabajo, indemnizacion,
+            total,
+            audit: audit.toString() + '\n\n' + base.audit
         };
     }
 
-    // ─── 6. IMPUESTO A LA RENTA ───────────────────────────────
+    // ─── 6. IMPUESTO A LA RENTA ──────────────────
     function impuestoRenta(params) {
         const {
             sueldoBruto, meses = 12, numGratificaciones = 2,
-            incluyeAsigFamiliar = false, otrosIngresos = 0
+            incluyeAsigFamiliar = false, otrosIngresos = 0,
+            tieneEPS = false, promedioComisiones = 0,
+            promedioBonos = 0, vecesComisiones = 6, vecesBonos = 6
         } = params;
 
-        const audit = ['=== CÁLCULO IR 5TA CATEGORÍA 2026 ==='];
+        const audit = new AuditLog('IR 5TA CATEGORÍA');
+        const base = getBaseRemunerativa({
+            sueldoBruto, incluyeAsigFamiliar,
+            promedioComisiones, promedioBonos,
+            vecesComisiones, vecesBonos
+        });
 
-        const base = getBaseRemunerativa(sueldoBruto, incluyeAsigFamiliar);
+        const tasaBonif = tieneEPS ? DATA.BONIF_EPS : DATA.BONIF_ESSALUD;
+        const sueldosAnuales = safe(base.baseBeneficios * meses);
+        const gratAnuales = safe(base.baseBeneficios * numGratificaciones);
+        const bonifAnuales = safe(gratAnuales * tasaBonif);
+        const rentaBrutaAnual = safe(sueldosAnuales + gratAnuales + bonifAnuales + otrosIngresos);
+        const deduccion = safe(DATA.DEDUCCION_UIT * DATA.UIT);
+        const rentaNetaAnual = safe(Math.max(0, rentaBrutaAnual - deduccion));
 
-        const sueldosAnuales = safeCalc(base.total * meses);
-        const gratAnuales = safeCalc(base.total * numGratificaciones);
-        const bonifAnuales = safeCalc(gratAnuales * DATA.BONIF_EXTRAORDINARIA);
-
-        const rentaBrutaAnual = safeCalc(sueldosAnuales + gratAnuales + bonifAnuales + otrosIngresos);
-        const deduccion = safeCalc(DATA.DEDUCCION_UIT * DATA.UIT);
-        const rentaNetaAnual = safeCalc(Math.max(0, rentaBrutaAnual - deduccion));
-
-        audit.push(`UIT 2026: S/ ${DATA.UIT} | 7 UIT = S/ ${deduccion}`);
-        audit.push(`Base mensual: ${base.total}`);
-        audit.push(`Sueldos (${meses}m): ${sueldosAnuales}`);
-        audit.push(`Gratificaciones (${numGratificaciones}): ${gratAnuales}`);
-        audit.push(`Bonif. extraordinaria: ${bonifAnuales}`);
-        audit.push(`Otros ingresos: ${otrosIngresos}`);
-        audit.push(`Renta bruta anual: ${rentaBrutaAnual}`);
-        audit.push(`Deducción 7 UIT: -${deduccion}`);
-        audit.push(`Renta neta anual: ${rentaNetaAnual}`);
+        audit.add(`Base mensual: ${base.baseBeneficios}`);
+        audit.add(`Bonif. tipo: ${tieneEPS ? 'EPS 6.75%' : 'EsSalud 9%'}`);
+        audit.calc('Sueldos', `${base.baseBeneficios} × ${meses}`, sueldosAnuales);
+        audit.calc('Gratificaciones', `${base.baseBeneficios} × ${numGratificaciones}`, gratAnuales);
+        audit.calc('Bonif.', `${gratAnuales} × ${tasaBonif}`, bonifAnuales);
+        audit.calc('Renta bruta', 'Σ', rentaBrutaAnual);
+        audit.calc('Deducción 7 UIT', `7 × ${DATA.UIT}`, deduccion);
+        audit.calc('Renta neta', `${rentaBrutaAnual} - ${deduccion}`, rentaNetaAnual);
 
         const irResult = calcularIRAnual(rentaNetaAnual);
-        const irMensual = meses > 0 ? safeCalc(irResult.impuesto / meses) : 0;
-        const tasaEfectiva = rentaBrutaAnual > 0
-            ? safeCalc((irResult.impuesto / rentaBrutaAnual) * 100)
-            : 0;
-
-        audit.push(`IR Anual: ${irResult.impuesto}`);
-        audit.push(`IR Mensual estimado: ${irResult.impuesto} / ${meses} = ${irMensual}`);
-        audit.push(`Tasa efectiva: ${tasaEfectiva}%`);
+        const irMensual = meses > 0 ? safe(irResult.impuesto / meses) : 0;
+        const tasaEfectiva = rentaBrutaAnual > 0 ? safe((irResult.impuesto / rentaBrutaAnual) * 100) : 0;
 
         return {
             base,
             desglose: { sueldosAnuales, gratAnuales, bonifAnuales, otrosIngresos },
-            rentaBrutaAnual, deduccion7UIT: deduccion,
-            rentaNetaAnual, irAnual: irResult.impuesto,
-            irMensual, tramos: irResult.tramos,
-            tasaEfectiva,
-            audit: audit.join('\n') + '\n' + irResult.audit
+            rentaBrutaAnual, deduccion7UIT: deduccion, rentaNetaAnual,
+            irAnual: irResult.impuesto, irMensual, tramos: irResult.tramos,
+            tasaEfectiva, tasaBonif,
+            audit: audit.toString() + '\n' + irResult.audit + '\n\n' + base.audit
         };
     }
 
-    // ─── 7. LIQUIDACIÓN ───────────────────────────────────────
-    // Con Triple Vacacional y Bonif. EPS diferenciada
+    // ─── 7. LIQUIDACIÓN ──────────────────────────
     function liquidacion(params) {
         const {
             sueldoBruto, fechaIngreso, fechaCese,
             motivo = 'renuncia', vacPendientes = 0,
-            vacNoGozadasDias = 0,
+            vacNoGozadasTriple = false,
             incluyeAsigFamiliar = false, regimen = 'general',
-            tieneEPS = false
+            tieneEPS = false, promedioComisiones = 0,
+            promedioBonos = 0, vecesComisiones = 6, vecesBonos = 6
         } = params;
 
-        const audit = ['=== CÁLCULO LIQUIDACIÓN 2026 ==='];
+        const audit = new AuditLog('LIQUIDACIÓN DE BENEFICIOS SOCIALES');
         const reg = DATA.REGIMENES[regimen];
-        const base = getBaseRemunerativa(sueldoBruto, incluyeAsigFamiliar, regimen);
+        const base = getBaseRemunerativa({
+            sueldoBruto, incluyeAsigFamiliar, regimen,
+            promedioComisiones, promedioBonos,
+            vecesComisiones, vecesBonos
+        });
 
+        const tasaBonif = tieneEPS ? DATA.BONIF_EPS : DATA.BONIF_ESSALUD;
+
+        // Tiempo de servicio
         const diffMs = fechaCese.getTime() - fechaIngreso.getTime();
         const totalDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
         const anos = Math.floor(totalDias / 365);
         const mesesRest = Math.floor((totalDias % 365) / 30);
         const diasRest = (totalDias % 365) % 30;
 
-        audit.push(`Tiempo: ${anos}a ${mesesRest}m ${diasRest}d (${totalDias} días)`);
-        audit.push(`Régimen: ${reg.nombre}`);
-        audit.push(`Base: ${base.total}`);
+        audit.add(`Régimen: ${reg.nombre}`);
+        audit.add(`Base beneficios: ${base.baseBeneficios}`);
+        audit.add(`Tiempo: ${anos}a ${mesesRest}m ${diasRest}d (${totalDias} días)`);
+        audit.add(`Bonif.: ${tieneEPS ? 'EPS 6.75%' : 'EsSalud 9%'}`);
 
-        // CTS Trunca [PLAME]
+        // CTS Trunca
         let ctsTrunca = 0;
         if (reg.cts) {
-            const factorCTS = reg.cts_dias_ano / 30;
-            const diasCTSTruncos = safeCalc(mesesRest * 30 + diasRest);
-            ctsTrunca = roundPLAME(safeCalc((base.total * factorCTS / DATA.DIAS_ANO) * diasCTSTruncos));
-            audit.push(`CTS trunca [PLAME]: (${base.total} × ${factorCTS} / 360) × ${diasCTSTruncos} = ${ctsTrunca}`);
+            const factorCTS = safe(reg.cts_dias_ano / DATA.DIAS_MES);
+            const diasCTS = safe(mesesRest * 30 + diasRest);
+            ctsTrunca = safe((base.baseBeneficios * factorCTS / DATA.DIAS_ANO) * diasCTS);
+            audit.section('CTS TRUNCA');
+            audit.calc('CTS', `(${base.baseBeneficios} × ${factorCTS} / 360) × ${diasCTS}`, ctsTrunca);
         }
 
-        // Gratificación Trunca [PLAME] + Bonif. EPS diferenciada
+        // Gratificación Trunca
         let gratTrunca = 0;
         let bonifGratTrunca = 0;
         if (reg.gratificacion) {
             const mesCese = fechaCese.getMonth() + 1;
-            const mesesSemestre = mesCese <= 6 ? mesCese : mesCese - 6;
-            gratTrunca = roundPLAME(
-                safeCalc((base.total * reg.gratificacion_factor / DATA.MESES_SEMESTRE) * mesesSemestre)
-            );
-            const tasaBonif = tieneEPS ? DATA.BONIF_EXTRAORDINARIA_EPS : DATA.BONIF_EXTRAORDINARIA;
-            bonifGratTrunca = roundPLAME(safeCalc(gratTrunca * tasaBonif));
-            audit.push(`Grat. trunca [PLAME]: (${base.total} × ${reg.gratificacion_factor} / 6) × ${mesesSemestre} = ${gratTrunca}`);
-            audit.push(`Bonif. ${tieneEPS ? '6.75% EPS' : '9% EsSalud'} [PLAME]: ${gratTrunca} × ${tasaBonif} = ${bonifGratTrunca}`);
+            const mesesSem = mesCese <= 6 ? mesCese : mesCese - 6;
+            gratTrunca = safe((base.baseBeneficios * reg.gratificacion_factor / DATA.MESES_SEMESTRE) * mesesSem);
+            bonifGratTrunca = safe(gratTrunca * tasaBonif);
+            audit.section('GRATIFICACIÓN TRUNCA');
+            audit.calc('Grat.', `(${base.baseBeneficios} × ${reg.gratificacion_factor} / 6) × ${mesesSem}`, gratTrunca);
+            audit.calc(`Bonif. ${tasaBonif * 100}%`, `${gratTrunca} × ${tasaBonif}`, bonifGratTrunca);
         }
 
-        // Vacaciones Truncas [PLAME]
-        const mesesVacTruncos = Math.floor((totalDias % 365) / 30);
-        const diasVacTruncos = (totalDias % 365) % 30;
-        const vacDiasProporcion = safeCalc(reg.vacaciones_dias * (mesesVacTruncos * 30 + diasVacTruncos) / DATA.DIAS_ANO);
-        const vacTruncas = roundPLAME(safeCalc((base.total / DATA.DIAS_MES) * vacDiasProporcion));
-        audit.push(`Vac. truncas [PLAME]: (${base.total}/30) × ${vacDiasProporcion} = ${vacTruncas}`);
+        // Vacaciones Truncas
+        const diasVacProp = safe(reg.vacaciones_dias * (mesesRest * 30 + diasRest) / DATA.DIAS_ANO);
+        const vacTruncas = safe((base.baseBeneficios / DATA.DIAS_MES) * diasVacProp);
+        audit.section('VACACIONES TRUNCAS');
+        audit.calc('Días proporcionales', `${reg.vacaciones_dias} × ${mesesRest * 30 + diasRest} / 360`, diasVacProp);
+        audit.calc('Vac. truncas', `(${base.baseBeneficios}/30) × ${diasVacProp}`, vacTruncas);
 
-        // Vacaciones pendientes no gozadas normales (1x)
-        const pagoVacPendientes = roundPLAME(safeCalc((base.total / DATA.DIAS_MES) * vacPendientes));
-        if (vacPendientes > 0) {
-            audit.push(`Vac. pendientes [PLAME]: (${base.total}/30) × ${vacPendientes}d = ${pagoVacPendientes}`);
+        // Vacaciones pendientes
+        const pagoVacPendientes = safe((base.baseBeneficios / DATA.DIAS_MES) * vacPendientes);
+
+        // Triple vacacional
+        let tripleVacacionalMonto = 0;
+        if (vacNoGozadasTriple) {
+            // Art. 23 D.Leg. 713: 3 remuneraciones
+            tripleVacacionalMonto = safe(base.baseBeneficios * 3);
+            audit.section('TRIPLE VACACIONAL');
+            audit.add('Art. 23 D.Leg. 713: 1 descanso + 1 trabajo + 1 indemnización');
+            audit.calc('Triple vacacional', `${base.baseBeneficios} × 3`, tripleVacacionalMonto);
         }
 
-        // Triple Vacacional (Art. 23 D.Leg. 713) — año no otorgado
-        let tripleVacacional = 0;
-        if (vacNoGozadasDias > 0) {
-            const remuDiariaBase = safeCalc(base.total / DATA.DIAS_MES);
-            const remuNormal = roundPLAME(safeCalc(remuDiariaBase * vacNoGozadasDias));
-            // Triple = 3x; la 1ª ya fue pagada → pagar 2x adicional
-            tripleVacacional = roundPLAME(safeCalc(remuNormal * 2));
-            audit.push(`TRIPLE VACACIONAL (${vacNoGozadasDias} días — Art. 23 D.Leg. 713):`);
-            audit.push(`  Remu. normal (1 sueldo): ${remuNormal}`);
-            audit.push(`  A pagar adicional (2 sueldos): ${tripleVacacional} [PLAME]`);
-        }
-
-        // Indemnización por despido arbitrario
+        // Indemnización despido arbitrario
         let indemnizacion = 0;
         if (motivo === 'despido-arbitrario') {
-            const anosServ = safeCalc(anos + mesesRest / 12 + diasRest / 360);
-            const indemnCalc = safeCalc(base.total * reg.indemnizacion_despido * anosServ);
-            const tope = safeCalc(base.total * reg.indemnizacion_tope_remu);
-            indemnizacion = roundPLAME(Math.min(indemnCalc, tope));
-            audit.push(`Indemnización: ${base.total} × ${reg.indemnizacion_despido} × ${anosServ} = ${indemnCalc}`);
-            audit.push(`Tope: ${base.total} × ${reg.indemnizacion_tope_remu} = ${tope}`);
-            audit.push(`Indemnización [PLAME]: min(${indemnCalc}, ${tope}) = ${indemnizacion}`);
+            const anosServ = safe(anos + mesesRest / 12 + diasRest / 360);
+            const indCalc = safe(base.baseBeneficios * reg.indemnizacion_despido * anosServ);
+            const tope = safe(base.baseBeneficios * reg.indemnizacion_tope_remu);
+            indemnizacion = Math.min(indCalc, tope);
+            audit.section('INDEMNIZACIÓN DESPIDO ARBITRARIO');
+            audit.calc('Cálculo', `${base.baseBeneficios} × ${reg.indemnizacion_despido} × ${anosServ}`, indCalc);
+            audit.add(`Tope: ${base.baseBeneficios} × ${reg.indemnizacion_tope_remu} = ${tope}`);
+            audit.calc('Final', `min(${indCalc}, ${tope})`, indemnizacion);
         }
 
-        // Suma de conceptos ya redondeados (PLAME-Style)
-        const totalLiquidacion = safeCalc(
-            ctsTrunca + gratTrunca + bonifGratTrunca +
-            vacTruncas + pagoVacPendientes + tripleVacacional + indemnizacion
+        const totalLiquidacion = safe(
+            ctsTrunca + gratTrunca + bonifGratTrunca + vacTruncas +
+            pagoVacPendientes + tripleVacacionalMonto + indemnizacion
         );
 
-        audit.push(`TOTAL LIQUIDACIÓN (suma conceptos PLAME): ${totalLiquidacion}`);
+        audit.section('TOTAL LIQUIDACIÓN');
+        audit.calc('TOTAL', 'Σ conceptos', totalLiquidacion);
+
+        // Verificación
+        const suma = safe(ctsTrunca + gratTrunca + bonifGratTrunca + vacTruncas + pagoVacPendientes + tripleVacacionalMonto + indemnizacion);
+        if (Math.abs(suma - totalLiquidacion) > 0.001) {
+            audit.warn(`¡ALERTA! Diferencia en suma: ${Math.abs(suma - totalLiquidacion)}`);
+        } else {
+            audit.add('✓ Verificación: PASS');
+        }
 
         return {
-            base, regimen: reg,
+            base, regimen: reg, tasaBonif,
             tiempoServicio: { anos, meses: mesesRest, dias: diasRest, totalDias },
             motivo, ctsTrunca, gratTrunca, bonifGratTrunca,
-            vacTruncas, pagoVacPendientes,
-            vacPendientes, vacNoGozadasDias,
-            tripleVacacional, indemnizacion,
-            totalLiquidacion,
-            audit: audit.join('\n')
+            vacTruncas, pagoVacPendientes, vacPendientes,
+            vacNoGozadasTriple, tripleVacacionalMonto,
+            indemnizacion, totalLiquidacion,
+            audit: audit.toString() + '\n\n' + base.audit
         };
     }
 
-    // ─── 8. ESSALUD ───────────────────────────────────────────
+    // ─── 8. ESSALUD ──────────────────────────────
     function essalud(params) {
         const { sueldoBruto, regimen = 'general', numTrabajadores = 1, incluyeAsigFamiliar = false } = params;
-
-        const audit = ['=== CÁLCULO ESSALUD 2026 ==='];
-        const base = getBaseRemunerativa(sueldoBruto, incluyeAsigFamiliar, regimen);
+        const audit = new AuditLog('ESSALUD');
+        const base = getBaseRemunerativa({ sueldoBruto, incluyeAsigFamiliar, regimen });
         const tasaInfo = DATA.ESSALUD[regimen] || DATA.ESSALUD.general;
 
-        const aporteUnitario = roundPLAME(safeCalc(base.total * tasaInfo.tasa));
-        const baseMinima = roundPLAME(safeCalc(DATA.RMV * tasaInfo.tasa));
-        const aporteReal = Math.max(aporteUnitario, baseMinima);
-        const aporteTotal = safeCalc(aporteReal * numTrabajadores);
-        const aporteAnual = safeCalc(aporteTotal * DATA.MESES_ANO);
+        const aporteUnit = safe(base.baseBeneficios * tasaInfo.tasa);
+        const baseMin = safe(DATA.RMV * tasaInfo.tasa);
+        const aporteReal = Math.max(aporteUnit, baseMin);
+        const aporteTotal = safe(aporteReal * numTrabajadores);
+        const aporteAnual = safe(aporteTotal * DATA.MESES_ANO);
 
-        audit.push(`Base: ${base.total}`);
-        audit.push(`Tasa: ${tasaInfo.tasa * 100}%`);
-        audit.push(`Aporte unitario [PLAME]: ${base.total} × ${tasaInfo.tasa} = ${aporteUnitario}`);
-        audit.push(`Base mínima (RMV ${DATA.RMV} × ${tasaInfo.tasa}): ${baseMinima}`);
-        audit.push(`Aporte real: max(${aporteUnitario}, ${baseMinima}) = ${aporteReal}`);
-        audit.push(`Total (${numTrabajadores} trab.): ${aporteTotal}`);
+        audit.calc('Aporte', `${base.baseBeneficios} × ${tasaInfo.tasa}`, aporteUnit);
+        audit.add(`Base mínima (RMV): ${baseMin}`);
+        audit.calc('Real', `max(${aporteUnit}, ${baseMin})`, aporteReal);
+        audit.calc('Total', `${aporteReal} × ${numTrabajadores}`, aporteTotal);
 
         return {
-            base, tasaInfo, aporteUnitario, baseMinima,
+            base, tasaInfo, aporteUnitario: aporteUnit, baseMinima: baseMin,
             aporteReal, numTrabajadores, aporteTotal, aporteAnual,
-            audit: audit.join('\n')
+            audit: audit.toString()
         };
     }
 
-    // ─── 9. UTILIDADES (D. Leg. 892) ──────────────────────────
+    // ─── 9. UTILIDADES ───────────────────────────
     function utilidades(params) {
         const {
             rentaEmpresa, porcentajeSector, diasTrabajados, totalDiasTodos,
             remuAnual, totalRemuTodos
         } = params;
 
-        const audit = ['=== CÁLCULO UTILIDADES ==='];
+        const audit = new AuditLog('UTILIDADES');
+        const montoDistribuir = safe(rentaEmpresa * porcentajeSector / 100);
+        const mitad = safe(montoDistribuir / 2);
+        const porDias = safe((mitad / totalDiasTodos) * diasTrabajados);
+        const porRemu = totalRemuTodos > 0 ? safe((mitad / totalRemuTodos) * remuAnual) : 0;
+        const totalCalc = safe(porDias + porRemu);
+        const remuMensual = safe(remuAnual / DATA.MESES_ANO);
+        const tope = safe(remuMensual * DATA.UTILIDADES_TOPE_REMUNERACIONES);
+        const totalFinal = Math.min(totalCalc, tope);
+        const excedente = safe(Math.max(0, totalCalc - tope));
 
-        const montoDistribuir = safeCalc(rentaEmpresa * porcentajeSector / 100);
-        const mitad = safeCalc(montoDistribuir / 2);
-
-        const porDias = roundPLAME(safeCalc((mitad / totalDiasTodos) * diasTrabajados));
-        const porRemu = totalRemuTodos > 0
-            ? roundPLAME(safeCalc((mitad / totalRemuTodos) * remuAnual))
-            : 0;
-        const totalCalculado = safeCalc(porDias + porRemu);
-
-        const remuMensual = safeCalc(remuAnual / DATA.MESES_ANO);
-        const tope = safeCalc(remuMensual * DATA.UTILIDADES_TOPE_REMUNERACIONES);
-        const totalFinal = Math.min(totalCalculado, tope);
-        const excedente = safeCalc(Math.max(0, totalCalculado - tope));
-
-        audit.push(`Renta empresa: ${rentaEmpresa}`);
-        audit.push(`Sector: ${porcentajeSector}%`);
-        audit.push(`Monto a distribuir: ${montoDistribuir}`);
-        audit.push(`Mitad: ${mitad}`);
-        audit.push(`Por días [PLAME]: (${mitad} / ${totalDiasTodos}) × ${diasTrabajados} = ${porDias}`);
-        audit.push(`Por remu [PLAME]: (${mitad} / ${totalRemuTodos}) × ${remuAnual} = ${porRemu}`);
-        audit.push(`Total calculado: ${totalCalculado}`);
-        audit.push(`Tope 18 remu: ${tope}`);
-        audit.push(`TOTAL FINAL: ${totalFinal}`);
+        audit.calc('A distribuir', `${rentaEmpresa} × ${porcentajeSector}%`, montoDistribuir);
+        audit.calc('Por días', `(${mitad}/${totalDiasTodos}) × ${diasTrabajados}`, porDias);
+        audit.calc('Por remu', `(${mitad}/${totalRemuTodos}) × ${remuAnual}`, porRemu);
+        audit.calc('Total calc', `${porDias} + ${porRemu}`, totalCalc);
+        audit.add(`Tope 18 remu: ${tope}`);
+        audit.calc('FINAL', `min(${totalCalc}, ${tope})`, totalFinal);
 
         return {
-            montoDistribuir, porDias, porRemu, totalCalculado,
+            montoDistribuir, porDias, porRemu, totalCalculado: totalCalc,
             remuMensual, tope, totalFinal, excedente,
-            audit: audit.join('\n')
+            audit: audit.toString()
         };
     }
 
-    // ─── 10. ASIGNACIÓN FAMILIAR ──────────────────────────────
+    // ─── 10. ASIGNACIÓN FAMILIAR ─────────────────
     function asignacionFamiliar(params) {
         const { numHijos = 0 } = params;
-        const monto = numHijos > 0
-            ? roundPLAME(safeCalc(DATA.RMV * DATA.ASIGNACION_FAMILIAR_PCT))
-            : 0;
-        const audit = [
-            '=== ASIGNACIÓN FAMILIAR 2026 ===',
-            `RMV 2026: S/ ${DATA.RMV}`,
-            `Tasa: ${DATA.ASIGNACION_FAMILIAR_PCT * 100}%`,
-            `Cálculo: ${DATA.RMV} × ${DATA.ASIGNACION_FAMILIAR_PCT} = ${monto} [PLAME]`,
-            `Hijos: ${numHijos}`,
-            `Derecho: ${numHijos > 0 ? 'SÍ' : 'NO'}`,
-            `Monto mensual: S/ ${monto}`
-        ].join('\n');
+        const monto = numHijos > 0 ? safe(DATA.RMV * DATA.ASIGNACION_FAMILIAR_PCT) : 0;
+        const audit = new AuditLog('ASIGNACIÓN FAMILIAR');
+        audit.add(`RMV ${DATA.YEAR}: ${DATA.RMV}`);
+        audit.add(`Tasa: ${DATA.ASIGNACION_FAMILIAR_PCT * 100}%`);
+        audit.add(`Hijos: ${numHijos}`);
+        audit.calc('Monto', `${DATA.RMV} × ${DATA.ASIGNACION_FAMILIAR_PCT}`, monto);
 
         return {
-            rmv: DATA.RMV,
-            porcentaje: DATA.ASIGNACION_FAMILIAR_PCT,
-            numHijos,
-            tieneDerechoFlag: numHijos > 0,
-            montoMensual: monto,
-            montoAnual: safeCalc(monto * 12),
-            audit
+            rmv: DATA.RMV, porcentaje: DATA.ASIGNACION_FAMILIAR_PCT,
+            numHijos, tieneDerechoFlag: numHijos > 0,
+            montoMensual: monto, montoAnual: safe(monto * 12),
+            audit: audit.toString()
         };
     }
 
-    // ─── 11. RENTA 5TA DETALLADA ──────────────────────────────
+    // ─── 11. RENTA 5TA DETALLADA ─────────────────
     function rentaQuintaDetallada(params) {
         const {
-            sueldoBruto, mesCalculo = 12,
-            remuPercibidas = 0, gratPercibidas = 0,
-            incluyeAsigFamiliar = false, otrosIngresos = 0
+            sueldoBruto, mesCalculo = 12, remuPercibidas = 0,
+            gratPercibidas = 0, incluyeAsigFamiliar = false,
+            otrosIngresos = 0, tieneEPS = false,
+            promedioComisiones = 0, promedioBonos = 0,
+            vecesComisiones = 6, vecesBonos = 6
         } = params;
 
-        const base = getBaseRemunerativa(sueldoBruto, incluyeAsigFamiliar);
+        const base = getBaseRemunerativa({
+            sueldoBruto, incluyeAsigFamiliar,
+            promedioComisiones, promedioBonos,
+            vecesComisiones, vecesBonos
+        });
+
+        const promedioVar = safe(base.comisionesComputable + base.bonosComputable);
         return proyectarRenta5ta({
             sueldoMensual: base.sueldoBruto,
             asigFamiliar: base.asigFamiliar,
-            mesCalculo, remuPercibidas, gratPercibidas, otrosIngresos
+            promedioVariables: promedioVar,
+            mesCalculo, remuPercibidas, gratPercibidas,
+            otrosIngresos, tieneEPS
         });
     }
 
-    // ─── 12. COSTO TOTAL DEL EMPLEADOR ────────────────────────
-    // Con diferenciación EPS y costos de despido/liquidación
+    // ─── 12. COSTO EMPLEADOR ─────────────────────
     function costoEmpleador(params) {
         const {
             sueldoBruto, regimen = 'general',
             incluyeAsigFamiliar = false, incluyeSCTR = false,
-            anosServicio = 4, tieneEPS = false
+            anosServicio = 4, tieneEPS = false,
+            promedioComisiones = 0, promedioBonos = 0,
+            vecesComisiones = 6, vecesBonos = 6
         } = params;
 
-        const audit = ['=== COSTO TOTAL DEL EMPLEADOR 2026 ==='];
+        const audit = new AuditLog('COSTO TOTAL EMPLEADOR');
         const reg = DATA.REGIMENES[regimen];
-        const base = getBaseRemunerativa(sueldoBruto, incluyeAsigFamiliar, regimen);
+        const base = getBaseRemunerativa({
+            sueldoBruto, incluyeAsigFamiliar, regimen,
+            promedioComisiones, promedioBonos,
+            vecesComisiones, vecesBonos
+        });
 
-        audit.push(`Régimen: ${reg.nombre}`);
-        audit.push(`Base: ${base.total}`);
+        const tasaBonif = tieneEPS ? DATA.BONIF_EPS : DATA.BONIF_ESSALUD;
+        audit.add(`Régimen: ${reg.nombre}`);
+        audit.add(`Base: ${base.baseBeneficios}`);
+        audit.add(`Bonif.: ${tieneEPS ? 'EPS 6.75%' : 'EsSalud 9%'}`);
 
-        // EsSalud
-        const essaludMensual = roundPLAME(safeCalc(base.total * reg.essalud_tasa));
-        audit.push(`EsSalud (${reg.essalud_tasa * 100}%) [PLAME]: ${essaludMensual}`);
+        const essaludMensual = safe(base.baseBeneficios * reg.essalud_tasa);
 
-        // CTS mensualizada
         let ctsMensualizada = 0;
         if (reg.cts) {
-            ctsMensualizada = roundPLAME(safeCalc((base.total * (reg.cts_dias_ano / DATA.DIAS_MES)) / DATA.MESES_ANO));
-            audit.push(`CTS mensualizada (${reg.cts_dias_ano}d/año) [PLAME]: ${ctsMensualizada}`);
+            ctsMensualizada = safe((base.baseBeneficios * (reg.cts_dias_ano / DATA.DIAS_MES)) / DATA.MESES_ANO);
         }
 
-        // Gratificaciones mensualizadas + Bonif. EPS diferenciada
         let gratMensualizada = 0;
         let bonifMensualizada = 0;
         if (reg.gratificacion) {
-            gratMensualizada = roundPLAME(safeCalc((base.total * reg.gratificacion_factor * 2) / DATA.MESES_ANO));
-            const tasaBonif = tieneEPS ? DATA.BONIF_EXTRAORDINARIA_EPS : DATA.BONIF_EXTRAORDINARIA;
-            bonifMensualizada = roundPLAME(safeCalc(gratMensualizada * tasaBonif));
-            audit.push(`Grat. mensualiz. (factor ${reg.gratificacion_factor}×2) [PLAME]: ${gratMensualizada}`);
-            audit.push(`Bonif. ${tieneEPS ? '6.75% EPS' : '9%'} mensualizada [PLAME]: ${bonifMensualizada}`);
+            gratMensualizada = safe((base.baseBeneficios * reg.gratificacion_factor * 2) / DATA.MESES_ANO);
+            bonifMensualizada = safe(gratMensualizada * tasaBonif);
         }
 
-        // Vacaciones mensualizadas
-        const vacMensualizada = roundPLAME(safeCalc((base.total * (reg.vacaciones_dias / DATA.DIAS_MES)) / DATA.MESES_ANO));
-        audit.push(`Vacaciones mensualiz. (${reg.vacaciones_dias}d) [PLAME]: ${vacMensualizada}`);
+        const vacMensualizada = safe((base.baseBeneficios * (reg.vacaciones_dias / DATA.DIAS_MES)) / DATA.MESES_ANO);
 
-        // SCTR
         let sctrMensual = 0;
         if (incluyeSCTR) {
-            sctrMensual = roundPLAME(safeCalc(base.total * DATA.SCTR.total));
-            audit.push(`SCTR (${(DATA.SCTR.total * 100).toFixed(2)}%) [PLAME]: ${sctrMensual}`);
+            sctrMensual = safe(base.baseBeneficios * DATA.SCTR.total);
         }
 
-        // Vida Ley
         let vidaLeyMensual = 0;
-        if (reg.vida_ley && anosServicio >= 4) {
-            vidaLeyMensual = roundPLAME(safeCalc(base.total * DATA.VIDA_LEY.prima_mensual_estimada));
-            audit.push(`Vida Ley (~${(DATA.VIDA_LEY.prima_mensual_estimada * 100).toFixed(2)}%) [PLAME]: ${vidaLeyMensual}`);
+        if (reg.vida_ley && anosServicio >= DATA.VIDA_LEY.anos_minimo) {
+            vidaLeyMensual = safe(base.baseBeneficios * DATA.VIDA_LEY.prima_estimada);
         }
 
-        const costoAdicional = safeCalc(
+        const costoAdicional = safe(
             essaludMensual + ctsMensualizada + gratMensualizada +
             bonifMensualizada + vacMensualizada + sctrMensual + vidaLeyMensual
         );
-        const costoTotalMensual = safeCalc(base.total + costoAdicional);
-        const costoTotalAnual = safeCalc(costoTotalMensual * DATA.MESES_ANO);
-        const porcentajeSobrecosto = safeCalc((costoAdicional / base.total) * 100);
+        const costoTotalMensual = safe(base.baseBeneficios + costoAdicional);
+        const costoTotalAnual = safe(costoTotalMensual * DATA.MESES_ANO);
+        const porcentajeSobrecosto = base.baseBeneficios > 0
+            ? safe((costoAdicional / base.baseBeneficios) * 100) : 0;
 
-        // Costo de liquidación (indemnización + beneficios truncos estimados 1 año)
-        // Estimación: liquidación completa a los anosServicio dados
-        const anosEst = Math.max(1, anosServicio);
-        const indemnizacionEstimada = regimen !== 'micro'
-            ? roundPLAME(Math.min(
-                safeCalc(base.total * reg.indemnizacion_despido * anosEst),
-                safeCalc(base.total * reg.indemnizacion_tope_remu)
-              ))
-            : roundPLAME(safeCalc(base.total * reg.indemnizacion_despido * anosEst));
+        // Costo de liquidar (despido arbitrario, 1 año)
+        const costoLiquidar1Ano = safe(
+            base.baseBeneficios * reg.indemnizacion_despido +
+            (reg.cts ? base.baseBeneficios : 0) +
+            (reg.gratificacion ? base.baseBeneficios * reg.gratificacion_factor : 0) +
+            (base.baseBeneficios * (reg.vacaciones_dias / DATA.DIAS_MES))
+        );
 
-        const beneficiosTruncos = roundPLAME(safeCalc(
-            (reg.cts ? base.total * (reg.cts_dias_ano / 360) * 6 : 0) +
-            (reg.gratificacion ? base.total * reg.gratificacion_factor * 0.5 : 0)
-        ));
-
-        const costoTotalDespido = safeCalc(indemnizacionEstimada + beneficiosTruncos);
-        const costoLaboralAnualTotal = safeCalc(costoTotalAnual + costoTotalDespido);
-
-        audit.push(`Costo adicional mensual: ${costoAdicional}`);
-        audit.push(`COSTO TOTAL MENSUAL: ${base.total} + ${costoAdicional} = ${costoTotalMensual}`);
-        audit.push(`COSTO LABORAL ANUAL: ${costoTotalAnual}`);
-        audit.push(`Indemnización estimada (${anosEst}a): ${indemnizacionEstimada}`);
-        audit.push(`Beneficios truncos estimados: ${beneficiosTruncos}`);
-        audit.push(`COSTO LABORAL ANUAL TOTAL (incluye despido): ${costoLaboralAnualTotal}`);
-        audit.push(`Sobrecosto: +${porcentajeSobrecosto}%`);
+        audit.section('DESGLOSE MENSUAL');
+        audit.calc('EsSalud', `${base.baseBeneficios} × ${reg.essalud_tasa}`, essaludMensual);
+        audit.calc('CTS mens.', '', ctsMensualizada);
+        audit.calc('Grat. mens.', '', gratMensualizada);
+        audit.calc(`Bonif. ${tasaBonif * 100}% mens.`, '', bonifMensualizada);
+        audit.calc('Vac. mens.', '', vacMensualizada);
+        if (sctrMensual > 0) audit.calc('SCTR', '', sctrMensual);
+        if (vidaLeyMensual > 0) audit.calc('Vida Ley', '', vidaLeyMensual);
+        audit.section('TOTALES');
+        audit.calc('Costo adicional', 'Σ', costoAdicional);
+        audit.calc('COSTO TOTAL MENSUAL', `${base.baseBeneficios} + ${costoAdicional}`, costoTotalMensual);
+        audit.calc('Sobrecosto', '', `+${porcentajeSobrecosto}%`);
+        audit.calc('Costo liquidar 1 año', '', costoLiquidar1Ano);
 
         return {
-            base, regimen: reg,
+            base, regimen: reg, tasaBonif,
             desglose: {
                 essaludMensual, ctsMensualizada, gratMensualizada,
                 bonifMensualizada, vacMensualizada, sctrMensual, vidaLeyMensual
             },
             costoAdicional, costoTotalMensual, costoTotalAnual,
-            porcentajeSobrecosto,
-            liquidacion: { indemnizacionEstimada, beneficiosTruncos, costoTotalDespido },
-            costoLaboralAnualTotal,
-            audit: audit.join('\n')
+            porcentajeSobrecosto, costoLiquidar1Ano,
+            audit: audit.toString() + '\n\n' + base.audit
         };
     }
 
-    // ─── 13. COMPARADOR PRO DE REGÍMENES ──────────────────────
-    // Tabla completa: Costo Anual Contratar vs. Costo Despedir/Liquidar
+    // ─── 13. COMPARADOR PRO ──────────────────────
     function comparadorRegimenes(params) {
         const {
             sueldoBruto, incluyeAsigFamiliar = false,
-            incluyeSCTR = false, anosServicio = 2,
-            tieneEPS = false
+            incluyeSCTR = false, tieneEPS = false,
+            promedioComisiones = 0, promedioBonos = 0,
+            vecesComisiones = 6, vecesBonos = 6
         } = params;
 
-        const audit = ['=== COMPARADOR PRO DE REGÍMENES 2026 ==='];
+        const audit = new AuditLog('COMPARADOR PRO DE REGÍMENES');
         const resultados = {};
 
         for (const key of ['general', 'pequena', 'micro']) {
             const r = costoEmpleador({
-                sueldoBruto,
-                regimen: key,
+                sueldoBruto, regimen: key,
                 incluyeAsigFamiliar: key === 'micro' ? false : incluyeAsigFamiliar,
-                incluyeSCTR,
-                anosServicio,
-                tieneEPS
+                incluyeSCTR, tieneEPS, anosServicio: 4,
+                promedioComisiones: key === 'micro' ? 0 : promedioComisiones,
+                promedioBonos: key === 'micro' ? 0 : promedioBonos,
+                vecesComisiones, vecesBonos
             });
             resultados[key] = r;
-            audit.push(`\n--- ${r.regimen.nombre} ---`);
-            audit.push(`Costo mensual: ${r.costoTotalMensual}`);
-            audit.push(`Costo anual contratar: ${r.costoTotalAnual}`);
-            audit.push(`Costo despedir/liquidar: ${r.liquidacion.costoTotalDespido}`);
-            audit.push(`COSTO LABORAL ANUAL TOTAL: ${r.costoLaboralAnualTotal}`);
-            audit.push(`Sobrecosto: +${r.porcentajeSobrecosto}%`);
+
+            audit.section(`${r.regimen.nombre.toUpperCase()}`);
+            audit.add(`Costo mensual: S/ ${plameRound(r.costoTotalMensual)}`);
+            audit.add(`Costo anual: S/ ${plameRound(r.costoTotalAnual)}`);
+            audit.add(`Sobrecosto: +${plameRound(r.porcentajeSobrecosto)}%`);
+            audit.add(`Costo liquidar 1 año: S/ ${plameRound(r.costoLiquidar1Ano)}`);
+            audit.add(`Costo anual TOTAL (operación + liquidación): S/ ${plameRound(r.costoTotalAnual + r.costoLiquidar1Ano)}`);
         }
 
-        const ahorroMicroVsGeneral = roundPLAME(safeCalc(
-            resultados.general.costoTotalMensual - resultados.micro.costoTotalMensual
-        ));
-        const ahorroPequenaVsGeneral = roundPLAME(safeCalc(
-            resultados.general.costoTotalMensual - resultados.pequena.costoTotalMensual
-        ));
-        const ahorroAnualMicro = roundPLAME(safeCalc(
-            resultados.general.costoLaboralAnualTotal - resultados.micro.costoLaboralAnualTotal
-        ));
-        const ahorroAnualPequena = roundPLAME(safeCalc(
-            resultados.general.costoLaboralAnualTotal - resultados.pequena.costoLaboralAnualTotal
-        ));
+        const ahorroMicroVsGeneral = safe(resultados.general.costoTotalAnual - resultados.micro.costoTotalAnual);
+        const ahorroPequenaVsGeneral = safe(resultados.general.costoTotalAnual - resultados.pequena.costoTotalAnual);
 
-        audit.push(`\nAhorro mensual Micro vs General: ${ahorroMicroVsGeneral}`);
-        audit.push(`Ahorro mensual Pequeña vs General: ${ahorroPequenaVsGeneral}`);
-        audit.push(`Ahorro anual total Micro vs General: ${ahorroAnualMicro}`);
-        audit.push(`Ahorro anual total Pequeña vs General: ${ahorroAnualPequena}`);
+        audit.section('ANÁLISIS DE AHORRO ANUAL');
+        audit.calc('Ahorro Micro vs General', '', ahorroMicroVsGeneral);
+        audit.calc('Ahorro Pequeña vs General', '', ahorroPequenaVsGeneral);
 
         return {
             general: resultados.general,
@@ -1230,31 +1376,109 @@ const CalcEngine = (() => {
             micro: resultados.micro,
             ahorroMicroVsGeneral,
             ahorroPequenaVsGeneral,
-            ahorroAnualMicro,
-            ahorroAnualPequena,
-            audit: audit.join('\n')
+            matriz: {
+                headers: ['Concepto', 'General', 'Pequeña', 'Micro'],
+                rows: [
+                    ['Remuneración', resultados.general.base.baseBeneficios, resultados.pequena.base.baseBeneficios, resultados.micro.base.baseBeneficios],
+                    ['EsSalud', resultados.general.desglose.essaludMensual, resultados.pequena.desglose.essaludMensual, resultados.micro.desglose.essaludMensual],
+                    ['CTS (mens.)', resultados.general.desglose.ctsMensualizada, resultados.pequena.desglose.ctsMensualizada, resultados.micro.desglose.ctsMensualizada],
+                    ['Gratif. (mens.)', resultados.general.desglose.gratMensualizada, resultados.pequena.desglose.gratMensualizada, resultados.micro.desglose.gratMensualizada],
+                    ['Bonif. (mens.)', resultados.general.desglose.bonifMensualizada, resultados.pequena.desglose.bonifMensualizada, resultados.micro.desglose.bonifMensualizada],
+                    ['Vacaciones (mens.)', resultados.general.desglose.vacMensualizada, resultados.pequena.desglose.vacMensualizada, resultados.micro.desglose.vacMensualizada],
+                    ['SCTR', resultados.general.desglose.sctrMensual, resultados.pequena.desglose.sctrMensual, resultados.micro.desglose.sctrMensual],
+                    ['Vida Ley', resultados.general.desglose.vidaLeyMensual, resultados.pequena.desglose.vidaLeyMensual, resultados.micro.desglose.vidaLeyMensual],
+                    ['COSTO MENSUAL', resultados.general.costoTotalMensual, resultados.pequena.costoTotalMensual, resultados.micro.costoTotalMensual],
+                    ['COSTO ANUAL', resultados.general.costoTotalAnual, resultados.pequena.costoTotalAnual, resultados.micro.costoTotalAnual],
+                    ['Sobrecosto %', resultados.general.porcentajeSobrecosto, resultados.pequena.porcentajeSobrecosto, resultados.micro.porcentajeSobrecosto],
+                    ['Costo liquidar 1a', resultados.general.costoLiquidar1Ano, resultados.pequena.costoLiquidar1Ano, resultados.micro.costoLiquidar1Ano],
+                    ['COSTO TOTAL ANUAL', safe(resultados.general.costoTotalAnual + resultados.general.costoLiquidar1Ano), safe(resultados.pequena.costoTotalAnual + resultados.pequena.costoLiquidar1Ano), safe(resultados.micro.costoTotalAnual + resultados.micro.costoLiquidar1Ano)]
+                ]
+            },
+            audit: audit.toString()
         };
     }
 
-    // ─── API Pública ──────────────────────────────────────────
+    // ─── 14. AUDITORÍA DE INTEGRIDAD ─────────────
+    function auditarIntegridad(params) {
+        const { sueldoBruto, tipoPension, resultadoNeto } = params;
+        const audit = new AuditLog('AUDITORÍA DE INTEGRIDAD');
+
+        const base = resultadoNeto.base;
+        const reconstruido = safe(base.baseNeta - resultadoNeto.pension.total - resultadoNeto.ir.mensual);
+        const diferencia = Math.abs(reconstruido - resultadoNeto.sueldoNeto);
+
+        audit.add(`Base neta: ${base.baseNeta}`);
+        audit.add(`Pensión: ${resultadoNeto.pension.total}`);
+        audit.add(`IR mensual: ${resultadoNeto.ir.mensual}`);
+        audit.add(`Neto calculado: ${resultadoNeto.sueldoNeto}`);
+        audit.add(`Neto reconstruido: ${reconstruido}`);
+        audit.add(`Diferencia: ${diferencia}`);
+
+        const pass = diferencia < 0.01;
+        audit.add(pass ? '✓ AUDITORÍA PASS' : '✗ AUDITORÍA FAIL - Inconsistencia detectada');
+
+        // Verificación PLAME
+        const netoPLAME = plameRound(resultadoNeto.sueldoNeto);
+        const basePLAME = plameRound(base.baseNeta);
+        const pensionPLAME = plameRound(resultadoNeto.pension.total);
+        const irPLAME = plameRound(resultadoNeto.ir.mensual);
+        const sumaPLAME = safe(basePLAME - pensionPLAME - irPLAME);
+        const difPLAME = Math.abs(sumaPLAME - netoPLAME);
+
+        audit.section('VERIFICACIÓN PLAME (redondeo por concepto)');
+        audit.add(`Base PLAME: ${basePLAME}`);
+        audit.add(`Pensión PLAME: ${pensionPLAME}`);
+        audit.add(`IR PLAME: ${irPLAME}`);
+        audit.add(`Suma PLAME: ${basePLAME} - ${pensionPLAME} - ${irPLAME} = ${sumaPLAME}`);
+        audit.add(`Neto PLAME: ${netoPLAME}`);
+        audit.add(`Diferencia PLAME: ${difPLAME}`);
+        audit.add(difPLAME <= 0.01 ? '✓ PLAME PASS' : `⚠ PLAME: diferencia de ${difPLAME} (por redondeo de conceptos)`);
+
+        return {
+            pass,
+            diferencia,
+            netoPLAME,
+            difPLAME,
+            audit: audit.toString()
+        };
+    }
+
+    // ─── 15. PERFILES (localStorage) ─────────────
+    function guardarPerfil(nombre, datos) {
+        const perfiles = JSON.parse(localStorage.getItem('sueldopro_perfiles') || '{}');
+        perfiles[nombre] = { ...datos, timestamp: Date.now(), version: DATA.VERSION };
+        localStorage.setItem('sueldopro_perfiles', JSON.stringify(perfiles));
+        return true;
+    }
+
+    function cargarPerfil(nombre) {
+        const perfiles = JSON.parse(localStorage.getItem('sueldopro_perfiles') || '{}');
+        return perfiles[nombre] || null;
+    }
+
+    function listarPerfiles() {
+        const perfiles = JSON.parse(localStorage.getItem('sueldopro_perfiles') || '{}');
+        return Object.entries(perfiles).map(([nombre, data]) => ({
+            nombre, timestamp: data.timestamp, version: data.version
+        }));
+    }
+
+    function eliminarPerfil(nombre) {
+        const perfiles = JSON.parse(localStorage.getItem('sueldopro_perfiles') || '{}');
+        delete perfiles[nombre];
+        localStorage.setItem('sueldopro_perfiles', JSON.stringify(perfiles));
+    }
+
+    // ─── API PÚBLICA ─────────────────────────────
     return Object.freeze({
-        safeCalc, roundUI, roundPLAME, formatMoney,
-        getBaseRemunerativa,
-        calcularPension,
-        calcularIRAnual,
+        safe, plameRound, formatMoney,
+        getBaseRemunerativa, calcularPension, calcularIRAnual,
         proyectarRenta5ta,
-        sueldoNeto,
-        gratificacion,
-        cts,
-        horasExtras,
-        vacaciones,
-        impuestoRenta,
-        liquidacion,
-        essalud,
-        utilidades,
-        asignacionFamiliar,
-        rentaQuintaDetallada,
-        costoEmpleador,
-        comparadorRegimenes
+        sueldoNeto, gratificacion, cts, horasExtras, vacaciones,
+        impuestoRenta, liquidacion, essalud, utilidades,
+        asignacionFamiliar, rentaQuintaDetallada,
+        costoEmpleador, comparadorRegimenes,
+        auditarIntegridad,
+        guardarPerfil, cargarPerfil, listarPerfiles, eliminarPerfil
     });
 })();

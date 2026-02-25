@@ -223,13 +223,12 @@
                                 </div>
                                 <div class="calc-card-body">
                                     <div class="form-group">
-                                        <label class="form-label">
-                                            <i class="fas fa-coins"></i> Remuneración Bruta Mensual
-                                        </label>
-                                        <div class="input-wrapper">
-                                            <span class="input-prefix">S/</span>
-                                            <input type="number" id="sn-sueldo-bruto" class="form-input" placeholder="Ej: 5000" min="0" step="0.01">
-                                        </div>
+    <label class="form-label"><i class="fas fa-exchange-alt"></i> Tipo Comisión AFP</label>
+    <select id="sn-tipo-comision" class="form-select">
+        <option value="flujo">Comisión sobre Flujo</option>
+        <option value="mixta">Comisión Mixta (Flujo + Saldo)</option>
+    </select>
+</div>
                                         <span class="form-hint">Incluye sueldo básico + conceptos remunerativos</span>
                                     </div>
                                     <div class="form-row">
@@ -310,14 +309,15 @@
                                 </div>
                                 <div class="calc-card-body">
                                     <div class="form-group">
-                                        <label class="form-label">
-                                            <i class="fas fa-coins"></i> Remuneración Bruta Mensual
-                                        </label>
-                                        <div class="input-wrapper">
-                                            <span class="input-prefix">S/</span>
-                                            <input type="number" id="grat-sueldo" class="form-input" placeholder="Ej: 4000" min="0" step="0.01">
-                                        </div>
-                                    </div>
+    <label class="form-label"><i class="fas fa-hospital"></i> ¿Tiene EPS?</label>
+    <div class="toggle-wrapper">
+        <label class="toggle">
+            <input type="checkbox" id="sn-tiene-eps">
+            <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Bonif. 6.75% en vez de 9%</span>
+    </div>
+</div>
                                     <div class="form-row">
                                         <div class="form-group">
                                             <label class="form-label">

@@ -1980,3 +1980,196 @@ img {
     padding: 4px 8px;
     border-radius: var(--radius-sm);
 }
+/* ═══════════════════════════════════════════════
+   SueldoPro Ultra v4.0 - ESTILOS ADICIONALES
+   ═══════════════════════════════════════════════ */
+
+/* ── Audit Log Bloomberg Terminal ── */
+.audit-log {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #080c14;
+    border-radius: var(--radius-sm);
+    margin-top: 8px;
+    border: 1px solid #1a2332;
+}
+.audit-log.expanded {
+    max-height: 700px;
+    overflow-y: auto;
+}
+.audit-log pre {
+    padding: 16px 20px;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 11px;
+    line-height: 1.8;
+    color: #22d3ee;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 0;
+    letter-spacing: 0.2px;
+}
+.audit-log pre::before {
+    content: '$ sueldopro-audit --verbose\n\n';
+    color: #64748b;
+    font-style: italic;
+}
+[data-theme="dark"] .audit-log { background: #020617; border-color: #0f172a; }
+
+.audit-toggle-btn {
+    float: right;
+    background: rgba(34, 211, 238, 0.1);
+    color: #22d3ee;
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    padding: 2px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 9px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.audit-toggle-btn:hover {
+    background: #22d3ee;
+    color: #020617;
+}
+
+/* ── Comparador Table ── */
+.comparador-table-wrap {
+    overflow-x: auto;
+    margin-top: 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+}
+.comparador-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    background: var(--bg-card);
+}
+.comparador-table thead {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+[data-theme="dark"] .comparador-table thead {
+    background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+}
+.comparador-table th {
+    padding: 10px 14px;
+    color: #e2e8f0;
+    font-weight: 700;
+    text-align: right;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 10px;
+    border-bottom: 2px solid var(--primary);
+}
+.comparador-table th:first-child { text-align: left; }
+.comparador-table td {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border-light);
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+}
+.comparador-label {
+    text-align: left !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 500;
+    color: var(--text-primary) !important;
+}
+.comparador-value {
+    font-weight: 600;
+    color: var(--text-primary) !important;
+}
+.comparador-total-row {
+    background: var(--primary-50) !important;
+}
+.comparador-total-row td {
+    font-weight: 800 !important;
+    color: var(--primary) !important;
+    border-bottom: 2px solid var(--primary-200);
+}
+.comparador-table tbody tr:hover {
+    background: var(--bg-card-hover);
+}
+
+/* ── Live Indicator ── */
+.calc-card { position: relative; }
+.calc-card::after {
+    content: 'LIVE';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    font-size: 8px;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    letter-spacing: 1.5px;
+    animation: livePulse 2s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+@keyframes livePulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+    50% { opacity: 0.6; box-shadow: 0 0 16px rgba(16, 185, 129, 0.6); }
+}
+
+/* ── Version Badge ── */
+.result-hero::after {
+    content: 'v${DATA?.VERSION || "4.0"}';
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 9px;
+    font-weight: 600;
+    opacity: 0.5;
+    letter-spacing: 0.5px;
+}
+.result-hero { position: relative; }
+
+/* ── Perfil Items ── */
+.perfil-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+.btn-perfil {
+    background: var(--primary-100);
+    color: var(--primary);
+    border: none;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 4px;
+    transition: all var(--transition-fast);
+}
+.btn-perfil:hover { background: var(--primary); color: white; }
+.btn-perfil-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.btn-perfil-danger:hover { background: #ef4444; color: white; }
+
+/* ── Warning indicators in results ── */
+.result-row-value:has(⚠) { color: var(--accent-orange) !important; }
+
+/* ── Enhanced scrollbar for audit ── */
+.audit-log::-webkit-scrollbar { width: 6px; }
+.audit-log::-webkit-scrollbar-track { background: #0a0e17; }
+.audit-log::-webkit-scrollbar-thumb { background: #22d3ee33; border-radius: 3px; }
+.audit-log::-webkit-scrollbar-thumb:hover { background: #22d3ee66; }
+
+/* ── Responsive comparador ── */
+@media (max-width: 768px) {
+    .comparador-table { font-size: 10px; }
+    .comparador-table th, .comparador-table td { padding: 6px 8px; }
+}
