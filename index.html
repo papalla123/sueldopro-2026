@@ -3,77 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PayCalc Pro | Calculadora Laboral Perú - SUNAT</title>
-    <meta name="description" content="Calculadora profesional de sueldos, gratificaciones, CTS, horas extras y más según normativa SUNAT Perú">
+    <meta name="description" content="SueldoPro Ultra - Calculadora laboral profesional del Perú. Sueldo neto, gratificaciones, CTS, horas extras, IR 5ta, liquidación y más. Normativa SUNAT 2026.">
+    <meta name="keywords" content="calculadora sueldo peru, sueldo neto, gratificación, CTS, horas extras, impuesto renta, liquidación, SUNAT, planilla, AFP, ONP">
+    <meta name="author" content="SueldoPro Ultra">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="SueldoPro Ultra | Calculadora Laboral Perú 2026">
+    <meta property="og:description" content="Motor de planilla corporativo. 12 calculadoras con precisión PLAME, audit trail y comparador de regímenes.">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#6366f1">
+
+    <title>SueldoPro Ultra | Calculadora Laboral Perú 2026 — SUNAT</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    <!-- Stylesheet -->
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
 </head>
 <body>
-    <!-- Loader -->
+
+    <!-- ══════════════════════════════════════════
+         LOADER
+         ══════════════════════════════════════════ -->
     <div id="loader" class="loader-overlay">
         <div class="loader-content">
             <div class="loader-logo">
                 <i class="fas fa-calculator"></i>
             </div>
-            <div class="loader-bar"><div class="loader-progress"></div></div>
-            <p>Cargando PayCalc Pro...</p>
+            <div class="loader-bar">
+                <div class="loader-progress"></div>
+            </div>
+            <p>Inicializando Motor de Planilla v4.0...</p>
+            <span class="loader-version">SUNAT • PLAME • 2026</span>
         </div>
     </div>
 
-    <!-- Particles Background -->
-    <canvas id="particles"></canvas>
+    <!-- ══════════════════════════════════════════
+         PARTICLES BACKGROUND
+         ══════════════════════════════════════════ -->
+    <canvas id="particles" aria-hidden="true"></canvas>
 
-    <!-- Navbar -->
-    <nav class="navbar" id="navbar">
+    <!-- ══════════════════════════════════════════
+         NAVBAR
+         ══════════════════════════════════════════ -->
+    <nav class="navbar" id="navbar" role="navigation" aria-label="Navegación principal">
         <div class="nav-container">
-            <a href="#" class="nav-logo">
-                <div class="logo-icon"><i class="fas fa-calculator"></i></div>
-                <span class="logo-text">PayCalc<span class="logo-highlight">Pro</span></span>
-                <span class="logo-badge">SUNAT</span>
+            <!-- Logo -->
+            <a href="#hero" class="nav-logo" aria-label="SueldoPro Ultra - Inicio">
+                <div class="logo-icon">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <span class="logo-text">Sueldo<span class="logo-highlight">Pro</span></span>
+                <span class="logo-badge">v4.0</span>
+                <span class="logo-badge logo-badge-green">2026</span>
             </a>
+
+            <!-- Navigation Links -->
             <div class="nav-links" id="navLinks">
-                <a href="#hero" class="nav-link active" data-section="hero">Inicio</a>
-                <a href="#calculadoras" class="nav-link" data-section="calculadoras">Calculadoras</a>
-                <a href="#features" class="nav-link" data-section="features">Funciones</a>
-                <a href="#tabla-ir" class="nav-link" data-section="tabla-ir">Tabla IR</a>
-                <a href="#faq" class="nav-link" data-section="faq">FAQ</a>
+                <a href="#hero" class="nav-link active" data-section="hero">
+                    <i class="fas fa-home"></i> Inicio
+                </a>
+                <a href="#calculadoras" class="nav-link" data-section="calculadoras">
+                    <i class="fas fa-calculator"></i> Calculadoras
+                </a>
+                <a href="#features" class="nav-link" data-section="features">
+                    <i class="fas fa-star"></i> Funciones
+                </a>
+                <a href="#tabla-ir" class="nav-link" data-section="tabla-ir">
+                    <i class="fas fa-table"></i> Tabla IR
+                </a>
+                <a href="#faq" class="nav-link" data-section="faq">
+                    <i class="fas fa-circle-question"></i> FAQ
+                </a>
             </div>
+
+            <!-- Nav Actions -->
             <div class="nav-actions">
-                <button class="theme-toggle" id="themeToggle" title="Cambiar tema">
+                <button class="theme-toggle" id="themeToggle" title="Cambiar tema" aria-label="Cambiar tema claro/oscuro">
                     <i class="fas fa-moon"></i>
                 </button>
-                <button class="btn-nav-cta" onclick="scrollToSection('calculadoras')">
-                    <i class="fas fa-rocket"></i> Calcular Ahora
+                <button class="btn-nav-cta" onclick="scrollToSection('calculadoras')" aria-label="Ir a calculadoras">
+                    <i class="fas fa-rocket"></i>
+                    <span>Calcular Ahora</span>
                 </button>
             </div>
-            <button class="nav-hamburger" id="hamburger">
-                <span></span><span></span><span></span>
+
+            <!-- Hamburger Mobile -->
+            <button class="nav-hamburger" id="hamburger" aria-label="Menú móvil" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
             </button>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero" id="hero">
-        <div class="hero-bg-elements">
+    <!-- ══════════════════════════════════════════
+         HERO SECTION
+         ══════════════════════════════════════════ -->
+    <section class="hero" id="hero" aria-label="Sección principal">
+        <!-- Background Elements -->
+        <div class="hero-bg-elements" aria-hidden="true">
             <div class="hero-circle circle-1"></div>
             <div class="hero-circle circle-2"></div>
             <div class="hero-circle circle-3"></div>
+            <div class="hero-grid-pattern"></div>
         </div>
+
         <div class="hero-container">
+            <!-- Left Content -->
             <div class="hero-content">
                 <div class="hero-badge animate-fade-in">
                     <i class="fas fa-shield-halved"></i>
-                    Basado en normativa SUNAT 2024
+                    Motor de Planilla Corporativo — SUNAT 2026
                 </div>
+
                 <h1 class="hero-title animate-fade-in">
                     Calcula tu sueldo con
-                    <span class="gradient-text">precisión profesional</span>
+                    <span class="gradient-text">precisión de auditoría</span>
                 </h1>
+
                 <p class="hero-subtitle animate-fade-in">
                     La plataforma más completa del Perú para calcular sueldo neto, gratificaciones,
-                    CTS, horas extras, impuesto a la renta y mucho más. Todo según la legislación laboral vigente.
+                    CTS, horas extras, impuesto a la renta, liquidación y costo empleador.
+                    <strong>Precisión PLAME</strong> con audit trail paso a paso.
                 </p>
+
+                <!-- Stats -->
                 <div class="hero-stats animate-fade-in">
                     <div class="stat-item">
                         <span class="stat-number" data-count="12">0</span>
@@ -82,14 +145,16 @@
                     <div class="stat-divider"></div>
                     <div class="stat-item">
                         <span class="stat-number" data-count="100">0</span><span class="stat-suffix">%</span>
-                        <span class="stat-label">Precisión SUNAT</span>
+                        <span class="stat-label">Precisión PLAME</span>
                     </div>
                     <div class="stat-divider"></div>
                     <div class="stat-item">
-                        <span class="stat-number" data-count="50000">0</span><span class="stat-suffix">+</span>
+                        <span class="stat-number" data-count="75000">0</span><span class="stat-suffix">+</span>
                         <span class="stat-label">Cálculos realizados</span>
                     </div>
                 </div>
+
+                <!-- CTA Buttons -->
                 <div class="hero-actions animate-fade-in">
                     <button class="btn-primary btn-lg" onclick="scrollToSection('calculadoras')">
                         <i class="fas fa-calculator"></i> Empezar a Calcular
@@ -98,27 +163,58 @@
                         <i class="fas fa-play-circle"></i> Ver Funciones
                     </button>
                 </div>
+
+                <!-- Trust Badges -->
+                <div class="hero-trust animate-fade-in">
+                    <div class="trust-item">
+                        <i class="fas fa-lock"></i>
+                        <span>Cálculo local</span>
+                    </div>
+                    <div class="trust-item">
+                        <i class="fas fa-bolt"></i>
+                        <span>Tiempo real</span>
+                    </div>
+                    <div class="trust-item">
+                        <i class="fas fa-file-invoice"></i>
+                        <span>PLAME compatible</span>
+                    </div>
+                    <div class="trust-item">
+                        <i class="fas fa-terminal"></i>
+                        <span>Audit trail</span>
+                    </div>
+                </div>
             </div>
-            <div class="hero-visual animate-fade-in">
+
+            <!-- Right Visual -->
+            <div class="hero-visual animate-fade-in" aria-hidden="true">
                 <div class="hero-card-stack">
                     <div class="hero-preview-card card-1">
                         <div class="preview-header">
                             <i class="fas fa-money-bill-wave"></i>
                             <span>Sueldo Neto</span>
+                            <span class="preview-badge">LIVE</span>
                         </div>
-                        <div class="preview-amount">S/ 3,245.80</div>
+                        <div class="preview-amount">S/ 3,456.80</div>
                         <div class="preview-bar">
-                            <div class="bar-fill" style="width:75%"></div>
+                            <div class="bar-fill" style="width:72%"></div>
+                        </div>
+                        <div class="preview-footer">
+                            <span>Bruto: S/ 5,000.00</span>
+                            <span class="preview-pct">-30.9%</span>
                         </div>
                     </div>
                     <div class="hero-preview-card card-2">
                         <div class="preview-header">
                             <i class="fas fa-gift"></i>
                             <span>Gratificación</span>
+                            <span class="preview-badge preview-badge-green">+9%</span>
                         </div>
-                        <div class="preview-amount">S/ 4,500.00</div>
+                        <div class="preview-amount">S/ 5,450.00</div>
                         <div class="preview-bar">
-                            <div class="bar-fill" style="width:90%"></div>
+                            <div class="bar-fill bar-fill-green" style="width:90%"></div>
+                        </div>
+                        <div class="preview-footer">
+                            <span>Incl. Bonif. Extraordinaria</span>
                         </div>
                     </div>
                     <div class="hero-preview-card card-3">
@@ -126,15 +222,20 @@
                             <i class="fas fa-piggy-bank"></i>
                             <span>CTS</span>
                         </div>
-                        <div class="preview-amount">S/ 2,750.00</div>
+                        <div class="preview-amount">S/ 2,916.67</div>
                         <div class="preview-bar">
-                            <div class="bar-fill" style="width:60%"></div>
+                            <div class="bar-fill bar-fill-purple" style="width:65%"></div>
+                        </div>
+                        <div class="preview-footer">
+                            <span>6 meses completos</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="hero-scroll-indicator">
+
+        <!-- Scroll Indicator -->
+        <div class="hero-scroll-indicator" aria-hidden="true">
             <div class="scroll-mouse">
                 <div class="scroll-dot"></div>
             </div>
@@ -142,73 +243,86 @@
         </div>
     </section>
 
-    <!-- Calculadoras Section -->
-    <section class="section calculadoras-section" id="calculadoras">
+    <!-- ══════════════════════════════════════════
+         CALCULADORAS SECTION
+         ══════════════════════════════════════════ -->
+    <section class="section calculadoras-section" id="calculadoras" aria-label="Calculadoras">
         <div class="container">
+            <!-- Section Header -->
             <div class="section-header">
-                <span class="section-badge"><i class="fas fa-calculator"></i> Herramientas</span>
-                <h2 class="section-title">Calculadoras <span class="gradient-text">Profesionales</span></h2>
-                <p class="section-subtitle">Selecciona la calculadora que necesitas. Todas están actualizadas según la normativa SUNAT 2024.</p>
+                <span class="section-badge"><i class="fas fa-calculator"></i> Herramientas Profesionales</span>
+                <h2 class="section-title">Calculadoras <span class="gradient-text">de Planilla</span></h2>
+                <p class="section-subtitle">
+                    12 calculadoras con precisión PLAME, audit trail y soporte para remuneración variable,
+                    inasistencias, EPS y comisión mixta AFP. Actualizadas a normativa 2026.
+                </p>
             </div>
 
-            <!-- Calculator Tabs -->
+            <!-- ════════════════════════════════
+                 CALCULATOR TABS
+                 ════════════════════════════════ -->
             <div class="calc-tabs-wrapper">
-                <div class="calc-tabs" id="calcTabs">
-                    <button class="calc-tab active" data-calc="sueldo-neto">
+                <div class="calc-tabs" id="calcTabs" role="tablist" aria-label="Calculadoras disponibles">
+                    <button class="calc-tab active" data-calc="sueldo-neto" role="tab" aria-selected="true">
                         <i class="fas fa-money-bill-wave"></i>
                         <span>Sueldo Neto</span>
                     </button>
-                    <button class="calc-tab" data-calc="gratificacion">
+                    <button class="calc-tab" data-calc="gratificacion" role="tab" aria-selected="false">
                         <i class="fas fa-gift"></i>
                         <span>Gratificación</span>
                     </button>
-                    <button class="calc-tab" data-calc="cts">
+                    <button class="calc-tab" data-calc="cts" role="tab" aria-selected="false">
                         <i class="fas fa-piggy-bank"></i>
                         <span>CTS</span>
                     </button>
-                    <button class="calc-tab" data-calc="horas-extras">
+                    <button class="calc-tab" data-calc="horas-extras" role="tab" aria-selected="false">
                         <i class="fas fa-clock"></i>
                         <span>Horas Extras</span>
                     </button>
-                    <button class="calc-tab" data-calc="vacaciones">
+                    <button class="calc-tab" data-calc="vacaciones" role="tab" aria-selected="false">
                         <i class="fas fa-umbrella-beach"></i>
                         <span>Vacaciones</span>
                     </button>
-                    <button class="calc-tab" data-calc="impuesto-renta">
+                    <button class="calc-tab" data-calc="impuesto-renta" role="tab" aria-selected="false">
                         <i class="fas fa-file-invoice-dollar"></i>
-                        <span>Impuesto Renta</span>
+                        <span>IR 5ta Cat.</span>
                     </button>
-                    <button class="calc-tab" data-calc="liquidacion">
+                    <button class="calc-tab" data-calc="liquidacion" role="tab" aria-selected="false">
                         <i class="fas fa-file-contract"></i>
                         <span>Liquidación</span>
                     </button>
-                    <button class="calc-tab" data-calc="essalud">
+                    <button class="calc-tab" data-calc="essalud" role="tab" aria-selected="false">
                         <i class="fas fa-heart-pulse"></i>
                         <span>EsSalud</span>
                     </button>
-                    <button class="calc-tab" data-calc="utilidades">
+                    <button class="calc-tab" data-calc="utilidades" role="tab" aria-selected="false">
                         <i class="fas fa-chart-pie"></i>
                         <span>Utilidades</span>
                     </button>
-                    <button class="calc-tab" data-calc="asignacion-familiar">
+                    <button class="calc-tab" data-calc="asignacion-familiar" role="tab" aria-selected="false">
                         <i class="fas fa-people-roof"></i>
                         <span>Asig. Familiar</span>
                     </button>
-                    <button class="calc-tab" data-calc="renta-quinta">
+                    <button class="calc-tab" data-calc="renta-quinta" role="tab" aria-selected="false">
                         <i class="fas fa-landmark"></i>
-                        <span>Renta 5ta</span>
+                        <span>Renta 5ta Pro</span>
                     </button>
-                    <button class="calc-tab" data-calc="costo-empleador">
+                    <button class="calc-tab" data-calc="costo-empleador" role="tab" aria-selected="false">
                         <i class="fas fa-building"></i>
                         <span>Costo Empleador</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Calculator Panels -->
+            <!-- ════════════════════════════════
+                 CALCULATOR PANELS
+                 ════════════════════════════════ -->
             <div class="calc-panels">
-                <!-- ========== SUELDO NETO ========== -->
-                <div class="calc-panel active" id="panel-sueldo-neto">
+
+                <!-- ╔══════════════════════════════════════╗
+                     ║  1. SUELDO NETO                      ║
+                     ╚══════════════════════════════════════╝ -->
+                <div class="calc-panel active" id="panel-sueldo-neto" role="tabpanel">
                     <div class="calc-layout">
                         <div class="calc-form-area">
                             <div class="calc-card">
@@ -218,43 +332,61 @@
                                     </div>
                                     <div>
                                         <h3>Calculadora de Sueldo Neto</h3>
-                                        <p>Calcula tu sueldo después de todos los descuentos de ley</p>
+                                        <p>Todos los descuentos de ley con precisión PLAME</p>
                                     </div>
                                 </div>
                                 <div class="calc-card-body">
+                                    <!-- Sueldo Bruto -->
                                     <div class="form-group">
-    <label class="form-label"><i class="fas fa-exchange-alt"></i> Tipo Comisión AFP</label>
-    <select id="sn-tipo-comision" class="form-select">
-        <option value="flujo">Comisión sobre Flujo</option>
-        <option value="mixta">Comisión Mixta (Flujo + Saldo)</option>
-    </select>
-</div>
-                                        <span class="form-hint">Incluye sueldo básico + conceptos remunerativos</span>
+                                        <label class="form-label" for="sn-sueldo-bruto">
+                                            <i class="fas fa-coins"></i> Remuneración Bruta Mensual
+                                        </label>
+                                        <div class="input-wrapper">
+                                            <span class="input-prefix">S/</span>
+                                            <input type="number" id="sn-sueldo-bruto" class="form-input" placeholder="Ej: 5000" min="0" step="0.01" autocomplete="off">
+                                        </div>
+                                        <span class="form-hint">Sueldo básico (sin asig. familiar ni variables)</span>
                                     </div>
+
+                                    <!-- Régimen + Pensión -->
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label">
+                                            <label class="form-label" for="sn-regimen">
                                                 <i class="fas fa-briefcase"></i> Régimen Laboral
                                             </label>
                                             <select id="sn-regimen" class="form-select">
-                                                <option value="general">General</option>
+                                                <option value="general">Régimen General</option>
                                                 <option value="pequena">Pequeña Empresa</option>
                                                 <option value="micro">Microempresa</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label">
-                                                <i class="fas fa-id-card"></i> Sistema Pensiones
+                                            <label class="form-label" for="sn-pension">
+                                                <i class="fas fa-id-card"></i> Sistema de Pensiones
                                             </label>
                                             <select id="sn-pension" class="form-select">
                                                 <option value="onp">ONP (13%)</option>
-                                                <option value="afp-integra">AFP Integra</option>
-                                                <option value="afp-profuturo">AFP ProFuturo</option>
-                                                <option value="afp-prima">AFP Prima</option>
                                                 <option value="afp-habitat">AFP Habitat</option>
+                                                <option value="afp-integra">AFP Integra</option>
+                                                <option value="afp-prima">AFP Prima</option>
+                                                <option value="afp-profuturo">AFP ProFuturo</option>
                                             </select>
                                         </div>
                                     </div>
+
+                                    <!-- Tipo Comisión AFP -->
+                                    <div class="form-group">
+                                        <label class="form-label" for="sn-tipo-comision">
+                                            <i class="fas fa-exchange-alt"></i> Tipo Comisión AFP
+                                        </label>
+                                        <select id="sn-tipo-comision" class="form-select">
+                                            <option value="flujo">Comisión sobre Flujo</option>
+                                            <option value="mixta">Comisión Mixta (Flujo + Saldo)</option>
+                                        </select>
+                                        <span class="form-hint">Solo aplica para AFP (no ONP)</span>
+                                    </div>
+
+                                    <!-- Asig Familiar + EPS -->
                                     <div class="form-row">
                                         <div class="form-group">
                                             <label class="form-label">
@@ -265,36 +397,151 @@
                                                     <input type="checkbox" id="sn-asig-familiar">
                                                     <span class="toggle-slider"></span>
                                                 </label>
-                                                <span class="toggle-label">10% de RMV (S/ 102.50)</span>
+                                                <span class="toggle-label">10% RMV (S/ 107.50)</span>
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="form-label">
-                                                <i class="fas fa-calendar"></i> Meses trabajados (año)
+                                                <i class="fas fa-hospital"></i> ¿Tiene EPS?
                                             </label>
-                                            <input type="number" id="sn-meses" class="form-input" value="12" min="1" max="12">
+                                            <div class="toggle-wrapper">
+                                                <label class="toggle">
+                                                    <input type="checkbox" id="sn-tiene-eps">
+                                                    <span class="toggle-slider"></span>
+                                                </label>
+                                                <span class="toggle-label">Bonif. 6.75% (no 9%)</span>
+                                            </div>
                                         </div>
                                     </div>
+
+                                    <!-- Mes de cálculo -->
+                                    <div class="form-group">
+                                        <label class="form-label" for="sn-meses">
+                                            <i class="fas fa-calendar"></i> Mes de cálculo (para proyección IR)
+                                        </label>
+                                        <input type="number" id="sn-meses" class="form-input" value="6" min="1" max="12">
+                                        <span class="form-hint">Afecta el divisor de retención IR 5ta categoría</span>
+                                    </div>
+
+                                    <!-- Sección: Remuneración Variable -->
+                                    <div class="form-section-divider">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>Remuneración Variable</span>
+                                        <span class="form-hint-inline">(Art. 17 D.S. 001-97-TR)</span>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label class="form-label" for="sn-promedio-comisiones">
+                                                <i class="fas fa-chart-line"></i> Prom. Comisiones (últimos 6m)
+                                            </label>
+                                            <div class="input-wrapper">
+                                                <span class="input-prefix">S/</span>
+                                                <input type="number" id="sn-promedio-comisiones" class="form-input" placeholder="0" min="0" step="0.01" value="0">
+                                            </div>
+                                            <span class="form-hint">Computable si se percibió ≥3 veces en semestre</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="sn-promedio-bonos">
+                                                <i class="fas fa-star"></i> Prom. Bonos Regulares (6m)
+                                            </label>
+                                            <div class="input-wrapper">
+                                                <span class="input-prefix">S/</span>
+                                                <input type="number" id="sn-promedio-bonos" class="form-input" placeholder="0" min="0" step="0.01" value="0">
+                                            </div>
+                                            <span class="form-hint">Bonos remunerativos regulares</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sección: Inasistencias -->
+                                    <div class="form-section-divider">
+                                        <i class="fas fa-calendar-xmark"></i>
+                                        <span>Inasistencias</span>
+                                        <span class="form-hint-inline">(Descuento con dominical)</span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="sn-dias-faltados">
+                                            <i class="fas fa-calendar-xmark"></i> Días Faltados (inasistencias injustificadas)
+                                        </label>
+                                        <input type="number" id="sn-dias-faltados" class="form-input" value="0" min="0" max="30">
+                                        <span class="form-hint">Fórmula: (Sueldo / 30) × días × 1.2 (incluye dominical proporcional)</span>
+                                    </div>
+
+                                    <!-- Sección: Conceptos No Remunerativos -->
+                                    <div class="form-section-divider">
+                                        <i class="fas fa-bus"></i>
+                                        <span>Conceptos No Remunerativos</span>
+                                        <span class="form-hint-inline">(No afectan descuentos)</span>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label class="form-label" for="sn-movilidad">
+                                                <i class="fas fa-bus"></i> Movilidad (supeditada)
+                                            </label>
+                                            <div class="input-wrapper">
+                                                <span class="input-prefix">S/</span>
+                                                <input type="number" id="sn-movilidad" class="form-input" placeholder="0" min="0" step="0.01" value="0">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="sn-refrigerio">
+                                                <i class="fas fa-utensils"></i> Refrigerio
+                                            </label>
+                                            <div class="input-wrapper">
+                                                <span class="input-prefix">S/</span>
+                                                <input type="number" id="sn-refrigerio" class="form-input" placeholder="0" min="0" step="0.01" value="0">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sección: Perfiles -->
+                                    <div class="form-section-divider">
+                                        <i class="fas fa-user-gear"></i>
+                                        <span>Perfiles Guardados</span>
+                                        <span class="form-hint-inline">(localStorage)</span>
+                                    </div>
+
+                                    <div id="perfilesLista" class="perfiles-container"></div>
+                                    <button class="btn-outline btn-block" onclick="guardarPerfilUI()" style="margin-top:8px">
+                                        <i class="fas fa-save"></i> Guardar Perfil Actual
+                                    </button>
+
+                                    <!-- Botón Calcular -->
                                     <button class="btn-primary btn-block btn-calculate" onclick="calcularSueldoNeto()">
                                         <i class="fas fa-calculator"></i> Calcular Sueldo Neto
+                                        <span class="btn-badge">PLAME</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Result Area -->
                         <div class="calc-result-area" id="result-sueldo-neto">
                             <div class="result-placeholder">
                                 <div class="result-placeholder-icon">
-                                    <i class="fas fa-arrow-left"></i>
+                                    <i class="fas fa-money-bill-wave"></i>
                                 </div>
                                 <h4>Ingresa tus datos</h4>
-                                <p>Completa el formulario para ver el desglose detallado de tu sueldo neto</p>
+                                <p>Completa el formulario para ver el desglose detallado de tu sueldo neto con precisión PLAME y audit trail</p>
+                                <div class="placeholder-features">
+                                    <span><i class="fas fa-check"></i> Descuento inasistencias</span>
+                                    <span><i class="fas fa-check"></i> Variables computables</span>
+                                    <span><i class="fas fa-check"></i> Tope SBS AFP</span>
+                                    <span><i class="fas fa-check"></i> EPS / EsSalud</span>
+                                    <span><i class="fas fa-check"></i> Comisión mixta</span>
+                                    <span><i class="fas fa-check"></i> Auditoría integridad</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ========== GRATIFICACIÓN ========== -->
-                <div class="calc-panel" id="panel-gratificacion">
+                <!-- ╔══════════════════════════════════════╗
+                     ║  2. GRATIFICACIÓN                    ║
+                     ╚══════════════════════════════════════╝ -->
+                <div class="calc-panel" id="panel-gratificacion" role="tabpanel">
                     <div class="calc-layout">
                         <div class="calc-form-area">
                             <div class="calc-card">
@@ -304,64 +551,62 @@
                                     </div>
                                     <div>
                                         <h3>Calculadora de Gratificación</h3>
-                                        <p>Julio (Fiestas Patrias) y Diciembre (Navidad) - Ley N° 27735</p>
+                                        <p>Julio y Diciembre — Ley 27735 + Ley 30334</p>
                                     </div>
                                 </div>
                                 <div class="calc-card-body">
                                     <div class="form-group">
-    <label class="form-label"><i class="fas fa-hospital"></i> ¿Tiene EPS?</label>
-    <div class="toggle-wrapper">
-        <label class="toggle">
-            <input type="checkbox" id="sn-tiene-eps">
-            <span class="toggle-slider"></span>
-        </label>
-        <span class="toggle-label">Bonif. 6.75% en vez de 9%</span>
-    </div>
-</div>
+                                        <label class="form-label" for="grat-sueldo"><i class="fas fa-coins"></i> Remuneración Bruta Mensual</label>
+                                        <div class="input-wrapper">
+                                            <span class="input-prefix">S/</span>
+                                            <input type="number" id="grat-sueldo" class="form-input" placeholder="Ej: 4000" min="0" step="0.01">
+                                        </div>
+                                    </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label">
-                                                <i class="fas fa-calendar-alt"></i> Período
-                                            </label>
+                                            <label class="form-label" for="grat-periodo"><i class="fas fa-calendar-alt"></i> Período</label>
                                             <select id="grat-periodo" class="form-select">
                                                 <option value="julio">Julio (Fiestas Patrias)</option>
                                                 <option value="diciembre">Diciembre (Navidad)</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label">
-                                                <i class="fas fa-calendar-check"></i> Meses completos trabajados
-                                            </label>
+                                            <label class="form-label" for="grat-meses"><i class="fas fa-calendar-check"></i> Meses completos en semestre</label>
                                             <input type="number" id="grat-meses" class="form-input" value="6" min="1" max="6">
-                                            <span class="form-hint">Del semestre correspondiente (máx 6)</span>
                                         </div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label">
-                                                <i class="fas fa-people-roof"></i> ¿Asignación Familiar?
-                                            </label>
+                                            <label class="form-label"><i class="fas fa-people-roof"></i> ¿Asignación Familiar?</label>
                                             <div class="toggle-wrapper">
-                                                <label class="toggle">
-                                                    <input type="checkbox" id="grat-asig-familiar">
-                                                    <span class="toggle-slider"></span>
-                                                </label>
-                                                <span class="toggle-label">Incluir</span>
+                                                <label class="toggle"><input type="checkbox" id="grat-asig-familiar"><span class="toggle-slider"></span></label>
+                                                <span class="toggle-label">Incluir (S/ 107.50)</span>
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label">
-                                                <i class="fas fa-coins"></i> Bonif. Extraordinaria (9%)
-                                            </label>
-                                            <div class="toggle-wrapper">
-                                                <label class="toggle">
-                                                    <input type="checkbox" id="grat-bonif" checked>
-                                                    <span class="toggle-slider"></span>
-                                                </label>
-                                                <span class="toggle-label">Ley 30334</span>
-                                            </div>
+                                            <label class="form-label" for="grat-bonif-tipo"><i class="fas fa-hospital"></i> Tipo Bonificación</label>
+                                            <select id="grat-bonif-tipo" class="form-select">
+                                                <option value="essalud">EsSalud (9%)</option>
+                                                <option value="eps">EPS (6.75%)</option>
+                                            </select>
                                         </div>
                                     </div>
+
+                                    <div class="form-section-divider">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>Remuneración Variable</span>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label class="form-label" for="grat-promedio-comisiones"><i class="fas fa-chart-line"></i> Prom. Comisiones (6m)</label>
+                                            <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="grat-promedio-comisiones" class="form-input" placeholder="0" min="0" step="0.01" value="0"></div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="grat-promedio-bonos"><i class="fas fa-star"></i> Prom. Bonos (6m)</label>
+                                            <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="grat-promedio-bonos" class="form-input" placeholder="0" min="0" step="0.01" value="0"></div>
+                                        </div>
+                                    </div>
+
                                     <button class="btn-primary btn-block btn-calculate" onclick="calcularGratificacion()">
                                         <i class="fas fa-calculator"></i> Calcular Gratificación
                                     </button>
@@ -372,307 +617,260 @@
                             <div class="result-placeholder">
                                 <div class="result-placeholder-icon"><i class="fas fa-gift"></i></div>
                                 <h4>Calcula tu Gratificación</h4>
-                                <p>Conoce el monto exacto de tu gratificación con bonificación extraordinaria</p>
+                                <p>Con soporte para EPS (6.75%) y variables computables</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ========== CTS ========== -->
-                <div class="calc-panel" id="panel-cts">
+                <!-- ╔══════════════════════════════════════╗
+                     ║  3. CTS                              ║
+                     ╚══════════════════════════════════════╝ -->
+                <div class="calc-panel" id="panel-cts" role="tabpanel">
                     <div class="calc-layout">
                         <div class="calc-form-area">
                             <div class="calc-card">
                                 <div class="calc-card-header">
-                                    <div class="calc-icon-wrapper gradient-purple">
-                                        <i class="fas fa-piggy-bank"></i>
-                                    </div>
-                                    <div>
-                                        <h3>Calculadora de CTS</h3>
-                                        <p>Compensación por Tiempo de Servicios - D.S. N° 001-97-TR</p>
-                                    </div>
+                                    <div class="calc-icon-wrapper gradient-purple"><i class="fas fa-piggy-bank"></i></div>
+                                    <div><h3>Calculadora de CTS</h3><p>D.S. N° 001-97-TR — Depósito semestral</p></div>
                                 </div>
                                 <div class="calc-card-body">
                                     <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-coins"></i> Remuneración Mensual</label>
-                                        <div class="input-wrapper">
-                                            <span class="input-prefix">S/</span>
-                                            <input type="number" id="cts-sueldo" class="form-input" placeholder="Ej: 3500" min="0" step="0.01">
-                                        </div>
+                                        <label class="form-label" for="cts-sueldo"><i class="fas fa-coins"></i> Remuneración Mensual</label>
+                                        <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="cts-sueldo" class="form-input" placeholder="Ej: 3500" min="0" step="0.01"></div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-calendar"></i> Meses completos</label>
+                                            <label class="form-label" for="cts-meses"><i class="fas fa-calendar"></i> Meses completos</label>
                                             <input type="number" id="cts-meses" class="form-input" value="6" min="0" max="6">
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-calendar-day"></i> Días adicionales</label>
+                                            <label class="form-label" for="cts-dias"><i class="fas fa-calendar-day"></i> Días adicionales</label>
                                             <input type="number" id="cts-dias" class="form-input" value="0" min="0" max="29">
                                         </div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-people-roof"></i> ¿Asignación Familiar?</label>
-                                            <div class="toggle-wrapper">
-                                                <label class="toggle">
-                                                    <input type="checkbox" id="cts-asig-familiar">
-                                                    <span class="toggle-slider"></span>
-                                                </label>
-                                                <span class="toggle-label">Incluir</span>
-                                            </div>
+                                            <label class="form-label"><i class="fas fa-people-roof"></i> ¿Asig. Familiar?</label>
+                                            <div class="toggle-wrapper"><label class="toggle"><input type="checkbox" id="cts-asig-familiar"><span class="toggle-slider"></span></label><span class="toggle-label">Incluir</span></div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-gift"></i> Última Gratificación</label>
-                                            <div class="input-wrapper">
-                                                <span class="input-prefix">S/</span>
-                                                <input type="number" id="cts-gratificacion" class="form-input" placeholder="1/6 se suma" min="0" step="0.01">
-                                            </div>
+                                            <label class="form-label" for="cts-gratificacion"><i class="fas fa-gift"></i> Última Gratificación</label>
+                                            <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="cts-gratificacion" class="form-input" placeholder="1/6 se suma" min="0" step="0.01"></div>
                                             <span class="form-hint">Se toma 1/6 como computable</span>
                                         </div>
                                     </div>
-                                    <button class="btn-primary btn-block btn-calculate" onclick="calcularCTS()">
-                                        <i class="fas fa-calculator"></i> Calcular CTS
-                                    </button>
+                                    <div class="form-section-divider"><i class="fas fa-chart-line"></i><span>Variables</span></div>
+                                    <div class="form-row">
+                                        <div class="form-group"><label class="form-label" for="cts-promedio-comisiones"><i class="fas fa-chart-line"></i> Prom. Comisiones</label><div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="cts-promedio-comisiones" class="form-input" placeholder="0" min="0" step="0.01" value="0"></div></div>
+                                        <div class="form-group"><label class="form-label" for="cts-promedio-bonos"><i class="fas fa-star"></i> Prom. Bonos</label><div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="cts-promedio-bonos" class="form-input" placeholder="0" min="0" step="0.01" value="0"></div></div>
+                                    </div>
+                                    <button class="btn-primary btn-block btn-calculate" onclick="calcularCTS()"><i class="fas fa-calculator"></i> Calcular CTS</button>
                                 </div>
                             </div>
                         </div>
                         <div class="calc-result-area" id="result-cts">
-                            <div class="result-placeholder">
-                                <div class="result-placeholder-icon"><i class="fas fa-piggy-bank"></i></div>
-                                <h4>Calcula tu CTS</h4>
-                                <p>Depósito semestral: Mayo y Noviembre</p>
-                            </div>
+                            <div class="result-placeholder"><div class="result-placeholder-icon"><i class="fas fa-piggy-bank"></i></div><h4>Calcula tu CTS</h4><p>Depósitos: Mayo y Noviembre. Incluye 1/6 de gratificación y variables.</p></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ========== HORAS EXTRAS ========== -->
-                <div class="calc-panel" id="panel-horas-extras">
-                <!-- Dentro del panel horas-extras, agregar ANTES del botón calcular: -->
-<div class="form-group">
-    <label class="form-label"><i class="fas fa-people-roof"></i> ¿Asignación Familiar?</label>
-    <div class="toggle-wrapper">
-        <label class="toggle">
-            <input type="checkbox" id="he-asig-familiar">
-            <span class="toggle-slider"></span>
-        </label>
-        <span class="toggle-label">Incluir en base (+S/ 102.50)</span>
-    </div>
-</div>
-
+                <!-- ╔══════════════════════════════════════╗
+                     ║  4. HORAS EXTRAS                     ║
+                     ╚══════════════════════════════════════╝ -->
+                <div class="calc-panel" id="panel-horas-extras" role="tabpanel">
                     <div class="calc-layout">
                         <div class="calc-form-area">
                             <div class="calc-card">
                                 <div class="calc-card-header">
-                                    <div class="calc-icon-wrapper gradient-orange">
-                                        <i class="fas fa-clock"></i>
-                                    </div>
-                                    <div>
-                                        <h3>Calculadora de Horas Extras</h3>
-                                        <p>Sobretiempo según D.S. N° 007-2002-TR</p>
-                                    </div>
+                                    <div class="calc-icon-wrapper gradient-orange"><i class="fas fa-clock"></i></div>
+                                    <div><h3>Calculadora de Horas Extras</h3><p>D.S. N° 007-2002-TR — Divisor 240h legal</p></div>
                                 </div>
                                 <div class="calc-card-body">
                                     <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-coins"></i> Remuneración Mensual</label>
-                                        <div class="input-wrapper">
-                                            <span class="input-prefix">S/</span>
-                                            <input type="number" id="he-sueldo" class="form-input" placeholder="Ej: 3000" min="0" step="0.01">
-                                        </div>
+                                        <label class="form-label" for="he-sueldo"><i class="fas fa-coins"></i> Remuneración Mensual</label>
+                                        <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="he-sueldo" class="form-input" placeholder="Ej: 1130" min="0" step="0.01"></div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-clock"></i> Horas extras (primeras 2h/día)</label>
+                                            <label class="form-label" for="he-horas-25"><i class="fas fa-clock"></i> Horas extras (+25%)</label>
                                             <input type="number" id="he-horas-25" class="form-input" placeholder="0" min="0" step="0.5">
-                                            <span class="form-hint">Sobretasa 25% sobre valor hora</span>
+                                            <span class="form-hint">Primeras 2 horas/día</span>
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-clock"></i> Horas extras (excedentes)</label>
+                                            <label class="form-label" for="he-horas-35"><i class="fas fa-clock"></i> Horas extras (+35%)</label>
                                             <input type="number" id="he-horas-35" class="form-input" placeholder="0" min="0" step="0.5">
-                                            <span class="form-hint">Sobretasa 35% sobre valor hora</span>
+                                            <span class="form-hint">A partir de 3ra hora</span>
                                         </div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-calendar-week"></i> Jornada semanal (horas)</label>
-                                            <input type="number" id="he-jornada" class="form-input" value="48" min="1" max="48">
+                                            <label class="form-label"><i class="fas fa-people-roof"></i> ¿Asig. Familiar?</label>
+                                            <div class="toggle-wrapper"><label class="toggle"><input type="checkbox" id="he-asig-familiar"><span class="toggle-slider"></span></label><span class="toggle-label">+S/ 107.50 en base</span></div>
                                         </div>
                                         <div class="form-group">
                                             <label class="form-label"><i class="fas fa-moon"></i> ¿Trabajo nocturno?</label>
-                                            <div class="toggle-wrapper">
-                                                <label class="toggle">
-                                                    <input type="checkbox" id="he-nocturno">
-                                                    <span class="toggle-slider"></span>
-                                                </label>
-                                                <span class="toggle-label">+35% sobretasa</span>
-                                            </div>
+                                            <div class="toggle-wrapper"><label class="toggle"><input type="checkbox" id="he-nocturno"><span class="toggle-slider"></span></label><span class="toggle-label">+35% sobretasa (10pm-6am)</span></div>
                                         </div>
                                     </div>
+
+                                    <div class="form-section-divider"><i class="fas fa-ruler-horizontal"></i><span>Configuración de Divisor</span></div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label class="form-label" for="he-divisor-tipo"><i class="fas fa-ruler-horizontal"></i> Divisor HE</label>
+                                            <select id="he-divisor-tipo" class="form-select">
+                                                <option value="legal">240h legal (30 × 8)</option>
+                                                <option value="real">Días reales del mes × 8</option>
+                                            </select>
+                                            <span class="form-hint">240h es el estándar legal</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="he-dias-reales"><i class="fas fa-calendar-day"></i> Días reales del mes</label>
+                                            <input type="number" id="he-dias-reales" class="form-input" value="30" min="28" max="31">
+                                            <span class="form-hint">Solo para divisor por días reales</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section-divider"><i class="fas fa-chart-line"></i><span>Variables</span></div>
+                                    <div class="form-row">
+                                        <div class="form-group"><label class="form-label" for="he-promedio-comisiones"><i class="fas fa-chart-line"></i> Prom. Comisiones</label><div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="he-promedio-comisiones" class="form-input" placeholder="0" min="0" step="0.01" value="0"></div></div>
+                                        <div class="form-group"><label class="form-label" for="he-promedio-bonos"><i class="fas fa-star"></i> Prom. Bonos</label><div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="he-promedio-bonos" class="form-input" placeholder="0" min="0" step="0.01" value="0"></div></div>
+                                    </div>
+
                                     <button class="btn-primary btn-block btn-calculate" onclick="calcularHorasExtras()">
                                         <i class="fas fa-calculator"></i> Calcular Horas Extras
+                                        <span class="btn-badge">÷240</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                         <div class="calc-result-area" id="result-horas-extras">
-                            <div class="result-placeholder">
-                                <div class="result-placeholder-icon"><i class="fas fa-clock"></i></div>
-                                <h4>Calcula tus Horas Extras</h4>
-                                <p>Primeras 2 horas: 25% | Excedentes: 35%</p>
-                            </div>
+                            <div class="result-placeholder"><div class="result-placeholder-icon"><i class="fas fa-clock"></i></div><h4>Calcula tus Horas Extras</h4><p>Divisor 240h legal. Sin redondeos intermedios. Caso S/ 1,130 + AF = exacto al céntimo.</p></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ========== VACACIONES ========== -->
-                <div class="calc-panel" id="panel-vacaciones">
+                <!-- ╔══════════════════════════════════════╗
+                     ║  5. VACACIONES                       ║
+                     ╚══════════════════════════════════════╝ -->
+                <div class="calc-panel" id="panel-vacaciones" role="tabpanel">
                     <div class="calc-layout">
                         <div class="calc-form-area">
                             <div class="calc-card">
                                 <div class="calc-card-header">
-                                    <div class="calc-icon-wrapper gradient-cyan">
-                                        <i class="fas fa-umbrella-beach"></i>
-                                    </div>
-                                    <div>
-                                        <h3>Calculadora de Vacaciones</h3>
-                                        <p>Descanso vacacional - D. Leg. N° 713</p>
-                                    </div>
+                                    <div class="calc-icon-wrapper gradient-cyan"><i class="fas fa-umbrella-beach"></i></div>
+                                    <div><h3>Calculadora de Vacaciones</h3><p>D. Leg. N° 713 — Incluye Triple Vacacional</p></div>
                                 </div>
                                 <div class="calc-card-body">
                                     <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-coins"></i> Remuneración Mensual</label>
-                                        <div class="input-wrapper">
-                                            <span class="input-prefix">S/</span>
-                                            <input type="number" id="vac-sueldo" class="form-input" placeholder="Ej: 4000" min="0" step="0.01">
-                                        </div>
+                                        <label class="form-label" for="vac-sueldo"><i class="fas fa-coins"></i> Remuneración Mensual</label>
+                                        <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="vac-sueldo" class="form-input" placeholder="Ej: 4000" min="0" step="0.01"></div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-calendar"></i> Días de vacaciones</label>
+                                            <label class="form-label" for="vac-dias"><i class="fas fa-calendar"></i> Días de vacaciones</label>
                                             <input type="number" id="vac-dias" class="form-input" value="30" min="1" max="30">
-                                            <span class="form-hint">Derecho: 30 días por año completo</span>
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-calendar-check"></i> Meses laborados</label>
+                                            <label class="form-label" for="vac-meses"><i class="fas fa-calendar-check"></i> Meses laborados</label>
                                             <input type="number" id="vac-meses" class="form-input" value="12" min="1" max="12">
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-exclamation-triangle"></i> ¿Vacaciones no gozadas?</label>
+                                        <label class="form-label"><i class="fas fa-exclamation-triangle"></i> ¿Triple Vacacional?</label>
                                         <div class="toggle-wrapper">
-                                            <label class="toggle">
-                                                <input type="checkbox" id="vac-no-gozadas">
-                                                <span class="toggle-slider"></span>
-                                            </label>
-                                            <span class="toggle-label">Triple remuneración vacacional</span>
+                                            <label class="toggle"><input type="checkbox" id="vac-triple"><span class="toggle-slider"></span></label>
+                                            <span class="toggle-label">Art. 23 D.Leg. 713: 3 remuneraciones (descanso + trabajo + indemnización)</span>
                                         </div>
                                     </div>
-                                    <button class="btn-primary btn-block btn-calculate" onclick="calcularVacaciones()">
-                                        <i class="fas fa-calculator"></i> Calcular Vacaciones
-                                    </button>
+                                    <div class="form-section-divider"><i class="fas fa-chart-line"></i><span>Variables</span></div>
+                                    <div class="form-row">
+                                        <div class="form-group"><label class="form-label" for="vac-promedio-comisiones"><i class="fas fa-chart-line"></i> Prom. Comisiones</label><div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="vac-promedio-comisiones" class="form-input" placeholder="0" min="0" step="0.01" value="0"></div></div>
+                                        <div class="form-group"><label class="form-label" for="vac-promedio-bonos"><i class="fas fa-star"></i> Prom. Bonos</label><div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="vac-promedio-bonos" class="form-input" placeholder="0" min="0" step="0.01" value="0"></div></div>
+                                    </div>
+                                    <button class="btn-primary btn-block btn-calculate" onclick="calcularVacaciones()"><i class="fas fa-calculator"></i> Calcular Vacaciones</button>
                                 </div>
                             </div>
                         </div>
                         <div class="calc-result-area" id="result-vacaciones">
-                            <div class="result-placeholder">
-                                <div class="result-placeholder-icon"><i class="fas fa-umbrella-beach"></i></div>
-                                <h4>Calcula tus Vacaciones</h4>
-                                <p>30 días calendario por cada año completo de servicios</p>
-                            </div>
+                            <div class="result-placeholder"><div class="result-placeholder-icon"><i class="fas fa-umbrella-beach"></i></div><h4>Calcula tus Vacaciones</h4><p>30 días por año. Incluye Triple Vacacional (Art. 23).</p></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ========== IMPUESTO A LA RENTA ========== -->
-                <div class="calc-panel" id="panel-impuesto-renta">
+                <!-- ╔══════════════════════════════════════╗
+                     ║  6. IMPUESTO A LA RENTA              ║
+                     ╚══════════════════════════════════════╝ -->
+                <div class="calc-panel" id="panel-impuesto-renta" role="tabpanel">
                     <div class="calc-layout">
                         <div class="calc-form-area">
                             <div class="calc-card">
                                 <div class="calc-card-header">
-                                    <div class="calc-icon-wrapper gradient-red">
-                                        <i class="fas fa-file-invoice-dollar"></i>
-                                    </div>
-                                    <div>
-                                        <h3>Impuesto a la Renta 5ta Categoría</h3>
-                                        <p>Proyección anual según tramos UIT 2024</p>
-                                    </div>
+                                    <div class="calc-icon-wrapper gradient-red"><i class="fas fa-file-invoice-dollar"></i></div>
+                                    <div><h3>Impuesto a la Renta 5ta Categoría</h3><p>Proyección anual con Bonif. 9%/6.75% — UIT 2026: S/ 5,150</p></div>
                                 </div>
                                 <div class="calc-card-body">
                                     <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-coins"></i> Remuneración Bruta Mensual</label>
-                                        <div class="input-wrapper">
-                                            <span class="input-prefix">S/</span>
-                                            <input type="number" id="ir-sueldo" class="form-input" placeholder="Ej: 8000" min="0" step="0.01">
-                                        </div>
+                                        <label class="form-label" for="ir-sueldo"><i class="fas fa-coins"></i> Remuneración Bruta Mensual</label>
+                                        <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="ir-sueldo" class="form-input" placeholder="Ej: 8000" min="0" step="0.01"></div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-calendar"></i> Meses por trabajar en el año</label>
+                                            <label class="form-label" for="ir-meses"><i class="fas fa-calendar"></i> Meses a trabajar</label>
                                             <input type="number" id="ir-meses" class="form-input" value="12" min="1" max="12">
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-gift"></i> Gratificaciones al año</label>
+                                            <label class="form-label" for="ir-gratificaciones"><i class="fas fa-gift"></i> Gratificaciones</label>
                                             <input type="number" id="ir-gratificaciones" class="form-input" value="2" min="0" max="2">
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-hand-holding-dollar"></i> Otros ingresos anuales</label>
-                                        <div class="input-wrapper">
-                                            <span class="input-prefix">S/</span>
-                                            <input type="number" id="ir-otros" class="form-input" placeholder="Bonos, comisiones, etc." min="0" step="0.01" value="0">
-                                        </div>
+                                        <label class="form-label" for="ir-otros"><i class="fas fa-hand-holding-dollar"></i> Otros ingresos anuales</label>
+                                        <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="ir-otros" class="form-input" placeholder="0" min="0" step="0.01" value="0"></div>
                                     </div>
-                                    <button class="btn-primary btn-block btn-calculate" onclick="calcularImpuestoRenta()">
-                                        <i class="fas fa-calculator"></i> Calcular Impuesto a la Renta
-                                    </button>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-hospital"></i> ¿Tiene EPS?</label>
+                                        <div class="toggle-wrapper"><label class="toggle"><input type="checkbox" id="ir-tiene-eps"><span class="toggle-slider"></span></label><span class="toggle-label">Bonif. 6.75% en proyección</span></div>
+                                    </div>
+                                    <button class="btn-primary btn-block btn-calculate" onclick="calcularImpuestoRenta()"><i class="fas fa-calculator"></i> Calcular IR 5ta</button>
                                 </div>
                             </div>
                         </div>
                         <div class="calc-result-area" id="result-impuesto-renta">
-                            <div class="result-placeholder">
-                                <div class="result-placeholder-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-                                <h4>Calcula tu IR 5ta Categoría</h4>
-                                <p>UIT 2024: S/ 5,150 | 7 UIT exoneradas</p>
-                            </div>
+                            <div class="result-placeholder"><div class="result-placeholder-icon"><i class="fas fa-file-invoice-dollar"></i></div><h4>Calcula tu IR</h4><p>UIT 2026: S/ 5,150 | 7 UIT exoneradas | Incluye Bonif. Extraordinaria en proyección</p></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ========== LIQUIDACIÓN ========== -->
-                <div class="calc-panel" id="panel-liquidacion">
+                <!-- ╔══════════════════════════════════════╗
+                     ║  7. LIQUIDACIÓN                      ║
+                     ╚══════════════════════════════════════╝ -->
+                <div class="calc-panel" id="panel-liquidacion" role="tabpanel">
                     <div class="calc-layout">
                         <div class="calc-form-area">
                             <div class="calc-card">
                                 <div class="calc-card-header">
-                                    <div class="calc-icon-wrapper gradient-pink">
-                                        <i class="fas fa-file-contract"></i>
-                                    </div>
-                                    <div>
-                                        <h3>Calculadora de Liquidación</h3>
-                                        <p>Beneficios sociales por cese laboral</p>
-                                    </div>
+                                    <div class="calc-icon-wrapper gradient-pink"><i class="fas fa-file-contract"></i></div>
+                                    <div><h3>Calculadora de Liquidación</h3><p>Beneficios sociales + Triple Vacacional + Indemnización</p></div>
                                 </div>
                                 <div class="calc-card-body">
                                     <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-coins"></i> Última Remuneración</label>
-                                        <div class="input-wrapper">
-                                            <span class="input-prefix">S/</span>
-                                            <input type="number" id="liq-sueldo" class="form-input" placeholder="Ej: 3500" min="0" step="0.01">
-                                        </div>
+                                        <label class="form-label" for="liq-sueldo"><i class="fas fa-coins"></i> Última Remuneración</label>
+                                        <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="liq-sueldo" class="form-input" placeholder="Ej: 3500" min="0" step="0.01"></div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-calendar-plus"></i> Fecha de Ingreso</label>
+                                            <label class="form-label" for="liq-fecha-ingreso"><i class="fas fa-calendar-plus"></i> Fecha de Ingreso</label>
                                             <input type="date" id="liq-fecha-ingreso" class="form-input">
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-calendar-minus"></i> Fecha de Cese</label>
+                                            <label class="form-label" for="liq-fecha-cese"><i class="fas fa-calendar-minus"></i> Fecha de Cese</label>
                                             <input type="date" id="liq-fecha-cese" class="form-input">
                                         </div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-ban"></i> Motivo de Cese</label>
+                                            <label class="form-label" for="liq-motivo"><i class="fas fa-ban"></i> Motivo de Cese</label>
                                             <select id="liq-motivo" class="form-select">
                                                 <option value="renuncia">Renuncia voluntaria</option>
                                                 <option value="despido-arbitrario">Despido arbitrario</option>
@@ -681,307 +879,252 @@
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-umbrella-beach"></i> Días vacaciones pendientes</label>
+                                            <label class="form-label" for="liq-vac-pendientes"><i class="fas fa-umbrella-beach"></i> Días vac. pendientes</label>
                                             <input type="number" id="liq-vac-pendientes" class="form-input" value="0" min="0" max="60">
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-people-roof"></i> ¿Asignación Familiar?</label>
-                                        <div class="toggle-wrapper">
-                                            <label class="toggle">
-                                                <input type="checkbox" id="liq-asig-familiar">
-                                                <span class="toggle-slider"></span>
-                                            </label>
-                                            <span class="toggle-label">Incluir</span>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label class="form-label"><i class="fas fa-people-roof"></i> ¿Asig. Familiar?</label>
+                                            <div class="toggle-wrapper"><label class="toggle"><input type="checkbox" id="liq-asig-familiar"><span class="toggle-slider"></span></label><span class="toggle-label">Incluir</span></div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label"><i class="fas fa-hospital"></i> ¿Tiene EPS?</label>
+                                            <div class="toggle-wrapper"><label class="toggle"><input type="checkbox" id="liq-tiene-eps"><span class="toggle-slider"></span></label><span class="toggle-label">Bonif. 6.75%</span></div>
                                         </div>
                                     </div>
-                                    <button class="btn-primary btn-block btn-calculate" onclick="calcularLiquidacion()">
-                                        <i class="fas fa-calculator"></i> Calcular Liquidación
-                                    </button>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-exclamation-triangle"></i> ¿Triple Vacacional (no gozadas)?</label>
+                                        <div class="toggle-wrapper">
+                                            <label class="toggle"><input type="checkbox" id="liq-triple-vacacional"><span class="toggle-slider"></span></label>
+                                            <span class="toggle-label">Art. 23 D.Leg. 713: 3 remuneraciones completas</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-section-divider"><i class="fas fa-chart-line"></i><span>Variables</span></div>
+                                    <div class="form-row">
+                                        <div class="form-group"><label class="form-label" for="liq-promedio-comisiones"><i class="fas fa-chart-line"></i> Prom. Comisiones</label><div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="liq-promedio-comisiones" class="form-input" placeholder="0" min="0" step="0.01" value="0"></div></div>
+                                        <div class="form-group"><label class="form-label" for="liq-promedio-bonos"><i class="fas fa-star"></i> Prom. Bonos</label><div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="liq-promedio-bonos" class="form-input" placeholder="0" min="0" step="0.01" value="0"></div></div>
+                                    </div>
+                                    <button class="btn-primary btn-block btn-calculate" onclick="calcularLiquidacion()"><i class="fas fa-calculator"></i> Calcular Liquidación</button>
                                 </div>
                             </div>
                         </div>
                         <div class="calc-result-area" id="result-liquidacion">
-                            <div class="result-placeholder">
-                                <div class="result-placeholder-icon"><i class="fas fa-file-contract"></i></div>
-                                <h4>Calcula tu Liquidación</h4>
-                                <p>CTS trunca + Gratificación trunca + Vacaciones truncas</p>
-                            </div>
+                            <div class="result-placeholder"><div class="result-placeholder-icon"><i class="fas fa-file-contract"></i></div><h4>Calcula tu Liquidación</h4><p>CTS trunca + Grat. trunca + Vac. truncas + Triple vacacional + Indemnización</p></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ========== ESSALUD ========== -->
-                <div class="calc-panel" id="panel-essalud">
+                <!-- ╔══════════════════════════════════════╗
+                     ║  8. ESSALUD                          ║
+                     ╚══════════════════════════════════════╝ -->
+                <div class="calc-panel" id="panel-essalud" role="tabpanel">
                     <div class="calc-layout">
                         <div class="calc-form-area">
                             <div class="calc-card">
                                 <div class="calc-card-header">
-                                    <div class="calc-icon-wrapper gradient-teal">
-                                        <i class="fas fa-heart-pulse"></i>
-                                    </div>
-                                    <div>
-                                        <h3>Calculadora EsSalud</h3>
-                                        <p>Aporte del empleador - Ley N° 26790</p>
-                                    </div>
+                                    <div class="calc-icon-wrapper gradient-teal"><i class="fas fa-heart-pulse"></i></div>
+                                    <div><h3>Calculadora EsSalud</h3><p>Ley N° 26790 — Aporte del empleador</p></div>
                                 </div>
                                 <div class="calc-card-body">
                                     <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-coins"></i> Remuneración Mensual</label>
-                                        <div class="input-wrapper">
-                                            <span class="input-prefix">S/</span>
-                                            <input type="number" id="es-sueldo" class="form-input" placeholder="Ej: 3000" min="0" step="0.01">
-                                        </div>
+                                        <label class="form-label" for="es-sueldo"><i class="fas fa-coins"></i> Remuneración Mensual</label>
+                                        <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="es-sueldo" class="form-input" placeholder="Ej: 3000" min="0" step="0.01"></div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-users"></i> Número de trabajadores</label>
+                                            <label class="form-label" for="es-trabajadores"><i class="fas fa-users"></i> Nro. trabajadores</label>
                                             <input type="number" id="es-trabajadores" class="form-input" value="1" min="1">
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-briefcase"></i> Régimen</label>
+                                            <label class="form-label" for="es-regimen"><i class="fas fa-briefcase"></i> Régimen</label>
                                             <select id="es-regimen" class="form-select">
                                                 <option value="general">General (9%)</option>
+                                                <option value="pequena">Pequeña Empresa (9%)</option>
                                                 <option value="agrario">Agrario (6%)</option>
-                                                <option value="micro">Microempresa (50% = 4.5%)</option>
+                                                <option value="micro">Microempresa (4.5%)</option>
                                             </select>
                                         </div>
                                     </div>
-                                    <button class="btn-primary btn-block btn-calculate" onclick="calcularEsSalud()">
-                                        <i class="fas fa-calculator"></i> Calcular EsSalud
-                                    </button>
+                                    <button class="btn-primary btn-block btn-calculate" onclick="calcularEsSalud()"><i class="fas fa-calculator"></i> Calcular EsSalud</button>
                                 </div>
                             </div>
                         </div>
                         <div class="calc-result-area" id="result-essalud">
-                            <div class="result-placeholder">
-                                <div class="result-placeholder-icon"><i class="fas fa-heart-pulse"></i></div>
-                                <h4>Calcula aporte EsSalud</h4>
-                                <p>9% de la remuneración (a cargo del empleador)</p>
-                            </div>
+                            <div class="result-placeholder"><div class="result-placeholder-icon"><i class="fas fa-heart-pulse"></i></div><h4>Calcula EsSalud</h4><p>A cargo del empleador. Base mínima: RMV (S/ 1,075)</p></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ========== UTILIDADES ========== -->
-                <div class="calc-panel" id="panel-utilidades">
+                <!-- ╔══════════════════════════════════════╗
+                     ║  9. UTILIDADES                       ║
+                     ╚══════════════════════════════════════╝ -->
+                <div class="calc-panel" id="panel-utilidades" role="tabpanel">
                     <div class="calc-layout">
                         <div class="calc-form-area">
                             <div class="calc-card">
                                 <div class="calc-card-header">
-                                    <div class="calc-icon-wrapper gradient-yellow">
-                                        <i class="fas fa-chart-pie"></i>
-                                    </div>
-                                    <div>
-                                        <h3>Calculadora de Utilidades</h3>
-                                        <p>Participación en utilidades - D. Leg. N° 892</p>
-                                    </div>
+                                    <div class="calc-icon-wrapper gradient-yellow"><i class="fas fa-chart-pie"></i></div>
+                                    <div><h3>Calculadora de Utilidades</h3><p>D. Leg. N° 892 — 50% días + 50% remuneraciones</p></div>
                                 </div>
                                 <div class="calc-card-body">
                                     <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-building"></i> Renta anual neta de la empresa</label>
-                                        <div class="input-wrapper">
-                                            <span class="input-prefix">S/</span>
-                                            <input type="number" id="util-renta" class="form-input" placeholder="Ej: 500000" min="0" step="0.01">
-                                        </div>
+                                        <label class="form-label" for="util-renta"><i class="fas fa-building"></i> Renta anual neta de la empresa</label>
+                                        <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="util-renta" class="form-input" placeholder="Ej: 500000" min="0" step="0.01"></div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-industry"></i> Sector de la empresa</label>
+                                            <label class="form-label" for="util-sector"><i class="fas fa-industry"></i> Sector</label>
                                             <select id="util-sector" class="form-select">
-                                                <option value="10">Pesquería (10%)</option>
-                                                <option value="10">Telecomunicaciones (10%)</option>
-                                                <option value="8" selected>Industriales (8%)</option>
-                                                <option value="8">Minería (8%)</option>
-                                                <option value="5">Comercio/Restaurantes (5%)</option>
-                                                <option value="5">Otras actividades (5%)</option>
+                                                <option value="10">Pesquería / Telecom (10%)</option>
+                                                <option value="8" selected>Industria / Minería (8%)</option>
+                                                <option value="5">Comercio / Otros (5%)</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-users"></i> Total trabajadores empresa</label>
+                                            <label class="form-label" for="util-total-trabajadores"><i class="fas fa-users"></i> Total trabajadores</label>
                                             <input type="number" id="util-total-trabajadores" class="form-input" value="50" min="1">
                                         </div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-calendar-check"></i> Tus días trabajados</label>
+                                            <label class="form-label" for="util-dias-trabajados"><i class="fas fa-calendar-check"></i> Tus días trabajados</label>
                                             <input type="number" id="util-dias-trabajados" class="form-input" value="360" min="1" max="360">
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-calendar"></i> Total días todos los trabajadores</label>
+                                            <label class="form-label" for="util-total-dias"><i class="fas fa-calendar"></i> Total días (todos)</label>
                                             <input type="number" id="util-total-dias" class="form-input" value="18000" min="1">
                                         </div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-coins"></i> Tu remuneración anual</label>
-                                            <div class="input-wrapper">
-                                                <span class="input-prefix">S/</span>
-                                                <input type="number" id="util-remu-anual" class="form-input" placeholder="Ej: 48000" min="0" step="0.01">
-                                            </div>
+                                            <label class="form-label" for="util-remu-anual"><i class="fas fa-coins"></i> Tu remu. anual</label>
+                                            <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="util-remu-anual" class="form-input" placeholder="Ej: 48000" min="0" step="0.01"></div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-coins"></i> Total remuneraciones (todos)</label>
-                                            <div class="input-wrapper">
-                                                <span class="input-prefix">S/</span>
-                                                <input type="number" id="util-total-remu" class="form-input" placeholder="Ej: 2400000" min="0" step="0.01">
-                                            </div>
+                                            <label class="form-label" for="util-total-remu"><i class="fas fa-coins"></i> Total remus. (todos)</label>
+                                            <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="util-total-remu" class="form-input" placeholder="Ej: 2400000" min="0" step="0.01"></div>
                                         </div>
                                     </div>
-                                    <button class="btn-primary btn-block btn-calculate" onclick="calcularUtilidades()">
-                                        <i class="fas fa-calculator"></i> Calcular Utilidades
-                                    </button>
+                                    <button class="btn-primary btn-block btn-calculate" onclick="calcularUtilidades()"><i class="fas fa-calculator"></i> Calcular Utilidades</button>
                                 </div>
                             </div>
                         </div>
                         <div class="calc-result-area" id="result-utilidades">
-                            <div class="result-placeholder">
-                                <div class="result-placeholder-icon"><i class="fas fa-chart-pie"></i></div>
-                                <h4>Calcula tus Utilidades</h4>
-                                <p>50% por días + 50% por remuneraciones</p>
-                            </div>
+                            <div class="result-placeholder"><div class="result-placeholder-icon"><i class="fas fa-chart-pie"></i></div><h4>Calcula Utilidades</h4><p>Tope: 18 remuneraciones mensuales por trabajador</p></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ========== ASIGNACIÓN FAMILIAR ========== -->
-                <div class="calc-panel" id="panel-asignacion-familiar">
+                <!-- ╔══════════════════════════════════════╗
+                     ║  10. ASIGNACIÓN FAMILIAR             ║
+                     ╚══════════════════════════════════════╝ -->
+                <div class="calc-panel" id="panel-asignacion-familiar" role="tabpanel">
                     <div class="calc-layout">
                         <div class="calc-form-area">
                             <div class="calc-card">
                                 <div class="calc-card-header">
-                                    <div class="calc-icon-wrapper gradient-indigo">
-                                        <i class="fas fa-people-roof"></i>
-                                    </div>
-                                    <div>
-                                        <h3>Asignación Familiar</h3>
-                                        <p>Ley N° 25129 - 10% de la RMV</p>
-                                    </div>
+                                    <div class="calc-icon-wrapper gradient-indigo"><i class="fas fa-people-roof"></i></div>
+                                    <div><h3>Asignación Familiar</h3><p>Ley N° 25129 — 10% de la RMV (S/ 1,075)</p></div>
                                 </div>
                                 <div class="calc-card-body">
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-baby"></i> Número de hijos menores</label>
-                                            <input type="number" id="af-hijos" class="form-input" value="1" min="0">
-                                            <span class="form-hint">Menores de 18 años (o hasta 24 si estudian)</span>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-coins"></i> RMV Vigente</label>
-                                            <div class="input-wrapper">
-                                                <span class="input-prefix">S/</span>
-                                                <input type="number" id="af-rmv" class="form-input" value="1025" readonly>
-                                            </div>
-                                        </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="af-hijos"><i class="fas fa-baby"></i> Número de hijos menores</label>
+                                        <input type="number" id="af-hijos" class="form-input" value="1" min="0">
+                                        <span class="form-hint">Menores de 18 años (o hasta 24 si estudian educación superior)</span>
                                     </div>
                                     <div class="info-box">
                                         <i class="fas fa-info-circle"></i>
-                                        <p>La asignación familiar es un monto fijo equivalente al 10% de la RMV vigente, independientemente del número de hijos. Se paga a trabajadores con hijos menores de 18 años o hasta 24 años si están cursando estudios superiores.</p>
+                                        <div>
+                                            <p><strong>RMV 2026: S/ 1,075</strong></p>
+                                            <p>La asignación familiar es un monto <strong>fijo</strong> (10% de la RMV = S/ 107.50), independientemente del número de hijos. Se otorga a trabajadores con al menos un hijo menor de 18 años o hasta 24 años si cursa estudios superiores.</p>
+                                        </div>
                                     </div>
-                                    <button class="btn-primary btn-block btn-calculate" onclick="calcularAsignacionFamiliar()">
-                                        <i class="fas fa-calculator"></i> Calcular Asignación Familiar
-                                    </button>
+                                    <button class="btn-primary btn-block btn-calculate" onclick="calcularAsignacionFamiliar()"><i class="fas fa-calculator"></i> Calcular Asignación Familiar</button>
                                 </div>
                             </div>
                         </div>
                         <div class="calc-result-area" id="result-asignacion-familiar">
-                            <div class="result-placeholder">
-                                <div class="result-placeholder-icon"><i class="fas fa-people-roof"></i></div>
-                                <h4>Asignación Familiar</h4>
-                                <p>Monto fijo: 10% de la RMV vigente</p>
-                            </div>
+                            <div class="result-placeholder"><div class="result-placeholder-icon"><i class="fas fa-people-roof"></i></div><h4>Asignación Familiar</h4><p>S/ 107.50 mensuales (10% de RMV S/ 1,075)</p></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ========== RENTA 5TA CATEGORÍA DETALLADA ========== -->
-                <div class="calc-panel" id="panel-renta-quinta">
+                <!-- ╔══════════════════════════════════════╗
+                     ║  11. RENTA 5TA DETALLADA             ║
+                     ╚══════════════════════════════════════╝ -->
+                <div class="calc-panel" id="panel-renta-quinta" role="tabpanel">
                     <div class="calc-layout">
                         <div class="calc-form-area">
                             <div class="calc-card">
                                 <div class="calc-card-header">
-                                    <div class="calc-icon-wrapper gradient-dark">
-                                        <i class="fas fa-landmark"></i>
-                                    </div>
-                                    <div>
-                                        <h3>Renta 5ta Categoría - Detallada</h3>
-                                        <p>Retención mensual proyectada con tramos UIT</p>
-                                    </div>
+                                    <div class="calc-icon-wrapper gradient-dark"><i class="fas fa-landmark"></i></div>
+                                    <div><h3>Renta 5ta Categoría — Pro</h3><p>Retención mensual con proyección real (Art. 40° Reg. LIR)</p></div>
                                 </div>
                                 <div class="calc-card-body">
                                     <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-coins"></i> Remuneración Bruta Mensual</label>
-                                        <div class="input-wrapper">
-                                            <span class="input-prefix">S/</span>
-                                            <input type="number" id="r5-sueldo" class="form-input" placeholder="Ej: 10000" min="0" step="0.01">
-                                        </div>
+                                        <label class="form-label" for="r5-sueldo"><i class="fas fa-coins"></i> Remuneración Bruta Mensual</label>
+                                        <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="r5-sueldo" class="form-input" placeholder="Ej: 10000" min="0" step="0.01"></div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-calendar"></i> Mes de cálculo</label>
+                                            <label class="form-label" for="r5-mes"><i class="fas fa-calendar"></i> Mes de cálculo</label>
                                             <select id="r5-mes" class="form-select">
-                                                <option value="1">Enero</option>
-                                                <option value="2">Febrero</option>
-                                                <option value="3">Marzo</option>
-                                                <option value="4">Abril</option>
-                                                <option value="5">Mayo</option>
-                                                <option value="6">Junio</option>
-                                                <option value="7">Julio</option>
-                                                <option value="8">Agosto</option>
-                                                <option value="9">Septiembre</option>
-                                                <option value="10">Octubre</option>
-                                                <option value="11">Noviembre</option>
-                                                <option value="12" selected>Diciembre</option>
+                                                <option value="1">Enero</option><option value="2">Febrero</option>
+                                                <option value="3">Marzo</option><option value="4">Abril</option>
+                                                <option value="5">Mayo</option><option value="6">Junio</option>
+                                                <option value="7">Julio</option><option value="8">Agosto</option>
+                                                <option value="9">Septiembre</option><option value="10">Octubre</option>
+                                                <option value="11">Noviembre</option><option value="12" selected>Diciembre</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-hand-holding-dollar"></i> Remuneraciones ya recibidas</label>
-                                            <div class="input-wrapper">
-                                                <span class="input-prefix">S/</span>
-                                                <input type="number" id="r5-recibido" class="form-input" placeholder="Acumulado" min="0" step="0.01" value="0">
-                                            </div>
+                                            <label class="form-label" for="r5-recibido"><i class="fas fa-hand-holding-dollar"></i> Remuneraciones percibidas</label>
+                                            <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="r5-recibido" class="form-input" placeholder="Acumulado" min="0" step="0.01" value="0"></div>
                                         </div>
                                     </div>
-                                    <button class="btn-primary btn-block btn-calculate" onclick="calcularRentaQuinta()">
-                                        <i class="fas fa-calculator"></i> Calcular Retención Mensual
-                                    </button>
+                                    <div class="form-group">
+                                        <label class="form-label" for="r5-grat-recibidas"><i class="fas fa-gift"></i> Gratificaciones ya percibidas</label>
+                                        <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="r5-grat-recibidas" class="form-input" placeholder="0" min="0" step="0.01" value="0"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-hospital"></i> ¿Tiene EPS?</label>
+                                        <div class="toggle-wrapper"><label class="toggle"><input type="checkbox" id="r5-tiene-eps"><span class="toggle-slider"></span></label><span class="toggle-label">Bonif. 6.75% en proyección</span></div>
+                                    </div>
+                                    <div class="form-section-divider"><i class="fas fa-chart-line"></i><span>Variables</span></div>
+                                    <div class="form-row">
+                                        <div class="form-group"><label class="form-label" for="r5-promedio-comisiones"><i class="fas fa-chart-line"></i> Prom. Comisiones</label><div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="r5-promedio-comisiones" class="form-input" placeholder="0" min="0" step="0.01" value="0"></div></div>
+                                        <div class="form-group"><label class="form-label" for="r5-promedio-bonos"><i class="fas fa-star"></i> Prom. Bonos</label><div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="r5-promedio-bonos" class="form-input" placeholder="0" min="0" step="0.01" value="0"></div></div>
+                                    </div>
+                                    <button class="btn-primary btn-block btn-calculate" onclick="calcularRentaQuinta()"><i class="fas fa-calculator"></i> Calcular Retención Mensual</button>
                                 </div>
                             </div>
                         </div>
                         <div class="calc-result-area" id="result-renta-quinta">
-                            <div class="result-placeholder">
-                                <div class="result-placeholder-icon"><i class="fas fa-landmark"></i></div>
-                                <h4>Renta de 5ta Categoría</h4>
-                                <p>Retención mensual según procedimiento SUNAT</p>
-                            </div>
+                            <div class="result-placeholder"><div class="result-placeholder-icon"><i class="fas fa-landmark"></i></div><h4>Renta 5ta Pro</h4><p>Proyección real: Sueldos + Gratificaciones + Bonif. 9%/6.75% + Variables</p></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ========== COSTO EMPLEADOR ========== -->
-                <div class="calc-panel" id="panel-costo-empleador">
+                <!-- ╔══════════════════════════════════════╗
+                     ║  12. COSTO EMPLEADOR + COMPARADOR    ║
+                     ╚══════════════════════════════════════╝ -->
+                <div class="calc-panel" id="panel-costo-empleador" role="tabpanel">
                     <div class="calc-layout">
                         <div class="calc-form-area">
                             <div class="calc-card">
                                 <div class="calc-card-header">
-                                    <div class="calc-icon-wrapper gradient-slate">
-                                        <i class="fas fa-building"></i>
-                                    </div>
-                                    <div>
-                                        <h3>Costo Total del Empleador</h3>
-                                        <p>Cuánto cuesta realmente un trabajador</p>
-                                    </div>
+                                    <div class="calc-icon-wrapper gradient-slate"><i class="fas fa-building"></i></div>
+                                    <div><h3>Costo Total del Empleador + Comparador PRO</h3><p>Incluye Vida Ley, SCTR, costo de liquidar y matriz comparativa</p></div>
                                 </div>
                                 <div class="calc-card-body">
                                     <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-coins"></i> Remuneración Bruta Mensual</label>
-                                        <div class="input-wrapper">
-                                            <span class="input-prefix">S/</span>
-                                            <input type="number" id="ce-sueldo" class="form-input" placeholder="Ej: 5000" min="0" step="0.01">
-                                        </div>
+                                        <label class="form-label" for="ce-sueldo"><i class="fas fa-coins"></i> Remuneración Bruta Mensual</label>
+                                        <div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="ce-sueldo" class="form-input" placeholder="Ej: 5000" min="0" step="0.01"></div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-briefcase"></i> Régimen</label>
+                                            <label class="form-label" for="ce-regimen"><i class="fas fa-briefcase"></i> Régimen</label>
                                             <select id="ce-regimen" class="form-select">
                                                 <option value="general">General</option>
                                                 <option value="pequena">Pequeña Empresa</option>
@@ -989,28 +1132,28 @@
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"><i class="fas fa-people-roof"></i> ¿Asignación Familiar?</label>
-                                            <div class="toggle-wrapper">
-                                                <label class="toggle">
-                                                    <input type="checkbox" id="ce-asig-familiar">
-                                                    <span class="toggle-slider"></span>
-                                                </label>
-                                                <span class="toggle-label">Incluir</span>
-                                            </div>
+                                            <label class="form-label"><i class="fas fa-people-roof"></i> ¿Asig. Familiar?</label>
+                                            <div class="toggle-wrapper"><label class="toggle"><input type="checkbox" id="ce-asig-familiar"><span class="toggle-slider"></span></label><span class="toggle-label">Incluir</span></div>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-shield-halved"></i> ¿SCTR?</label>
-                                        <div class="toggle-wrapper">
-                                            <label class="toggle">
-                                                <input type="checkbox" id="ce-sctr">
-                                                <span class="toggle-slider"></span>
-                                            </label>
-                                            <span class="toggle-label">Seguro Complementario de Trabajo de Riesgo</span>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label class="form-label"><i class="fas fa-shield-halved"></i> ¿SCTR?</label>
+                                            <div class="toggle-wrapper"><label class="toggle"><input type="checkbox" id="ce-sctr"><span class="toggle-slider"></span></label><span class="toggle-label">Seguro Complementario</span></div>
                                         </div>
+                                        <div class="form-group">
+                                            <label class="form-label"><i class="fas fa-hospital"></i> ¿Tiene EPS?</label>
+                                            <div class="toggle-wrapper"><label class="toggle"><input type="checkbox" id="ce-tiene-eps"><span class="toggle-slider"></span></label><span class="toggle-label">Bonif. 6.75%</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-section-divider"><i class="fas fa-chart-line"></i><span>Variables</span></div>
+                                    <div class="form-row">
+                                        <div class="form-group"><label class="form-label" for="ce-promedio-comisiones"><i class="fas fa-chart-line"></i> Prom. Comisiones</label><div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="ce-promedio-comisiones" class="form-input" placeholder="0" min="0" step="0.01" value="0"></div></div>
+                                        <div class="form-group"><label class="form-label" for="ce-promedio-bonos"><i class="fas fa-star"></i> Prom. Bonos</label><div class="input-wrapper"><span class="input-prefix">S/</span><input type="number" id="ce-promedio-bonos" class="form-input" placeholder="0" min="0" step="0.01" value="0"></div></div>
                                     </div>
                                     <button class="btn-primary btn-block btn-calculate" onclick="calcularCostoEmpleador()">
-                                        <i class="fas fa-calculator"></i> Calcular Costo Total
+                                        <i class="fas fa-calculator"></i> Calcular Costo + Comparador PRO
+                                        <span class="btn-badge">3 REG.</span>
                                     </button>
                                 </div>
                             </div>
@@ -1018,75 +1161,105 @@
                         <div class="calc-result-area" id="result-costo-empleador">
                             <div class="result-placeholder">
                                 <div class="result-placeholder-icon"><i class="fas fa-building"></i></div>
-                                <h4>Costo Total del Empleador</h4>
-                                <p>Sueldo + EsSalud + CTS + Gratificaciones + más</p>
+                                <h4>Costo Empleador + Comparador</h4>
+                                <p>Matriz comparativa: General vs Pequeña vs Micro. Incluye costo de operación anual + costo de liquidar.</p>
+                                <div class="placeholder-features">
+                                    <span><i class="fas fa-check"></i> EsSalud</span>
+                                    <span><i class="fas fa-check"></i> CTS mensualizada</span>
+                                    <span><i class="fas fa-check"></i> Gratif. mensualizada</span>
+                                    <span><i class="fas fa-check"></i> Bonif. 9%/6.75%</span>
+                                    <span><i class="fas fa-check"></i> Vacaciones</span>
+                                    <span><i class="fas fa-check"></i> SCTR</span>
+                                    <span><i class="fas fa-check"></i> Vida Ley</span>
+                                    <span><i class="fas fa-check"></i> Costo liquidar</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+
+            </div><!-- /calc-panels -->
+        </div><!-- /container -->
     </section>
 
-    <!-- Features Section -->
-    <section class="section features-section" id="features">
+    <!-- ══════════════════════════════════════════
+         FEATURES SECTION
+         ══════════════════════════════════════════ -->
+    <section class="section features-section" id="features" aria-label="Características">
         <div class="container">
             <div class="section-header">
-                <span class="section-badge"><i class="fas fa-star"></i> Características</span>
-                <h2 class="section-title">¿Por qué <span class="gradient-text">PayCalc Pro</span>?</h2>
-                <p class="section-subtitle">Diseñado con los más altos estándares para profesionales de RRHH y trabajadores peruanos.</p>
+                <span class="section-badge"><i class="fas fa-star"></i> Grado Corporativo</span>
+                <h2 class="section-title">¿Por qué <span class="gradient-text">SueldoPro Ultra</span>?</h2>
+                <p class="section-subtitle">Diseñado para pasar auditorías SUNAT. Motor v4.0 con precisión de planilla electrónica.</p>
             </div>
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon gradient-blue"><i class="fas fa-shield-halved"></i></div>
-                    <h3>100% SUNAT</h3>
-                    <p>Todos los cálculos están basados en la normativa vigente de SUNAT, legislación laboral peruana y decretos supremos actualizados al 2024.</p>
+                    <h3>Precisión PLAME</h3>
+                    <p>Cero redondeos intermedios. 10 decimales internos. Redondeo PLAME solo al monto final por concepto. Imposible fallar ante fiscalización.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon gradient-green"><i class="fas fa-bolt"></i></div>
-                    <h3>Cálculo Instantáneo</h3>
-                    <p>Resultados en milisegundos con desglose detallado. Sin esperas, sin registros, sin complicaciones.</p>
+                    <div class="feature-icon gradient-green"><i class="fas fa-terminal"></i></div>
+                    <h3>Audit Trail</h3>
+                    <p>Cada cálculo genera un log paso a paso estilo Bloomberg. Muestra la fórmula exacta: "Base S/ 1,237.50 / 240 × 1.25 = S/ 6.4453..."</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon gradient-purple"><i class="fas fa-download"></i></div>
-                    <h3>Exporta Resultados</h3>
-                    <p>Descarga tus cálculos en formato PDF profesional para presentar a tu contador o departamento de RRHH.</p>
+                    <div class="feature-icon gradient-purple"><i class="fas fa-chart-line"></i></div>
+                    <h3>Remu. Variable</h3>
+                    <p>Soporte completo para comisiones y bonos. Promedia últimos 6 meses si se percibieron ≥3 veces (Art. 17 D.S. 001-97-TR).</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon gradient-orange"><i class="fas fa-mobile-screen"></i></div>
-                    <h3>100% Responsive</h3>
-                    <p>Funciona perfectamente en cualquier dispositivo: celular, tablet o computadora de escritorio.</p>
+                    <div class="feature-icon gradient-orange"><i class="fas fa-calendar-xmark"></i></div>
+                    <h3>Inasistencias</h3>
+                    <p>Descuento proporcional con dominical: (Sueldo/30) × días × 1.2. Lo que separa a un profesional de un amateur.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon gradient-red"><i class="fas fa-chart-line"></i></div>
-                    <h3>Visualización Clara</h3>
-                    <p>Gráficos y desgloses visuales que te permiten entender exactamente cómo se compone tu sueldo.</p>
+                    <div class="feature-icon gradient-red"><i class="fas fa-hospital"></i></div>
+                    <h3>EPS vs EsSalud</h3>
+                    <p>Diferenciación automática: Bonificación Extraordinaria 9% (EsSalud) o 6.75% (EPS) en gratificaciones, IR y liquidación.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon gradient-cyan"><i class="fas fa-lock"></i></div>
-                    <h3>Privacidad Total</h3>
-                    <p>Todos los cálculos se realizan localmente en tu navegador. No almacenamos ningún dato personal.</p>
+                    <div class="feature-icon gradient-cyan"><i class="fas fa-exchange-alt"></i></div>
+                    <h3>AFP Comisión Mixta</h3>
+                    <p>Soporte para comisión sobre flujo y comisión mixta (flujo + saldo). Tope SBS para prima de seguro (S/ 13,733.34).</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon gradient-pink"><i class="fas fa-table"></i></div>
+                    <h3>Comparador PRO</h3>
+                    <p>Matriz comparativa de 3 regímenes: costo operación + costo liquidar. Ahorro anual General vs Pequeña vs Micro.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon gradient-teal"><i class="fas fa-umbrella-beach"></i></div>
+                    <h3>Triple Vacacional</h3>
+                    <p>Art. 23 D.Leg. 713 completo: 1 descanso + 1 trabajo + 1 indemnización. Desglosado en liquidación y vacaciones.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon gradient-indigo"><i class="fas fa-user-gear"></i></div>
+                    <h3>Perfiles</h3>
+                    <p>Guarda múltiples perfiles de trabajadores en localStorage. Carga y compara escenarios al instante.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Tabla IR Section -->
-    <section class="section tabla-ir-section" id="tabla-ir">
+    <!-- ══════════════════════════════════════════
+         TABLA IR SECTION
+         ══════════════════════════════════════════ -->
+    <section class="section tabla-ir-section" id="tabla-ir" aria-label="Tabla de Impuesto a la Renta">
         <div class="container">
             <div class="section-header">
-                <span class="section-badge"><i class="fas fa-table"></i> Referencia</span>
-                <h2 class="section-title">Tabla de <span class="gradient-text">Impuesto a la Renta</span> 2024</h2>
-                <p class="section-subtitle">Tramos y tasas vigentes para Renta de 5ta Categoría. UIT 2024 = S/ 5,150</p>
+                <span class="section-badge"><i class="fas fa-table"></i> Referencia Legal</span>
+                <h2 class="section-title">Tabla de <span class="gradient-text">Impuesto a la Renta</span> 2026</h2>
+                <p class="section-subtitle">Tramos y tasas para Renta de 5ta Categoría. UIT 2026 = S/ 5,150. Deducción: 7 UIT = S/ 36,050.</p>
             </div>
             <div class="table-responsive">
-                <table class="premium-table">
+                <table class="premium-table" aria-label="Tramos de Impuesto a la Renta 5ta Categoría">
                     <thead>
                         <tr>
-                            <th>Tramo</th>
-                            <th>Renta Neta Anual</th>
-                            <th>Rango en Soles (2024)</th>
-                            <th>Tasa</th>
+                            <th scope="col">Tramo</th>
+                            <th scope="col">Renta Neta Anual</th>
+                            <th scope="col">Rango en Soles (2026)</th>
+                            <th scope="col">Tasa</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1099,19 +1272,19 @@
                         <tr>
                             <td><span class="badge badge-green">2do Tramo</span></td>
                             <td>Más de 5 UIT hasta 20 UIT</td>
-                            <td>S/ 25,750 - S/ 103,000</td>
+                            <td>S/ 25,750 — S/ 103,000</td>
                             <td><strong>14%</strong></td>
                         </tr>
                         <tr>
                             <td><span class="badge badge-yellow">3er Tramo</span></td>
                             <td>Más de 20 UIT hasta 35 UIT</td>
-                            <td>S/ 103,000 - S/ 180,250</td>
+                            <td>S/ 103,000 — S/ 180,250</td>
                             <td><strong>17%</strong></td>
                         </tr>
                         <tr>
                             <td><span class="badge badge-orange">4to Tramo</span></td>
                             <td>Más de 35 UIT hasta 45 UIT</td>
-                            <td>S/ 180,250 - S/ 231,750</td>
+                            <td>S/ 180,250 — S/ 231,750</td>
                             <td><strong>20%</strong></td>
                         </tr>
                         <tr>
@@ -1125,85 +1298,149 @@
             </div>
             <div class="table-note">
                 <i class="fas fa-info-circle"></i>
-                <p><strong>Nota:</strong> Las primeras 7 UIT (S/ 36,050) de renta bruta anual están exoneradas. La renta neta se calcula después de deducir las 7 UIT.</p>
+                <div>
+                    <p><strong>Deducción:</strong> Las primeras 7 UIT (S/ 36,050) de renta bruta anual están exoneradas.</p>
+                    <p><strong>Proyección:</strong> La renta bruta incluye sueldos + gratificaciones + bonificación extraordinaria (9% EsSalud o 6.75% EPS) + variables computables.</p>
+                    <p><strong>Retención:</strong> El IR anual se divide según el divisor del mes (Ene-Abr: ÷12, May-Ago: ÷8, Sep-Nov: ÷4, Dic: ÷1).</p>
+                </div>
+            </div>
+
+            <!-- Tabla de Constantes -->
+            <div class="section-header" style="margin-top:48px">
+                <h3 class="section-title" style="font-size:24px">Constantes <span class="gradient-text">2026</span></h3>
+            </div>
+            <div class="table-responsive">
+                <table class="premium-table" aria-label="Constantes laborales 2026">
+                    <thead>
+                        <tr><th scope="col">Concepto</th><th scope="col">Valor</th><th scope="col">Base Legal</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>UIT</td><td><strong>S/ 5,150</strong></td><td>D.S. 309-2023-EF</td></tr>
+                        <tr><td>RMV</td><td><strong>S/ 1,075</strong></td><td>D.S. 003-2024-TR</td></tr>
+                        <tr><td>Asignación Familiar</td><td><strong>S/ 107.50</strong> (10% RMV)</td><td>Ley 25129</td></tr>
+                        <tr><td>Deducción IR</td><td><strong>7 UIT = S/ 36,050</strong></td><td>Art. 46° LIR</td></tr>
+                        <tr><td>Divisor HE</td><td><strong>240 horas</strong> (30 × 8)</td><td>D.S. 007-2002-TR</td></tr>
+                        <tr><td>Tope SBS Seguro AFP</td><td><strong>S/ 13,733.34</strong></td><td>SBS</td></tr>
+                        <tr><td>Bonif. EsSalud</td><td><strong>9%</strong></td><td>Ley 30334</td></tr>
+                        <tr><td>Bonif. EPS</td><td><strong>6.75%</strong></td><td>Ley 30334</td></tr>
+                        <tr><td>Factor Inasistencia</td><td><strong>1.2</strong> (con dominical)</td><td>D.S. 012-92-TR</td></tr>
+                        <tr><td>Vida Ley (prima est.)</td><td><strong>~0.53%</strong></td><td>D. Leg. 688</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </section>
 
-    <!-- FAQ Section -->
-    <section class="section faq-section" id="faq">
+    <!-- ══════════════════════════════════════════
+         FAQ SECTION
+         ══════════════════════════════════════════ -->
+    <section class="section faq-section" id="faq" aria-label="Preguntas frecuentes">
         <div class="container">
             <div class="section-header">
-                <span class="section-badge"><i class="fas fa-circle-question"></i> Ayuda</span>
+                <span class="section-badge"><i class="fas fa-circle-question"></i> Centro de Ayuda</span>
                 <h2 class="section-title">Preguntas <span class="gradient-text">Frecuentes</span></h2>
-                <p class="section-subtitle">Resolvemos las dudas más comunes sobre cálculos laborales en el Perú.</p>
+                <p class="section-subtitle">Resolvemos las dudas más comunes sobre cálculos laborales en el Perú. Normativa 2026.</p>
             </div>
-            <div class="faq-list" id="faqList">
-                <!-- FAQ items will be injected by JS -->
+            <div class="faq-list" id="faqList" role="list">
+                <!-- FAQ items injected by script.js from DATA.FAQ -->
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer">
+    <!-- ══════════════════════════════════════════
+         FOOTER
+         ══════════════════════════════════════════ -->
+    <footer class="footer" role="contentinfo">
         <div class="container">
             <div class="footer-grid">
+                <!-- Brand -->
                 <div class="footer-brand">
                     <div class="footer-logo">
                         <div class="logo-icon"><i class="fas fa-calculator"></i></div>
-                        <span class="logo-text">PayCalc<span class="logo-highlight">Pro</span></span>
+                        <span class="logo-text">Sueldo<span class="logo-highlight">Pro</span></span>
+                        <span class="logo-badge">v4.0</span>
                     </div>
-                    <p>La calculadora laboral más completa del Perú. Basada en normativa SUNAT y legislación laboral vigente 2024.</p>
+                    <p>Motor de planilla corporativo. 12 calculadoras con precisión PLAME, audit trail paso a paso y comparador de regímenes. Normativa SUNAT/MTPE 2026.</p>
                     <div class="footer-social">
-                        <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-link" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="social-link" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-link" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
                     </div>
                 </div>
+
+                <!-- Calculadoras -->
                 <div class="footer-links-group">
                     <h4>Calculadoras</h4>
                     <ul>
-                        <li><a href="#" onclick="activateCalc('sueldo-neto')">Sueldo Neto</a></li>
-                        <li><a href="#" onclick="activateCalc('gratificacion')">Gratificación</a></li>
-                        <li><a href="#" onclick="activateCalc('cts')">CTS</a></li>
-                        <li><a href="#" onclick="activateCalc('horas-extras')">Horas Extras</a></li>
-                        <li><a href="#" onclick="activateCalc('vacaciones')">Vacaciones</a></li>
-                        <li><a href="#" onclick="activateCalc('liquidacion')">Liquidación</a></li>
+                        <li><a href="#" onclick="activateCalc('sueldo-neto');return false">Sueldo Neto</a></li>
+                        <li><a href="#" onclick="activateCalc('gratificacion');return false">Gratificación</a></li>
+                        <li><a href="#" onclick="activateCalc('cts');return false">CTS</a></li>
+                        <li><a href="#" onclick="activateCalc('horas-extras');return false">Horas Extras</a></li>
+                        <li><a href="#" onclick="activateCalc('vacaciones');return false">Vacaciones</a></li>
+                        <li><a href="#" onclick="activateCalc('liquidacion');return false">Liquidación</a></li>
                     </ul>
                 </div>
+
+                <!-- Más Herramientas -->
                 <div class="footer-links-group">
                     <h4>Más Herramientas</h4>
                     <ul>
-                        <li><a href="#" onclick="activateCalc('impuesto-renta')">Impuesto a la Renta</a></li>
-                        <li><a href="#" onclick="activateCalc('essalud')">EsSalud</a></li>
-                        <li><a href="#" onclick="activateCalc('utilidades')">Utilidades</a></li>
-                        <li><a href="#" onclick="activateCalc('renta-quinta')">Renta 5ta Cat.</a></li>
-                        <li><a href="#" onclick="activateCalc('costo-empleador')">Costo Empleador</a></li>
+                        <li><a href="#" onclick="activateCalc('impuesto-renta');return false">IR 5ta Categoría</a></li>
+                        <li><a href="#" onclick="activateCalc('essalud');return false">EsSalud</a></li>
+                        <li><a href="#" onclick="activateCalc('utilidades');return false">Utilidades</a></li>
+                        <li><a href="#" onclick="activateCalc('asignacion-familiar');return false">Asig. Familiar</a></li>
+                        <li><a href="#" onclick="activateCalc('renta-quinta');return false">Renta 5ta Pro</a></li>
+                        <li><a href="#" onclick="activateCalc('costo-empleador');return false">Costo Empleador</a></li>
                     </ul>
                 </div>
+
+                <!-- Legal -->
                 <div class="footer-links-group">
-                    <h4>Legal</h4>
+                    <h4>Normativa</h4>
                     <ul>
+                        <li><a href="https://www.sunat.gob.pe" target="_blank" rel="noopener">SUNAT</a></li>
+                        <li><a href="https://www.gob.pe/mtpe" target="_blank" rel="noopener">MTPE</a></li>
+                        <li><a href="https://www.sbs.gob.pe" target="_blank" rel="noopener">SBS</a></li>
                         <li><a href="#">Aviso Legal</a></li>
-                        <li><a href="#">Política de Privacidad</a></li>
-                        <li><a href="#">Términos de Uso</a></li>
-                        <li><a href="#">SUNAT</a></li>
-                        <li><a href="#">MTPE</a></li>
+                        <li><a href="#">Privacidad</a></li>
+                        <li><a href="#">Términos</a></li>
                     </ul>
                 </div>
             </div>
+
+            <!-- Footer Bottom -->
             <div class="footer-bottom">
-                <p>&copy; 2024 PayCalc Pro. Todos los derechos reservados. Herramienta informativa - no reemplaza asesoría profesional.</p>
-                <p class="footer-disclaimer">Los cálculos son referenciales y se basan en la normativa general vigente. Para casos específicos, consulte con un especialista laboral o tributario.</p>
+                <div class="footer-bottom-left">
+                    <p>&copy; 2026 SueldoPro Ultra v4.0 — Motor de Planilla Corporativo</p>
+                    <p class="footer-disclaimer">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Los cálculos son referenciales y se basan en la normativa general vigente.
+                        Para casos específicos, consulte con un especialista laboral o tributario.
+                        No reemplaza asesoría profesional.
+                    </p>
+                </div>
+                <div class="footer-bottom-right">
+                    <div class="footer-tech-badges">
+                        <span class="tech-badge"><i class="fas fa-shield-halved"></i> PLAME</span>
+                        <span class="tech-badge"><i class="fas fa-terminal"></i> Audit</span>
+                        <span class="tech-badge"><i class="fas fa-bolt"></i> Live</span>
+                        <span class="tech-badge"><i class="fas fa-lock"></i> Local</span>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>
 
-    <!-- Toast Notifications -->
-    <div id="toastContainer" class="toast-container"></div>
+    <!-- ══════════════════════════════════════════
+         TOAST NOTIFICATIONS CONTAINER
+         ══════════════════════════════════════════ -->
+    <div id="toastContainer" class="toast-container" role="alert" aria-live="polite"></div>
 
-    <!-- Scripts -->
+    <!-- ══════════════════════════════════════════
+         SCRIPTS
+         ══════════════════════════════════════════ -->
     <script src="data.js"></script>
     <script src="script.js"></script>
+
 </body>
 </html>
