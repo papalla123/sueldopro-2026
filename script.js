@@ -138,6 +138,24 @@ function activateCalc(calcId) {
     scrollToSection('calculadoras');
 }
 
+// ─── FAQ ─────────────────────────────────────
+function initFAQ() {
+    const list = document.getElementById('faqList');
+    if (!list) return;
+    DATA.FAQ.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'faq-item';
+        el.innerHTML = `<button class="faq-question" onclick="toggleFAQ(this)"><span>${item.pregunta}</span><i class="fas fa-chevron-down"></i></button><div class="faq-answer"><div class="faq-answer-inner">${item.respuesta}</div></div>`;
+        list.appendChild(el);
+    });
+}
+function toggleFAQ(btn) {
+    const item = btn.closest('.faq-item');
+    const wasActive = item.classList.contains('active');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+    if (!wasActive) item.classList.add('active');
+}
+
 // ─── Counters ────────────────────────────────
 function initCounters() {
     const obs = new IntersectionObserver(entries => {

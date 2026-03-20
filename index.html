@@ -1333,24 +1333,21 @@
         </div>
     </section>
 
-// ─── FAQ ─────────────────────────────────────
-function initFAQ() {
-    const list = document.getElementById('faqList');
-    if (!list) return;
-    DATA.FAQ.forEach(item => {
-        const el = document.createElement('div');
-        el.className = 'faq-item';
-        el.innerHTML = `<button class="faq-question" onclick="toggleFAQ(this)"><span>${item.pregunta}</span><i class="fas fa-chevron-down"></i></button><div class="faq-answer"><div class="faq-answer-inner">${item.respuesta}</div></div>`;
-        list.appendChild(el);
-    });
-}
-function toggleFAQ(btn) {
-    const item = btn.closest('.faq-item');
-    const wasActive = item.classList.contains('active');
-    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
-    if (!wasActive) item.classList.add('active');
-}
-
+    <!-- ══════════════════════════════════════════
+         FAQ SECTION
+         ══════════════════════════════════════════ -->
+    <section class="section faq-section" id="faq" aria-label="Preguntas frecuentes">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-circle-question"></i> Centro de Ayuda</span>
+                <h2 class="section-title">Preguntas <span class="gradient-text">Frecuentes</span></h2>
+                <p class="section-subtitle">Resolvemos las dudas más comunes sobre cálculos laborales en el Perú. Normativa 2026.</p>
+            </div>
+            <div class="faq-list" id="faqList" role="list">
+                <!-- FAQ items injected by script.js from DATA.FAQ -->
+            </div>
+        </div>
+    </section>
 
     <!-- ══════════════════════════════════════════
          FOOTER
@@ -1434,16 +1431,6 @@ function toggleFAQ(btn) {
                 </div>
             </div>
         </div>
-<section class="seo-content-extra" style="max-width: 1100px; margin: 50px auto; padding: 20px; border-top: 1px solid #eee; line-height: 1.8; color: #555;">
-    <h2>Guía Técnica: Cálculo de Planilla en Perú 2026</h2>
-    <p>Para calcular el <strong>sueldo neto</strong> en el Perú, es imperativo seguir las normas de la SUNAT y el Ministerio de Trabajo. Nuestra herramienta procesa datos basados en el D.S. 003-97-TR y las actualizaciones de la UIT para el año 2026. Los descuentos principales incluyen el aporte previsional, que puede ser a la <strong>ONP (13%)</strong> o a la <strong>AFP</strong> (donde se suma el aporte obligatorio, la prima de seguro y la comisión de la gestora).</p>
-    
-    <h3>Gratificaciones y Beneficios Sociales</h3>
-    <p>La Ley N° 27735 establece que las gratificaciones de julio y diciembre equivalen a una remuneración mensual íntegra, siempre que el trabajador haya laborado el semestre completo. A esto se le suma la Bonificación Extraordinaria del 9% (EsSalud) o 6.75% (EPS). En el caso de la <strong>CTS</strong>, el cálculo se realiza semestralmente y se deposita en los meses de mayo y noviembre.</p>
-
-    <h3>Impuesto a la Renta de Quinta Categoría</h3>
-    <p>El cálculo del IR 5ta categoría es uno de los procesos más complejos. Se basa en la proyección de ingresos anuales menos las 7 UIT de deducción legal. Nuestra calculadora aplica las tasas progresivas acumulativas del 8%, 14%, 17%, 20% y 30% de forma automática, asegurando precisión frente a las fiscalizaciones de PLAME.</p>
-</section>
     </footer>
 
     <!-- ══════════════════════════════════════════
